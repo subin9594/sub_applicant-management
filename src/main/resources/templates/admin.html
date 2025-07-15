@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>지원서 관리</title>
+</head>
+<body>
+<h2>지원서 목록</h2>
+<form th:action="@{/admin/logout}" method="get" style="float:right;">
+  <button type="submit">로그아웃</button>
+</form>
+<table border="1">
+  <thead>
+  <tr>
+    <th>이름</th>
+    <th>학번</th>
+    <th>전화번호</th>
+    <th>이메일</th>
+    <th>지원동기</th>
+    <th>상태</th>
+    <th>처리</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="app : ${applications}">
+    <td th:text="${app.name}"></td>
+    <td th:text="${app.studentId}"></td>
+    <td th:text="${app.phoneNumber}"></td>
+    <td th:text="${app.email}"></td>
+    <td th:text="${app.motivation}"></td>
+    <td th:text="${app.status}"></td>
+    <td>
+      <form th:action="@{'/admin/approve/' + ${app.id}}" method="post" style="display:inline;">
+        <button type="submit" name="status" value="ACCEPTED">합격</button>
+      </form>
+      <form th:action="@{'/admin/approve/' + ${app.id}}" method="post" style="display:inline;">
+        <button type="submit" name="status" value="REJECTED">불합격</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

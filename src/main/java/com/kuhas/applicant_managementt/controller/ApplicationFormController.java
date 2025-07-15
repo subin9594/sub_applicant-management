@@ -26,12 +26,14 @@ public class ApplicationFormController {
 
     // 지원서 제출
     @PostMapping
-    public ResponseEntity<ApplicationFormResponse> submitApplication(@Valid @RequestBody ApplicationFormRequest request) {
+    public String submitApplication(@ModelAttribute ApplicationFormRequest request, org.springframework.ui.Model model) {
         try {
-            ApplicationFormResponse response = applicationFormService.submitApplication(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            applicationFormService.submitApplication(request);
+            model.addAttribute("message", "지원서가 성공적으로 제출되었습니다!");
+            return "home";
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            model.addAttribute("error", e.getMessage());
+            return "home";
         }
     }
 

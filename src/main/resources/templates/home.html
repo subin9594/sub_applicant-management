@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>지원서 제출</title>
+</head>
+<body>
+<h2>지원서 제출</h2>
+<div th:if="${message}" style="color:green;">[[${message}]]</div>
+<div th:if="${error}" style="color:red;">[[${error}]]</div>
+<form th:action="@{/api/applications}" method="post">
+  <label for="name">이름:</label>
+  <input type="text" id="name" name="name" required maxlength="100"><br/>
+  <label for="studentId">학번:</label>
+  <input type="text" id="studentId" name="studentId" required maxlength="20"><br/>
+  <label for="phoneNumber">전화번호:</label>
+  <input type="text" id="phoneNumber" name="phoneNumber" required maxlength="20"><br/>
+  <label for="email">이메일:</label>
+  <input type="email" id="email" name="email" required maxlength="100"><br/>
+  <label for="motivation">지원동기:</label><br/>
+  <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50"></textarea><br/>
+  <button type="submit">지원서 제출</button>
+</form>
+</body>
+</html>
