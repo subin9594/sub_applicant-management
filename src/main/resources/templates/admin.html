@@ -112,7 +112,7 @@
   <form th:action="@{/admin/logout}" method="get" style="float:right;">
     <button type="submit" class="logout-btn">로그아웃</button>
   </form>
-  <h2>지원서 목록</h2>
+  <h2>KUHAS 부원 모집 지원서 목록</h2>
   <table>
     <thead>
     <tr>
@@ -162,12 +162,54 @@
     </tbody>
   </table>
 </div>
+<!-- 커스텀 모달 영역 -->
+<div id="customModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35);">
+  <div id="customModalBox" style="background:#fff; border-radius:16px; max-width:350px; margin:120px auto 0 auto; padding:32px 24px; box-shadow:0 4px 24px #0002; text-align:center;">
+    <div id="customModalMsg" style="font-size:1.1rem; margin-bottom:18px; line-height:1.6;"></div>
+    <div id="customModalBtns">
+      <button id="customModalOk" style="background:#4f8cff; color:#fff; border:none; border-radius:6px; padding:10px 24px; font-size:1rem; margin-right:12px;">확인</button>
+      <button id="customModalCancel" style="background:#e5e7eb; color:#222; border:none; border-radius:6px; padding:10px 24px; font-size:1rem;">취소</button>
+    </div>
+  </div>
+</div>
 <script>
+  // 커스텀 모달 함수
+  function showModal(msg) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('customModal');
+      const msgBox = document.getElementById('customModalMsg');
+      const okBtn = document.getElementById('customModalOk');
+      const cancelBtn = document.getElementById('customModalCancel');
+      msgBox.innerHTML = msg.replace(/\n/g, '<br>');
+      modal.style.display = 'block';
+      cancelBtn.style.display = '';
+      okBtn.focus();
+      function close(result) {
+        modal.style.display = 'none';
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+        modal.onclick = null;
+        document.onkeydown = null;
+        resolve(result);
+      }
+      okBtn.onclick = () => close(true);
+      cancelBtn.onclick = () => close(false);
+      modal.onclick = (e) => { if (e.target === modal) close(false); };
+      document.onkeydown = function(e) {
+        if (modal.style.display === 'block') {
+          if (e.key === 'Escape') { close(false); }
+          if (e.key === 'Enter') { close(true); }
+        }
+      };
+    });
+  }
   document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('form[action*="/admin/delete/"]').forEach(function(form) {
-          form.addEventListener('submit', function(e) {
-              if (!confirm('삭제하시겠습니까?\nENTER를 누르면 삭제 됩니다.\n취소하려면 ESC를 눌러주세요')) {
-                  e.preventDefault();
+          form.addEventListener('submit', async function(e) {
+              e.preventDefault();
+              const ok = await showModal('삭제하시겠습니까?\nENTER를 누르면 삭제 됩니다.\n취소하려면 ESC를 눌러주세요');
+              if (ok) {
+                  form.submit();
               }
           });
       });
