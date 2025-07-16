@@ -52,7 +52,7 @@ public class EmailService {
                             "현재 상태: " + applicationForm.getStatus().getDisplayName() + "<br><br>" +
                             "결과는 이메일로 개별 안내드리겠습니다.<br><br>" +
                             "감사합니다.<br><br></p>" +
-                            "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기<br><br><br><br><br><br></a></p>" +
+                            "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS Notion 보러가기<br><br><br><br><br><br></a></p>" +
                             "<span style='font-size:12px;color:#888;'>&copy; 2025 KUHAS. All rights reserved.</span>" +
                             "</div>" +
                             "</div>" +
@@ -93,7 +93,7 @@ public class EmailService {
                                 "축하드립니다! KUHAS 부원 모집에 <span style='color:green;font-weight:bold;'>합격</span>하셨습니다.<br>" +
                                 "추후 일정은 개별 연락 드릴 예정이니 메일 및 연락을 확인해주세요.<br><br>" +
                                 "감사합니다.<br><br></p>" +
-                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기<br><br><br><br><br><br></a></p>" +
+                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS Notion 보러가기<br><br><br><br><br><br></a></p>" +
                                 "<span style='font-size:12px;color:#888;'>&copy; 2025 KUHAS. All rights reserved.</span>" +
                                 "</div>" +
                                 "</div>" +
@@ -110,7 +110,7 @@ public class EmailService {
                                 "아쉽게도 KUHAS 부원 모집에 <span style='color:red;font-weight:bold;'>불합격</span>하셨습니다.<br>" +
                                 "앞으로 더 좋은 기회가 있을 때 다시 지원해주시기 바랍니다.<br><br>" +
                                 "지원해주셔서 감사합니다.<br><br></p>" +
-                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기<br><br><br><br><br><br></a></p>" +
+                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS Notion 보러가기<br><br><br><br><br><br></a></p>" +
                                 "<span style='font-size:12px;color:#888;'>&copy; 2025 KUHAS. All rights reserved.</span>" +
                                 "</div>" +
                                 "</div>" +
