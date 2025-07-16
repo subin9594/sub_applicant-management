@@ -36,10 +36,11 @@ public class EmailService {
             if (logoResource.exists()) {
                 helper.addInline("logoImage", logoResource);
             }
-            String logoImgTag = "<img src='cid:logoImage' alt='KUHAS' style='width:300px;max-width:100%;margin-bottom:24px;display:block;margin-left:auto;margin-right:auto;'>";
             String htmlContent =
-                    "<div style='font-family:Arial,sans-serif; text-align:center;'>" +
-                            logoImgTag +
+                    "<body style=\"margin:0; padding:0;\">" +
+                            "<div style=\"width:100vw; min-height:100vh; text-align:center; font-family:Arial,sans-serif;\">" +
+                            "<img src='cid:logoImage' alt='KUHAS' style='width:300px;max-width:100%;margin:40px auto 24px auto;display:block;'>" +
+                            "<div style=\"display:inline-block; background:rgba(255,255,255,0.8); padding:40px 32px; border-radius:16px; box-shadow:0 2px 8px #0001; text-align:center; max-width:480px;\">" +
                             "<h2 style='color:#222;'>KUHAS 부원 모집 지원서 접수 확인</h2>" +
                             "<p style='text-align:center;'>안녕하세요, <b>" + applicationForm.getName() + "</b>님.<br><br>" +
                             "지원서가 성공적으로 접수되었습니다.<br>" +
@@ -49,11 +50,13 @@ public class EmailService {
                             "- 이메일: " + applicationForm.getEmail() + "<br>" +
                             "- 전화번호: " + applicationForm.getPhoneNumber() + "<br><br>" +
                             "현재 상태: " + applicationForm.getStatus().getDisplayName() + "<br><br>" +
-                            "결과는 이메일로 개별 안내드리겠습니다.<br>" +
-                            "감사합니다.<br></p>" +
-                            "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기</a></p>" +
+                            "결과는 이메일로 개별 안내드리겠습니다.<br><br>" +
+                            "감사합니다.<br><br></p>" +
+                            "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기<br><br><br><br><br><br></a></p>" +
                             "<span style='font-size:12px;color:#888;'>&copy; 2025 KUHAS. All rights reserved.</span>" +
-                            "</div>";
+                            "</div>" +
+                            "</div>" +
+                            "</body>";
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
             mailSender.send(mimeMessage);
@@ -78,33 +81,40 @@ public class EmailService {
             if (logoResource.exists()) {
                 helper.addInline("logoImage", logoResource);
             }
-            String logoImgTag = "<img src='cid:logoImage' alt='KUHAS' style='width:300px;max-width:100%;margin-bottom:24px;display:block;margin-left:auto;margin-right:auto;'>";
             if (status == ApplicationForm.ApplicationStatus.ACCEPTED) {
-                subject = "[합격 안내] " + applicationForm.getName() + "님 축하드립니다!";
+                subject = "[KUHAS 부원 모집 합격 안내] " + applicationForm.getName() + "님 축하드립니다!";
                 htmlContent =
-                        "<div style='font-family:Arial,sans-serif; text-align:center;'>" +
-                                logoImgTag +
+                        "<body style=\"margin:0; padding:0;\">" +
+                                "<div style=\"width:100vw; min-height:100vh; text-align:center; font-family:Arial,sans-serif;\">" +
+                                "<img src='cid:logoImage' alt='KUHAS' style='width:300px;max-width:100%;margin:40px auto 24px auto;display:block;'>" +
+                                "<div style=\"display:inline-block; background:rgba(255,255,255,0.8); padding:40px 32px; border-radius:16px; box-shadow:0 2px 8px #0001; text-align:center; max-width:480px;\">" +
                                 "<h2 style='color:#222;'>KUHAS 부원 모집 지원 결과 안내</h2>" +
                                 "<p style='text-align:center;'>안녕하세요, <b>" + applicationForm.getName() + "</b>님.<br><br>" +
                                 "축하드립니다! KUHAS 부원 모집에 <span style='color:green;font-weight:bold;'>합격</span>하셨습니다.<br>" +
-                                "추후 일정은 개별 연락 드릴 예정이니 메일 및 연락을 확인해주세요.<br>" +
-                                "감사합니다.<br></p>" +
-                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기</a></p>" +
+                                "추후 일정은 개별 연락 드릴 예정이니 메일 및 연락을 확인해주세요.<br><br>" +
+                                "감사합니다.<br><br></p>" +
+                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기<br><br><br><br><br><br></a></p>" +
                                 "<span style='font-size:12px;color:#888;'>&copy; 2025 KUHAS. All rights reserved.</span>" +
-                                "</div>";
+                                "</div>" +
+                                "</div>" +
+                                "</body>";
             } else if (status == ApplicationForm.ApplicationStatus.REJECTED) {
-                subject = "[불합격 안내] " + applicationForm.getName() + "님";
+                subject = "[KUHAS 부원 모집 합불 안내] " + applicationForm.getName() + "님";
                 htmlContent =
-                        "<div style='font-family:Arial,sans-serif; text-align:center;'>" +
-                                logoImgTag +
+                        "<body style=\"margin:0; padding:0;\">" +
+                                "<div style=\"width:100vw; min-height:100vh; text-align:center; font-family:Arial,sans-serif;\">" +
+                                "<img src='cid:logoImage' alt='KUHAS' style='width:300px;max-width:100%;margin:40px auto 24px auto;display:block;'>" +
+                                "<div style=\"display:inline-block; background:rgba(255,255,255,0.8); padding:40px 32px; border-radius:16px; box-shadow:0 2px 8px #0001; text-align:center; max-width:480px;\">" +
                                 "<h2 style='color:#222;'>KUHAS 부원 모집 지원 결과 안내</h2>" +
                                 "<p style='text-align:center;'>안녕하세요, <b>" + applicationForm.getName() + "</b>님.<br><br>" +
                                 "아쉽게도 KUHAS 부원 모집에 <span style='color:red;font-weight:bold;'>불합격</span>하셨습니다.<br>" +
-                                "앞으로 더 좋은 기회가 있을 때 다시 지원해주시기 바랍니다.<br>" +
-                                "지원해주셔서 감사합니다.<br></p>" +
-                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기</a></p>" +
+                                "앞으로 더 좋은 기회가 있을 때 다시 지원해주시기 바랍니다.<br><br>" +
+                                "지원해주셔서 감사합니다.<br><br></p>" +
+                                "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS 관련 정보 보러가기<br><br><br><br><br><br></a></p>" +
                                 "<span style='font-size:12px;color:#888;'>&copy; 2025 KUHAS. All rights reserved.</span>" +
-                                "</div>";
+                                "</div>" +
+                                "</div>" +
+                                "</body>";
             } else {
                 subject = "[지원 결과 안내] " + applicationForm.getName() + "님";
                 htmlContent = "결과 안내";
