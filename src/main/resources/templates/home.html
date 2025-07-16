@@ -2,24 +2,204 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>지원서 제출</title>
+  <title>KUHAS 부원 모집 지원서 제출</title>
+  <style>
+    body {
+        background: #f7f8fa;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Segoe UI', 'Apple SD Gothic Neo', Arial, sans-serif;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    .form-box {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px #0002;
+        padding: 40px 32px 32px 32px;
+        min-width: 340px;
+        max-width: 400px;
+    }
+    h2 {
+        margin-bottom: 32px;
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: -1px;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    label {
+        font-weight: 500;
+        margin-bottom: 4px;
+        text-align: left;
+    }
+    input, textarea {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 1rem;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+        background: #f9fafb;
+        transition: border 0.2s;
+    }
+    input:focus, textarea:focus {
+        border: 1.5px solid #4f8cff;
+        background: #fff;
+    }
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    button[type="submit"] {
+        margin-top: 12px;
+        background: #4f8cff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button[type="submit"]:hover {
+        background: #2563eb;
+    }
+    .message {
+        color: #22c55e;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+    .error {
+        color: #ef4444;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+  </style>
 </head>
 <body>
-<h2>지원서 제출</h2>
-<div th:if="${message}" style="color:green;">[[${message}]]</div>
-<div th:if="${error}" style="color:red;">[[${error}]]</div>
-<form th:action="@{/api/applications}" method="post">
-  <label for="name">이름:</label>
-  <input type="text" id="name" name="name" required maxlength="100"><br/>
-  <label for="studentId">학번:</label>
-  <input type="text" id="studentId" name="studentId" required maxlength="20"><br/>
-  <label for="phoneNumber">전화번호:</label>
-  <input type="text" id="phoneNumber" name="phoneNumber" required maxlength="20"><br/>
-  <label for="email">이메일:</label>
-  <input type="email" id="email" name="email" required maxlength="100"><br/>
-  <label for="motivation">지원동기:</label><br/>
-  <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50"></textarea><br/>
-  <button type="submit">지원서 제출</button>
-</form>
+<div class="container">
+  <div class="form-box">
+    <h2>KUHAS</h2>
+    <h2>부원 모집 지원서 제출</h2>
+    <div th:if="${message}" class="message" style="padding:32px 0 24px 0;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="32" fill="#4f8cff"/>
+          <path d="M18 34L28 44L46 26" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div style="font-size:1.3rem; font-weight:600; color:#222;">[[${message}]]</div>
+        <div style="font-size:1rem; color:#555; margin-top:4px;">KUHAS 지원에 감사드립니다.<br>결과는 이메일로 개별 안내드릴 예정입니다.</div>
+        <a href="/" style="margin-top:18px; color:#4f8cff; text-decoration:underline; font-weight:500;">홈으로 돌아가기</a>
+      </div>
+    </div>
+    <div th:if="${error}" class="error" style="padding:32px 0 24px 0;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="28" cy="28" r="28" fill="#ef4444"/>
+          <path d="M18 18L38 38M38 18L18 38" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:1.15rem; font-weight:600; color:#ef4444;">[[${error}]]</div>
+        <div style="font-size:1rem; color:#555; margin-top:4px;">관리자에게 문의하시면 지원서 삭제 및 수정이 가능합니다.</div>
+        <a href="/" style="margin-top:18px; color:#4f8cff; text-decoration:underline; font-weight:500;">홈으로 돌아가기</a>
+      </div>
+    </div>
+    <form th:action="@{/api/applications}" method="post" id="applicationForm" th:if="${message} == null">
+      <label for="name">이름:</label>
+      <input type="text" id="name" name="name" required maxlength="100">
+      <label for="studentId">학번:</label>
+      <input type="text" id="studentId" name="studentId" required maxlength="20">
+      <label for="phoneNumber">전화번호:</label>
+      <input type="text" id="phoneNumber" name="phoneNumber" required maxlength="20">
+      <label for="email">이메일:</label>
+      <input type="email" id="email" name="email" required maxlength="100">
+      <label for="motivation">지원동기:</label>
+      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50"></textarea>
+      <button type="submit">지원서 제출</button>
+    </form>
+    <!-- 커스텀 모달 영역 -->
+    <div id="customModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35);">
+      <div id="customModalBox" style="background:#fff; border-radius:16px; max-width:350px; margin:120px auto 0 auto; padding:32px 24px; box-shadow:0 4px 24px #0002; text-align:center;">
+        <div id="customModalMsg" style="font-size:1.1rem; margin-bottom:18px; line-height:1.6;"></div>
+        <div id="customModalBtns">
+          <button id="customModalOk" style="background:#4f8cff; color:#fff; border:none; border-radius:6px; padding:10px 24px; font-size:1rem; margin-right:12px;">확인</button>
+          <button id="customModalCancel" style="background:#e5e7eb; color:#222; border:none; border-radius:6px; padding:10px 24px; font-size:1rem;">취소</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+          const missing = [];
+          if (!document.getElementById('name').value.trim()) missing.push('이름');
+          const studentId = document.getElementById('studentId').value.trim();
+          if (!studentId) missing.push('학번');
+          if (!document.getElementById('phoneNumber').value.trim()) missing.push('전화번호');
+          if (!document.getElementById('email').value.trim()) missing.push('이메일');
+          const motivation = document.getElementById('motivation').value.trim();
+          if (!motivation) missing.push('지원동기');
+          if (missing.length > 0) {
+              alert(missing.join(', ') + ' 항목이 작성되지 않았습니다.');
+              e.preventDefault();
+              return;
+          }
+          if (studentId.length !== 10) {
+              alert('학번은 10자리여야 합니다.');
+              e.preventDefault();
+              return;
+          }
+          if (motivation.length < 50) {
+              alert('지원동기는 50자 이상 작성해야 합니다.');
+              e.preventDefault();
+              return;
+          }
+          const ok = await showModal('지원서를 제출하시겠습니까?\n확인을 누르면 제출이 됩니다.\n수정을 원하시면 취소를 눌러주세요.');
+          if (!ok) {
+              e.preventDefault();
+              return;
+          }
+      });
+      // 커스텀 모달 함수
+      function showModal(msg, opts = {}) {
+        return new Promise((resolve) => {
+          const modal = document.getElementById('customModal');
+          const msgBox = document.getElementById('customModalMsg');
+          const okBtn = document.getElementById('customModalOk');
+          const cancelBtn = document.getElementById('customModalCancel');
+          msgBox.innerHTML = msg.replace(/\n/g, '<br>');
+          modal.style.display = 'block';
+          cancelBtn.style.display = '';
+          okBtn.focus();
+          function close(result) {
+            modal.style.display = 'none';
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            modal.onclick = null;
+            resolve(result);
+          }
+          okBtn.onclick = () => close(true);
+          cancelBtn.onclick = () => close(false);
+          modal.onclick = (e) => { if (e.target === modal) close(false); };
+          document.onkeydown = function(e) {
+            if (modal.style.display === 'block') {
+              if (e.key === 'Escape') { close(false); }
+              if (e.key === 'Enter') { close(true); }
+            }
+          };
+        });
+      }
+    </script>
+  </div>
+</div>
 </body>
 </html>

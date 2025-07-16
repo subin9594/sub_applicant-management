@@ -27,14 +27,11 @@ public class ApplicationFormService {
 
     // 지원서 제출
     public ApplicationFormResponse submitApplication(ApplicationFormRequest request) {
-        // 중복 지원 확인 (학번 기준)
-        if (applicationFormRepository.findByStudentId(request.getStudentId()).isPresent()) {
-            throw new IllegalArgumentException("이미 지원한 학번입니다: " + request.getStudentId());
-        }
-
-        // 중복 지원 확인 (이메일 기준)
-        if (applicationFormRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("이미 지원한 이메일입니다: " + request.getEmail());
+        // 중복 지원 확인 (학번, 이메일, 전화번호 기준)
+        if (applicationFormRepository.findByStudentId(request.getStudentId()).isPresent() ||
+                applicationFormRepository.findByEmail(request.getEmail()).isPresent() ||
+                applicationFormRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
+            throw new IllegalArgumentException("동일한 이메일, 학번 또는 전화번호로 이미 지원하셨습니다. 지원서 수정은 관리자에게 문의 바랍니다.");
         }
 
         ApplicationForm applicationForm = new ApplicationForm(
@@ -56,7 +53,7 @@ public class ApplicationFormService {
     // 모든 지원서 조회
     @Transactional(readOnly = true)
     public List<ApplicationFormResponse> getAllApplications() {
-        return applicationFormRepository.findAllByOrderByCreatedAtDesc()
+        return applicationFormRepository.findAllByOrderByCreatedAtAsc()
                 .stream()
                 .map(ApplicationFormResponse::new)
                 .collect(Collectors.toList());
@@ -119,6 +116,19 @@ public class ApplicationFormService {
         }
 
         applicationFormRepository.deleteById(id);
+    }
+
+    // 관리자 지원서 수정
+    public void updateApplicationByAdmin(Long id, String name, String studentId, String phoneNumber, String email, String motivation, String status) {
+        ApplicationForm applicationForm = applicationFormRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("지원서를 찾을 수 없습니다: " + id));
+        applicationForm.setName(name);
+        applicationForm.setStudentId(studentId);
+        applicationForm.setPhoneNumber(phoneNumber);
+        applicationForm.setEmail(email);
+        applicationForm.setMotivation(motivation);
+        applicationForm.setStatus(ApplicationForm.ApplicationStatus.valueOf(status));
+        applicationFormRepository.save(applicationForm);
     }
 
     // 통계 정보 조회

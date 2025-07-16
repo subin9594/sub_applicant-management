@@ -33,6 +33,9 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
     // 이메일로 검색
     List<ApplicationForm> findByEmailContainingIgnoreCase(String email);
 
+    // 전화번호로 지원서 찾기
+    Optional<ApplicationForm> findByPhoneNumber(String phoneNumber);
+
     // 복합 검색 (이름, 학번, 이메일)
     @Query("SELECT a FROM ApplicationForm a WHERE " +
             "LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -45,4 +48,7 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
 
     // 상태별 최근 지원서 순으로 정렬
     List<ApplicationForm> findByStatusOrderByCreatedAtDesc(ApplicationForm.ApplicationStatus status);
+
+    // 생성일 오름차순(빠른 순) 지원서 목록 조회
+    List<ApplicationForm> findAllByOrderByCreatedAtAsc();
 }

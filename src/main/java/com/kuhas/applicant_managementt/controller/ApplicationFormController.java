@@ -8,11 +8,13 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/api/applications")
 @CrossOrigin(origins = "*")
 public class ApplicationFormController {
@@ -37,8 +39,15 @@ public class ApplicationFormController {
         }
     }
 
-    // 모든 지원서 조회
+    // 지원서 제출 폼 및 안내 화면 (GET)
     @GetMapping
+    public String showApplicationForm() {
+        return "home";
+    }
+
+    // 모든 지원서 조회
+    @GetMapping("/list")
+    @ResponseBody
     public ResponseEntity<List<ApplicationFormResponse>> getAllApplications() {
         List<ApplicationFormResponse> applications = applicationFormService.getAllApplications();
         return ResponseEntity.ok(applications);
@@ -46,6 +55,7 @@ public class ApplicationFormController {
 
     // ID로 지원서 조회
     @GetMapping("/{id}")
+    @ResponseBody
     public ResponseEntity<ApplicationFormResponse> getApplicationById(@PathVariable Long id) {
         try {
             ApplicationFormResponse response = applicationFormService.getApplicationById(id);
@@ -57,6 +67,7 @@ public class ApplicationFormController {
 
     // 학번으로 지원서 조회
     @GetMapping("/student/{studentId}")
+    @ResponseBody
     public ResponseEntity<ApplicationFormResponse> getApplicationByStudentId(@PathVariable String studentId) {
         try {
             ApplicationFormResponse response = applicationFormService.getApplicationByStudentId(studentId);
@@ -68,6 +79,7 @@ public class ApplicationFormController {
 
     // 상태별 지원서 조회
     @GetMapping("/status/{status}")
+    @ResponseBody
     public ResponseEntity<List<ApplicationFormResponse>> getApplicationsByStatus(@PathVariable String status) {
         try {
             ApplicationForm.ApplicationStatus applicationStatus = ApplicationForm.ApplicationStatus.valueOf(status.toUpperCase());
@@ -80,6 +92,7 @@ public class ApplicationFormController {
 
     // 키워드로 지원서 검색
     @GetMapping("/search")
+    @ResponseBody
     public ResponseEntity<List<ApplicationFormResponse>> searchApplications(@RequestParam String keyword) {
         List<ApplicationFormResponse> applications = applicationFormService.searchApplications(keyword);
         return ResponseEntity.ok(applications);
@@ -87,6 +100,7 @@ public class ApplicationFormController {
 
     // 지원서 상태 변경
     @PutMapping("/{id}/status")
+    @ResponseBody
     public ResponseEntity<ApplicationFormResponse> updateApplicationStatus(
             @PathVariable Long id,
             @RequestParam String status) {
@@ -101,6 +115,7 @@ public class ApplicationFormController {
 
     // 지원서 삭제
     @DeleteMapping("/{id}")
+    @ResponseBody
     public ResponseEntity<Void> deleteApplication(@PathVariable Long id) {
         try {
             applicationFormService.deleteApplication(id);
@@ -112,6 +127,7 @@ public class ApplicationFormController {
 
     // 통계 정보 조회
     @GetMapping("/statistics")
+    @ResponseBody
     public ResponseEntity<ApplicationFormService.ApplicationStatistics> getStatistics() {
         ApplicationFormService.ApplicationStatistics statistics = applicationFormService.getStatistics();
         return ResponseEntity.ok(statistics);

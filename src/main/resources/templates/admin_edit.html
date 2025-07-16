@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>KUHAS 부원 모집 지원서 수정</title>
+  <style>
+    body {
+        background: #f7f8fa;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Segoe UI', 'Apple SD Gothic Neo', Arial, sans-serif;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    .form-box {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px #0002;
+        padding: 40px 32px 32px 32px;
+        min-width: 340px;
+        max-width: 480px;
+    }
+    h2 {
+        margin-bottom: 32px;
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: -1px;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    label {
+        font-weight: 500;
+        margin-bottom: 4px;
+        text-align: left;
+    }
+    input, textarea, select {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 1rem;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+        background: #f9fafb;
+        transition: border 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+        border: 1.5px solid #4f8cff;
+        background: #fff;
+    }
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    .btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+    }
+    button[type="submit"] {
+        background: #4f8cff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+        transition: background 0.2s;
+    }
+    button[type="submit"]:hover {
+        background: #2563eb;
+    }
+    .cancel-btn {
+        background: #e5e7eb;
+        color: #222;
+    }
+    .cancel-btn:hover {
+        background: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="form-box">
+    <h2>KUHAS</h2>
+    <h2>부원 모집 지원서 수정</h2>
+    <form th:action="@{'/admin/edit/' + ${application.id}}" method="post">
+      <label for="name">이름:</label>
+      <input type="text" id="name" name="name" th:value="${application.name}" required maxlength="100">
+      <label for="studentId">학번:</label>
+      <input type="text" id="studentId" name="studentId" th:value="${application.studentId}" required maxlength="20">
+      <label for="phoneNumber">전화번호:</label>
+      <input type="text" id="phoneNumber" name="phoneNumber" th:value="${application.phoneNumber}" required maxlength="20">
+      <label for="email">이메일:</label>
+      <input type="email" id="email" name="email" th:value="${application.email}" required maxlength="100">
+      <label for="motivation">지원동기:</label>
+      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" th:text="${application.motivation}"></textarea>
+      <label for="status">상태:</label>
+      <select id="status" name="status">
+        <option th:value="PENDING" th:selected="${application.status == 'PENDING'}">PENDING</option>
+        <option th:value="ACCEPTED" th:selected="${application.status == 'ACCEPTED'}">ACCEPTED</option>
+        <option th:value="REJECTED" th:selected="${application.status == 'REJECTED'}">REJECTED</option>
+      </select>
+      <div class="btn-row">
+        <button type="submit">저장</button>
+        <a th:href="@{/admin}" class="cancel-btn" style="text-align:center; display:inline-block; line-height:44px; border-radius:6px; flex:1; text-decoration:none;">취소</a>
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -2,43 +2,176 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>지원서 관리</title>
+  <title>KUHAS 부원 모집 지원서 관리</title>
+  <style>
+    body {
+        background: #f7f8fa;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Segoe UI', 'Apple SD Gothic Neo', Arial, sans-serif;
+    }
+    .admin-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px #0002;
+        padding: 36px 32px 32px 32px;
+    }
+    h2 {
+        margin-bottom: 32px;
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: left;
+        letter-spacing: -1px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        margin-bottom: 24px;
+    }
+    th, td {
+        border: none;
+        padding: 12px 10px;
+        text-align: left;
+        font-size: 1rem;
+        white-space: nowrap;
+        min-width: 60px;
+    }
+    thead th {
+        background: #f1f5f9;
+        font-weight: 700;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+    }
+    tbody tr:last-child {
+        border-bottom: none;
+    }
+    td {
+        vertical-align: top;
+        word-break: break-all;
+    }
+    td.motivation-cell {
+        white-space: normal;
+        word-break: break-word;
+        max-width: 300px;
+        overflow-wrap: anywhere;
+    }
+    .status-pending { color: #f59e42; font-weight: 600; }
+    .status-accepted { color: #22c55e; font-weight: 600; }
+    .status-rejected { color: #ef4444; font-weight: 600; }
+    .action-btn {
+        background: #4f8cff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 16px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin-right: 4px;
+        transition: background 0.2s;
+    }
+    .action-btn:last-child { margin-right: 0; }
+    .action-btn:hover { background: #2563eb; }
+    .action-btn.accept {
+        background: #22c55e;
+        color: #fff;
+    }
+    .action-btn.accept:hover {
+        background: #16a34a;
+    }
+    .action-btn.edit {
+        background: #fde68a;
+        color: #222;
+    }
+    .action-btn.edit:hover {
+        background: #fbbf24;
+    }
+    .logout-btn {
+        float: right;
+        background: #e5e7eb;
+        color: #222;
+        border: none;
+        border-radius: 6px;
+        padding: 7px 18px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin-top: 8px;
+        margin-bottom: 16px;
+    }
+    .logout-btn:hover { background: #cbd5e1; }
+  </style>
 </head>
 <body>
-<h2>지원서 목록</h2>
-<form th:action="@{/admin/logout}" method="get" style="float:right;">
-  <button type="submit">로그아웃</button>
-</form>
-<table border="1">
-  <thead>
-  <tr>
-    <th>이름</th>
-    <th>학번</th>
-    <th>전화번호</th>
-    <th>이메일</th>
-    <th>지원동기</th>
-    <th>상태</th>
-    <th>처리</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="app : ${applications}">
-    <td th:text="${app.name}"></td>
-    <td th:text="${app.studentId}"></td>
-    <td th:text="${app.phoneNumber}"></td>
-    <td th:text="${app.email}"></td>
-    <td th:text="${app.motivation}"></td>
-    <td th:text="${app.status}"></td>
-    <td>
-      <form th:action="@{'/admin/approve/' + ${app.id}}" method="post" style="display:inline;">
-        <button type="submit" name="status" value="ACCEPTED">합격</button>
-      </form>
-      <form th:action="@{'/admin/approve/' + ${app.id}}" method="post" style="display:inline;">
-        <button type="submit" name="status" value="REJECTED">불합격</button>
-      </form>
-    </td>
-  </tr>
-  </tbody>
-</table>
+<div class="admin-container">
+  <form th:action="@{/admin/logout}" method="get" style="float:right;">
+    <button type="submit" class="logout-btn">로그아웃</button>
+  </form>
+  <h2>지원서 목록</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>순번</th>
+      <th>지원 시각</th>
+      <th>이름</th>
+      <th>학번</th>
+      <th>전화번호</th>
+      <th>이메일</th>
+      <th>지원동기</th>
+      <th>상태</th>
+      <th>처리</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="app, iterStat : ${applications}">
+      <td th:text="${iterStat.index + 1}"></td>
+      <td>
+        <span th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd')}"></span><br/>
+        <span th:text="${#temporals.format(app.createdAt, 'HH:mm:ss')}"></span>
+      </td>
+      <td th:text="${app.name}"></td>
+      <td th:text="${app.studentId}"></td>
+      <td th:text="${app.phoneNumber}"></td>
+      <td th:text="${app.email}"></td>
+      <td th:utext="${#strings.replace(app.motivation, '(.{30})', '$1<wbr>')}" class="motivation-cell"></td>
+      <td th:text="${app.status}" th:classappend="'status-' + ${app.status.toString().toLowerCase()}"></td>
+      <td>
+        <div style="display:flex; gap:6px;">
+          <form th:action="@{'/admin/approve/' + ${app.id}}" method="post" style="display:inline;">
+            <button type="submit" name="status" value="ACCEPTED" class="action-btn accept">합격</button>
+          </form>
+          <form th:action="@{'/admin/approve/' + ${app.id}}" method="post" style="display:inline;">
+            <button type="submit" name="status" value="REJECTED" class="action-btn">불합격</button>
+          </form>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <form th:action="@{'/admin/edit/' + ${app.id}}" method="get" style="display:inline;">
+            <button type="submit" class="action-btn edit">수정</button>
+          </form>
+          <form th:action="@{'/admin/delete/' + ${app.id}}" method="post" style="display:inline;">
+            <button type="submit" class="action-btn" style="background:#ef4444; color:#fff;">삭제</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('form[action*="/admin/delete/"]').forEach(function(form) {
+          form.addEventListener('submit', function(e) {
+              if (!confirm('삭제하시겠습니까?\nENTER를 누르면 삭제 됩니다.\n취소하려면 ESC를 눌러주세요')) {
+                  e.preventDefault();
+              }
+          });
+      });
+  });
+</script>
 </body>
 </html>

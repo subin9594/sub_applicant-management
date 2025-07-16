@@ -29,7 +29,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             helper.setTo(applicationForm.getEmail());
             helper.setFrom(new InternetAddress("subo3os2@korea.ac.kr", "KUHAS"));
-            String subject = "[지원서 접수 확인] " + applicationForm.getName() + "님의 지원서가 접수되었습니다";
+            String subject = "[KUHAS 부원 모집 지원서 접수 확인] " + applicationForm.getName() + "님의 지원서가 접수되었습니다";
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
             // 이미지 첨부 (CID, classpath)
             Resource logoResource = new ClassPathResource("static/logo.png");

@@ -63,4 +63,30 @@ public class HomeController {
         applicationFormService.updateApplicationStatus(id, newStatus);
         return "redirect:/admin";
     }
+
+    @GetMapping("/admin/edit/{id}")
+    public String editApplicationForm(@PathVariable Long id, HttpSession session, Model model) {
+        if (session.getAttribute("admin") == null) {
+            return "redirect:/admin";
+        }
+        ApplicationFormResponse application = applicationFormService.getApplicationById(id);
+        model.addAttribute("application", application);
+        return "admin_edit";
+    }
+
+    @PostMapping("/admin/edit/{id}")
+    public String editApplicationSubmit(@PathVariable Long id,
+                                        @RequestParam String name,
+                                        @RequestParam String studentId,
+                                        @RequestParam String phoneNumber,
+                                        @RequestParam String email,
+                                        @RequestParam String motivation,
+                                        @RequestParam String status,
+                                        HttpSession session) {
+        if (session.getAttribute("admin") == null) {
+            return "redirect:/admin";
+        }
+        applicationFormService.updateApplicationByAdmin(id, name, studentId, phoneNumber, email, motivation, status);
+        return "redirect:/admin";
+    }
 }
