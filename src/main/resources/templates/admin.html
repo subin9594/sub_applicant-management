@@ -150,9 +150,7 @@
           </form>
         </div>
         <div style="display:flex; gap:6px; margin-top:6px;">
-          <form th:action="@{'/admin/edit/' + ${app.id}}" method="get" style="display:inline;">
-            <button type="submit" class="action-btn edit">수정</button>
-          </form>
+          <a th:href="@{'/admin/edit/' + ${app.id}}" class="action-btn edit" style="display:inline-block;">수정</a>
           <form th:action="@{'/admin/delete/' + ${app.id}}" method="post" style="display:inline;">
             <button type="submit" class="action-btn" style="background:#ef4444; color:#fff;">삭제</button>
           </form>

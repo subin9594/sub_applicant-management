@@ -94,22 +94,29 @@
 <div class="container">
   <div class="form-box">
     <h2>KUHAS 부원 모집 지원서 수정</h2>
-    <form th:action="@{'/admin/edit/' + ${application.id}}" method="post" id="editForm">
+    <!-- 에러 메시지 표시 -->
+    <div th:if="${error}" style="color:red; margin-bottom:10px;" th:text="${error}"></div>
+    <!-- 커스텀 에러 메시지 영역 -->
+    <div id="customErrorMsg" style="display:none; background:#fee2e2; color:#b91c1c; border-radius:8px; padding:14px 0; margin-bottom:18px; font-weight:600; text-align:center; font-size:1.1rem;"></div>
+    <form th:action="@{/admin/edit/{id}(id=${id})}" method="post" id="editForm">
       <label for="name">이름:</label>
-      <input type="text" id="name" name="name" th:value="${application.name}" required maxlength="100">
+      <input type="text" id="name" name="name" th:value="${name != null ? name : application.name}" required maxlength="100">
       <label for="studentId">학번:</label>
-      <input type="text" id="studentId" name="studentId" th:value="${application.studentId}" required maxlength="20">
+      <input type="text" id="studentId" name="studentId" th:value="${studentId != null ? studentId : application.studentId}" required maxlength="20" onblur="checkStudentId()">
+      <div id="studentIdError" style="color:red;"></div>
       <label for="phoneNumber">전화번호:</label>
-      <input type="text" id="phoneNumber" name="phoneNumber" th:value="${application.phoneNumber}" required maxlength="20">
+      <input type="text" id="phoneNumber" name="phoneNumber" th:value="${phoneNumber != null ? phoneNumber : application.phoneNumber}" required maxlength="20" onblur="checkPhoneNumber()">
+      <div id="phoneNumberError" style="color:red;"></div>
       <label for="email">이메일:</label>
-      <input type="email" id="email" name="email" th:value="${application.email}" required maxlength="100">
+      <input type="email" id="email" name="email" th:value="${email != null ? email : application.email}" required maxlength="100" onblur="checkEmail()">
+      <div id="emailError" style="color:red;"></div>
       <label for="motivation">지원동기:</label>
-      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" th:text="${application.motivation}"></textarea>
+      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" th:text="${motivation != null ? motivation : application.motivation}"></textarea>
       <label for="status">상태:</label>
       <select id="status" name="status">
-        <option th:value="PENDING" th:selected="${application.status == 'PENDING'}">PENDING</option>
-        <option th:value="ACCEPTED" th:selected="${application.status == 'ACCEPTED'}">ACCEPTED</option>
-        <option th:value="REJECTED" th:selected="${application.status == 'REJECTED'}">REJECTED</option>
+        <option value="PENDING" th:selected="${(status != null ? status : application.status) == 'PENDING'}">PENDING</option>
+        <option value="ACCEPTED" th:selected="${(status != null ? status : application.status) == 'ACCEPTED'}">ACCEPTED</option>
+        <option value="REJECTED" th:selected="${(status != null ? status : application.status) == 'REJECTED'}">REJECTED</option>
       </select>
       <div class="btn-row">
         <button type="submit">저장</button>
@@ -159,12 +166,97 @@
     });
   }
   document.getElementById('editForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const ok = await showModal('수정하시겠습니까?');
-    if (ok) {
-      e.target.submit();
+      e.preventDefault();
+      const errorDiv = document.getElementById('customErrorMsg');
+      errorDiv.style.display = 'none';
+      errorDiv.innerText = '';
+
+      // 커스텀 유효성 검사
+      const name = document.getElementById('name').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const motivation = document.getElementById('motivation').value.trim();
+
+      // 이름: 한글 또는 영문만
+      if (!/^[가-힣a-zA-Z\s]+$/.test(name)) {
+        errorDiv.innerText = '이름은 한글 또는 영문으로만 작성해야 합니다.';
+        errorDiv.style.display = 'block';
+        document.getElementById('name').focus();
+        return;
+      }
+      // 학번: 숫자 10자리
+      if (!/^[0-9]{10}$/.test(studentId)) {
+        errorDiv.innerText = '학번은 숫자 10자리로 작성해야 합니다.';
+        errorDiv.style.display = 'block';
+        document.getElementById('studentId').focus();
+        return;
+      }
+      // 전화번호: 숫자와 하이픈(-)만, 하이픈 포함 8~14자
+      if (!/^[0-9\-]+$/.test(phoneNumber)) {
+        errorDiv.innerText = '전화번호는 숫자와 -(하이픈)만 작성할 수 있습니다.';
+        errorDiv.style.display = 'block';
+        document.getElementById('phoneNumber').focus();
+        return;
+      }
+      if (phoneNumber.length < 8 || phoneNumber.length > 14) {
+        errorDiv.innerText = '전화번호는 -(하이픈) 포함 8자 미만, 14자 초과로 입력해 주세요.';
+        errorDiv.style.display = 'block';
+        document.getElementById('phoneNumber').focus();
+        return;
+      }
+      // 지원동기: 50자 이상
+      if (motivation.length < 50) {
+        errorDiv.innerText = '지원동기는 50자 이상 작성해야 합니다.';
+        errorDiv.style.display = 'block';
+        document.getElementById('motivation').focus();
+        return;
+      }
+
+      // 모든 유효성 통과 시에만 팝업
+      const ok = await showModal('수정하시겠습니까?');
+      if (ok) {
+        e.target.submit();
+      }
+    });
+    function checkStudentId() {
+        var studentId = document.getElementById('studentId').value;
+        if (!studentId) return;
+        fetch('/api/applications/student/' + studentId)
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('studentIdError').innerText = '이미 사용 중인 학번입니다.';
+                } else {
+                    document.getElementById('studentIdError').innerText = '';
+                }
+            });
     }
-  });
+    function checkEmail() {
+        var email = document.getElementById('email').value;
+        if (!email) return;
+        fetch('/api/applications?email=' + encodeURIComponent(email))
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    document.getElementById('emailError').innerText = '이미 사용 중인 이메일입니다.';
+                } else {
+                    document.getElementById('emailError').innerText = '';
+                }
+            });
+    }
+    function checkPhoneNumber() {
+        var phoneNumber = document.getElementById('phoneNumber').value;
+        if (!phoneNumber) return;
+        fetch('/api/applications?phoneNumber=' + encodeURIComponent(phoneNumber))
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    document.getElementById('phoneNumberError').innerText = '이미 사용 중인 전화번호입니다.';
+                } else {
+                    document.getElementById('phoneNumberError').innerText = '';
+                }
+            });
+    }
 </script>
 </body>
 </html>

@@ -120,15 +120,44 @@ public class ApplicationFormService {
 
     // 관리자 지원서 수정
     public void updateApplicationByAdmin(Long id, String name, String studentId, String phoneNumber, String email, String motivation, String status) {
-        ApplicationForm applicationForm = applicationFormRepository.findById(id)
+        ApplicationForm before = applicationFormRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("지원서를 찾을 수 없습니다: " + id));
-        applicationForm.setName(name);
-        applicationForm.setStudentId(studentId);
-        applicationForm.setPhoneNumber(phoneNumber);
-        applicationForm.setEmail(email);
-        applicationForm.setMotivation(motivation);
-        applicationForm.setStatus(ApplicationForm.ApplicationStatus.valueOf(status));
-        applicationFormRepository.save(applicationForm);
+        // 중복 학번, 이메일, 전화번호 체크 (본인 제외)
+        applicationFormRepository.findByStudentId(studentId)
+                .filter(form -> !form.getId().equals(id))
+                .ifPresent(form -> { throw new IllegalArgumentException("이미 사용 중인 학번입니다."); });
+
+        applicationFormRepository.findByEmail(email)
+                .filter(form -> !form.getId().equals(id))
+                .ifPresent(form -> { throw new IllegalArgumentException("이미 사용 중인 이메일입니다."); });
+
+        applicationFormRepository.findByPhoneNumber(phoneNumber)
+                .filter(form -> !form.getId().equals(id))
+                .ifPresent(form -> { throw new IllegalArgumentException("이미 사용 중인 전화번호입니다."); });
+
+        // 필수 입력 및 길이 체크
+        if (name == null || name.isBlank() || name.length() > 100)
+            throw new IllegalArgumentException("이름은 필수이며 100자 이하여야 합니다.");
+        if (studentId == null || studentId.isBlank() || studentId.length() > 20)
+            throw new IllegalArgumentException("학번은 필수이며 20자 이하여야 합니다.");
+        if (phoneNumber == null || phoneNumber.isBlank() || phoneNumber.length() > 20)
+            throw new IllegalArgumentException("전화번호는 필수이며 20자 이하여야 합니다.");
+        if (email == null || email.isBlank() || email.length() > 100)
+            throw new IllegalArgumentException("이메일은 필수이며 100자 이하여야 합니다.");
+        if (motivation == null || motivation.isBlank() || motivation.length() > 2000)
+            throw new IllegalArgumentException("지원동기는 필수이며 2000자 이하여야 합니다.");
+
+        // 실제 수정
+        before.setName(name);
+        before.setStudentId(studentId);
+        before.setPhoneNumber(phoneNumber);
+        before.setEmail(email);
+        before.setMotivation(motivation);
+        before.setStatus(ApplicationForm.ApplicationStatus.valueOf(status));
+        applicationFormRepository.save(before);
+
+        // 지원서 수정 안내 메일 발송 (수정 전/후 모두 전달)
+        emailService.sendApplicationModifiedEmail(before, name, studentId, phoneNumber, email, motivation, status);
     }
 
     // 통계 정보 조회

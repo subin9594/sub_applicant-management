@@ -44,11 +44,12 @@ public class EmailService {
                             "<h2 style='color:#222;'>KUHAS 부원 모집 지원서 접수 확인</h2>" +
                             "<p style='text-align:center;'>안녕하세요, <b>" + applicationForm.getName() + "</b>님.<br><br>" +
                             "지원서가 성공적으로 접수되었습니다.<br>" +
-                            "지원 정보:<br>" +
+                            "<b>지원 정보:</b><br>" +
                             "- 이름: " + applicationForm.getName() + "<br>" +
                             "- 학번: " + applicationForm.getStudentId() + "<br>" +
                             "- 이메일: " + applicationForm.getEmail() + "<br>" +
-                            "- 전화번호: " + applicationForm.getPhoneNumber() + "<br><br>" +
+                            "- 전화번호: " + applicationForm.getPhoneNumber() + "<br>" +
+                            "- 지원동기: " + applicationForm.getMotivation() + "<br>" +
                             "현재 상태: " + applicationForm.getStatus().getDisplayName() + "<br><br>" +
                             "결과는 이메일로 개별 안내드리겠습니다.<br><br>" +
                             "감사합니다.<br><br></p>" +
@@ -126,5 +127,62 @@ public class EmailService {
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             System.err.println("HTML 이메일 발송 실패: " + e.getMessage());
         }
+    }
+    // 지원서 수정 안내 메일 발송 (수정 전/후 모두 전달)
+    public void sendApplicationModifiedEmail(ApplicationForm before, String name, String studentId, String phoneNumber, String email, String motivation, String status) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(email);
+            helper.setFrom(new InternetAddress("subo3os2@korea.ac.kr", "KUHAS"));
+            String subject = "[KUHAS 부원 모집 지원] 지원서 수정 안내";
+            String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
+            Resource logoResource = new org.springframework.core.io.ClassPathResource("static/logo.png");
+            if (logoResource.exists()) {
+                helper.addInline("logoImage", logoResource);
+            }
+            String htmlContent =
+                    "<body style=\"margin:0; padding:0;\">" +
+                            "<div style=\"width:100vw; min-height:100vh; text-align:center; font-family:Arial,sans-serif;\">" +
+                            "<img src='cid:logoImage' alt='KUHAS' style='width:300px;max-width:100%;margin:40px auto 24px auto;display:block;'>" +
+                            "<div style=\"display:inline-block; background:rgba(255,255,255,0.8); padding:40px 32px; border-radius:16px; box-shadow:0 2px 8px #0001; text-align:center; max-width:480px;\">" +
+                            "<h2 style='color:#222;'>KUHAS 지원서 수정 안내</h2>" +
+                            "<p style='text-align:center;'>안녕하세요, <b>" + highlightIfChanged(before.getName(), name) + "</b>님.<br><br>" +
+                            "지원서 정보가 성공적으로 수정되었습니다.<br><br>" +
+                            "<b>수정된 지원서 정보:</b><br>" +
+                            "- 이름: " + highlightIfChanged(before.getName(), name) + "<br>" +
+                            "- 학번: " + highlightIfChanged(before.getStudentId(), studentId) + "<br>" +
+                            "- 이메일: " + highlightIfChanged(before.getEmail(), email) + "<br>" +
+                            "- 전화번호: " + highlightIfChanged(before.getPhoneNumber(), phoneNumber) + "<br>" +
+                            "- 지원동기: " + highlightIfChanged(before.getMotivation(), motivation) + "<br>" +
+                            "- 현재 상태: " + highlightIfChanged(before.getStatus().name(), status) + "<br><br>" +
+                            "결과는 이메일로 개별 안내드리겠습니다.<br><br>" +
+                            "감사합니다.<br><br></p>" +
+                            "<p><a href='" + infoUrl + "' style='color:#0056b3;text-decoration:underline;font-weight:bold;'>🔗 KUHAS Notion 보러가기<br><br><br><br><br><br></a></p>" +
+                            "<span style='font-size:12px;color:#888;'>&copy; 2025 KUHAS. All rights reserved.</span>" +
+                            "</div>" +
+                            "</div>" +
+                            "</body>";
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
+            System.out.println("지원서 수정 안내 메일 발송 완료: " + email);
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+            System.err.println("지원서 수정 안내 메일 발송 실패: " + e.getMessage());
+        }
+    }
+
+    private String highlightIfChanged(String oldVal, String newVal) {
+        if (oldVal == null) oldVal = "";
+        if (newVal == null) newVal = "";
+        if (!oldVal.equals(newVal)) {
+            return "<span style=\"color:#2563eb; font-weight:bold;\">" + escapeHtml(newVal) + "</span>";
+        } else {
+            return escapeHtml(newVal);
+        }
+    }
+    private String escapeHtml(String s) {
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
     }
 }

@@ -141,80 +141,82 @@
     </div>
     <script>
       const errorDiv = document.getElementById('formError');
-      function hideError() {
-        errorDiv.style.display = 'none';
-      }
-      document.querySelectorAll('#applicationForm input, #applicationForm textarea').forEach(function(el) {
-        el.addEventListener('input', hideError);
-      });
-      document.getElementById('applicationForm').addEventListener('submit', async function(e) {
-          e.preventDefault(); // 항상 먼저 막음
-          errorDiv.style.display = 'none';
-          let errorMsg = '';
-          const missing = [];
-          const name = document.getElementById('name').value.trim();
-          const studentId = document.getElementById('studentId').value.trim();
-          const phoneNumber = document.getElementById('phoneNumber').value.trim();
-          const email = document.getElementById('email').value.trim();
-          const motivation = document.getElementById('motivation').value.trim();
-          if (!name) missing.push('이름');
-          if (!studentId) missing.push('학번');
-          if (!phoneNumber) missing.push('전화번호');
-          if (!email) missing.push('이메일');
-          if (!motivation) missing.push('지원동기');
-          if (missing.length > 0) {
-              errorMsg = missing.join(', ') + ' 항목이 작성되지 않았습니다.';
-          } else if (!/^[가-힣a-zA-Z\s]+$/.test(name)) {
-              errorMsg = '이름은 한글 또는 영문으로만 작성해야 합니다.';
-          } else if (!/^\d{10}$/.test(studentId)) {
-              errorMsg = '학번은 숫자 10자리로 작성해야 합니다.';
-          } else if (!/^\d+$/.test(phoneNumber)) {
-              errorMsg = '전화번호는 숫자로만 작성해야 합니다.';
-          } else if (motivation.length < 50) {
-              errorMsg = '지원동기는 50자 이상 작성해야 합니다.';
-          }
-          if (errorMsg) {
-              errorDiv.textContent = errorMsg;
-              errorDiv.style.display = 'block';
-              return;
-          }
-          const ok = await showModal('지원서를 제출하시겠습니까?\n확인을 누르면 제출이 됩니다.\n수정을 원하시면 취소를 눌러주세요.');
-          if (ok) {
-              e.target.submit(); // 확인 눌렀을 때만 실제 제출
-          }
-          // 확인을 누르지 않으면 아무 동작도 하지 않음
-      });
-      // 커스텀 모달 함수
-      function showModal(msg, opts = {}) {
-        return new Promise((resolve) => {
-          const modal = document.getElementById('customModal');
-          const msgBox = document.getElementById('customModalMsg');
-          const okBtn = document.getElementById('customModalOk');
-          const cancelBtn = document.getElementById('customModalCancel');
-          msgBox.innerHTML = msg.replace(/\n/g, '<br>');
-          modal.style.display = 'block';
-          cancelBtn.style.display = '';
-          okBtn.focus();
-          function close(result) {
-            modal.style.display = 'none';
-            okBtn.onclick = null;
-            cancelBtn.onclick = null;
-            modal.onclick = null;
-            resolve(result);
-          }
-          okBtn.onclick = () => close(true);
-          cancelBtn.onclick = () => close(false);
-          modal.onclick = (e) => { if (e.target === modal) close(false); };
-          document.onkeydown = function(e) {
-            if (modal.style.display === 'block') {
-              if (e.key === 'Escape') { close(false); }
-              if (e.key === 'Enter') { close(true); }
-            }
-          };
-        });
-      }
+       function hideError() {
+         errorDiv.style.display = 'none';
+       }
+       document.querySelectorAll('#applicationForm input, #applicationForm textarea').forEach(function(el) {
+         el.addEventListener('input', hideError);
+       });
+       document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+           e.preventDefault(); // 항상 먼저 막음
+           errorDiv.style.display = 'none';
+           let errorMsg = '';
+           const missing = [];
+           const name = document.getElementById('name').value.trim();
+           const studentId = document.getElementById('studentId').value.trim();
+           const phoneNumber = document.getElementById('phoneNumber').value.trim();
+           const email = document.getElementById('email').value.trim();
+           const motivation = document.getElementById('motivation').value.trim();
+           if (!name) missing.push('이름');
+           if (!studentId) missing.push('학번');
+           if (!phoneNumber) missing.push('전화번호');
+           if (!email) missing.push('이메일');
+           if (!motivation) missing.push('지원동기');
+           if (missing.length > 0) {
+               errorMsg = missing.join(', ') + ' 항목이 작성되지 않았습니다.';
+           } else if (!/^[가-힣a-zA-Z\s]+$/.test(name)) {
+               errorMsg = '이름은 한글 또는 영문으로만 작성해야 합니다.';
+           } else if (!/^\d{10}$/.test(studentId)) {
+               errorMsg = '학번은 숫자 10자리로 작성해야 합니다.';
+           } else if (!/^[0-9\-]+$/.test(phoneNumber)) {
+               errorMsg = '전화번호는 숫자와 -(하이픈)만 작성할 수 있습니다.';
+           } else if (phoneNumber.length < 8 || phoneNumber.length > 14) {
+               errorMsg = '전화번호는 -(하이픈) 포함 8자 미만, 14자 초과로 입력해 주세요.';
+           }else if (motivation.length < 50) {
+               errorMsg = '지원동기는 50자 이상 작성해야 합니다.';
+           }
+           if (errorMsg) {
+               errorDiv.textContent = errorMsg;
+               errorDiv.style.display = 'block';
+               return;
+           }
+           const ok = await showModal('지원서를 제출하시겠습니까?\n확인을 누르면 제출이 됩니다.\n수정을 원하시면 취소를 눌러주세요.');
+           if (ok) {
+               e.target.submit(); // 확인 눌렀을 때만 실제 제출
+           }
+           // 확인을 누르지 않으면 아무 동작도 하지 않음
+       });
+       // 커스텀 모달 함수
+       function showModal(msg, opts = {}) {
+         return new Promise((resolve) => {
+           const modal = document.getElementById('customModal');
+           const msgBox = document.getElementById('customModalMsg');
+           const okBtn = document.getElementById('customModalOk');
+           const cancelBtn = document.getElementById('customModalCancel');
+           msgBox.innerHTML = msg.replace(/\n/g, '<br>');
+           modal.style.display = 'block';
+           cancelBtn.style.display = '';
+           okBtn.focus();
+           function close(result) {
+             modal.style.display = 'none';
+             okBtn.onclick = null;
+             cancelBtn.onclick = null;
+             modal.onclick = null;
+             resolve(result);
+           }
+           okBtn.onclick = () => close(true);
+           cancelBtn.onclick = () => close(false);
+           modal.onclick = (e) => { if (e.target === modal) close(false); };
+           document.onkeydown = function(e) {
+             if (modal.style.display === 'block') {
+               if (e.key === 'Escape') { close(false); }
+               if (e.key === 'Enter') { close(true); }
+             }
+           };
+         });
+       }
     </script>
+    </div>
   </div>
-</div>
 </body>
 </html>
