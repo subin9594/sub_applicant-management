@@ -49,7 +49,7 @@ public class EmailService {
                             "- 학번: " + applicationForm.getStudentId() + "<br>" +
                             "- 이메일: " + applicationForm.getEmail() + "<br>" +
                             "- 전화번호: " + applicationForm.getPhoneNumber() + "<br>" +
-                            "- 지원동기: " + applicationForm.getMotivation() + "<br>" +
+                            "- 지원동기: " + applicationForm.getMotivation() + "<br><br>" +
                             "현재 상태: " + applicationForm.getStatus().getDisplayName() + "<br><br>" +
                             "결과는 이메일로 개별 안내드리겠습니다.<br><br>" +
                             "감사합니다.<br><br></p>" +
