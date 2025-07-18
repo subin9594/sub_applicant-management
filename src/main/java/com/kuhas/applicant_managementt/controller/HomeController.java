@@ -71,6 +71,7 @@ public class HomeController {
         }
         ApplicationFormResponse application = applicationFormService.getApplicationById(id);
         model.addAttribute("application", application);
+        model.addAttribute("id", id); // 항상 id 추가
         return "admin_edit";
     }
 
@@ -82,11 +83,32 @@ public class HomeController {
                                         @RequestParam String email,
                                         @RequestParam String motivation,
                                         @RequestParam String status,
-                                        HttpSession session) {
+                                        HttpSession session,
+                                        Model model) {
         if (session.getAttribute("admin") == null) {
             return "redirect:/admin";
         }
-        applicationFormService.updateApplicationByAdmin(id, name, studentId, phoneNumber, email, motivation, status);
+            try {
+                applicationFormService.updateApplicationByAdmin(id, name, studentId, phoneNumber, email, motivation, status);
+                return "redirect:/admin";
+            } catch (IllegalArgumentException e) {
+                model.addAttribute("error", e.getMessage());
+                model.addAttribute("name", name);
+                model.addAttribute("studentId", studentId);
+                model.addAttribute("phoneNumber", phoneNumber);
+                model.addAttribute("email", email);
+                model.addAttribute("motivation", motivation);
+                model.addAttribute("status", status);
+                model.addAttribute("id", id); // 항상 id 추가
+                return "admin_edit";
+            }
+    }
+    @PostMapping("/admin/delete/{id}")
+    public String deleteApplication(@PathVariable Long id, HttpSession session) {
+        if (session.getAttribute("admin") == null) {
+            return "redirect:/admin";
+        }
+        applicationFormService.deleteApplication(id);
         return "redirect:/admin";
     }
 }
