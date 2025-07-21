@@ -115,18 +115,18 @@
         <a href="/" style="margin-top:18px; color:#4f8cff; text-decoration:underline; font-weight:500;">홈으로 돌아가기</a>
       </div>
     </div>
-    <div id="formError" style="display:none; color:#ef4444; background:#fff3f3; border-radius:8px; padding:12px 0; margin-bottom:18px; text-align:center; font-weight:600;"></div>
+    <div id="formError" style="display:none; color:#ef4444; background:#fff3f3; border-radius:8px; padding:12px 0; margin-bottom:18px; text-align:center; font-weight:600; scroll-margin-top:40px;"></div>
     <form th:action="@{/api/applications}" method="post" id="applicationForm" th:if="${message} == null">
       <label for="name">이름:</label>
-      <input type="text" id="name" name="name" required maxlength="100">
+      <input type="text" id="name" name="name" required maxlength="100" autocomplete="name">
       <label for="studentId">학번:</label>
-      <input type="text" id="studentId" name="studentId" required maxlength="20">
+      <input type="text" id="studentId" name="studentId" required maxlength="20" autocomplete="off">
       <label for="phoneNumber">전화번호:</label>
-      <input type="text" id="phoneNumber" name="phoneNumber" required maxlength="20">
+      <input type="text" id="phoneNumber" name="phoneNumber" required maxlength="20" autocomplete="tel">
       <label for="email">이메일:</label>
-      <input type="email" id="email" name="email" required maxlength="100">
+      <input type="email" id="email" name="email" required maxlength="100" autocomplete="email">
       <label for="motivation">지원동기:</label>
-      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50"></textarea>
+      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" autocomplete="off"></textarea>
       <button type="submit">지원서 제출</button>
     </form>
     <!-- 커스텀 모달 영역 -->

@@ -97,21 +97,21 @@
     <!-- 에러 메시지 표시 -->
     <div th:if="${error}" style="color:red; margin-bottom:10px;" th:text="${error}"></div>
     <!-- 커스텀 에러 메시지 영역 -->
-    <div id="customErrorMsg" style="display:none; background:#fee2e2; color:#b91c1c; border-radius:8px; padding:14px 0; margin-bottom:18px; font-weight:600; text-align:center; font-size:1.1rem;"></div>
+    <div id="customErrorMsg" style="display:none; background:#fee2e2; color:#b91c1c; border-radius:8px; padding:14px 0; margin-bottom:18px; font-weight:600; text-align:center; font-size:1.1rem; scroll-margin-top:40px;"></div>
     <form th:action="@{/admin/edit/{id}(id=${id})}" method="post" id="editForm">
       <label for="name">이름:</label>
-      <input type="text" id="name" name="name" th:value="${name != null ? name : application.name}" required maxlength="100">
+      <input type="text" id="name" name="name" th:value="${name != null ? name : application.name}" required maxlength="100" autocomplete="name">
       <label for="studentId">학번:</label>
-      <input type="text" id="studentId" name="studentId" th:value="${studentId != null ? studentId : application.studentId}" required maxlength="20" onblur="checkStudentId()">
+      <input type="text" id="studentId" name="studentId" th:value="${studentId != null ? studentId : application.studentId}" required maxlength="20" onblur="checkStudentId()" autocomplete="off">
       <div id="studentIdError" style="color:red;"></div>
       <label for="phoneNumber">전화번호:</label>
-      <input type="text" id="phoneNumber" name="phoneNumber" th:value="${phoneNumber != null ? phoneNumber : application.phoneNumber}" required maxlength="20" onblur="checkPhoneNumber()">
+      <input type="text" id="phoneNumber" name="phoneNumber" th:value="${phoneNumber != null ? phoneNumber : application.phoneNumber}" required maxlength="20" onblur="checkPhoneNumber()" autocomplete="tel">
       <div id="phoneNumberError" style="color:red;"></div>
       <label for="email">이메일:</label>
-      <input type="email" id="email" name="email" th:value="${email != null ? email : application.email}" required maxlength="100" onblur="checkEmail()">
+      <input type="email" id="email" name="email" th:value="${email != null ? email : application.email}" required maxlength="100" onblur="checkEmail()" autocomplete="email">
       <div id="emailError" style="color:red;"></div>
       <label for="motivation">지원동기:</label>
-      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" th:text="${motivation != null ? motivation : application.motivation}"></textarea>
+      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" th:text="${motivation != null ? motivation : application.motivation}" autocomplete="off"></textarea>
       <label for="status">상태:</label>
       <select id="status" name="status">
         <option value="PENDING" th:selected="${(status != null ? status : application.status) == 'PENDING'}">PENDING</option>
