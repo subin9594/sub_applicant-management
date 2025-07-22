@@ -83,9 +83,12 @@ class _AdminMainPageState extends State<AdminMainPage> {
     final response = await http.post(url, body: {'status': status});
     if (response.statusCode == 302 || response.statusCode == 200) {
       _fetchApplications();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('상태 변경 실패')));
-    }
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('상태 변경 실패')),
+        );
+        }
   }
 
   Future<void> _deleteApplication(int id) async {
@@ -93,9 +96,13 @@ class _AdminMainPageState extends State<AdminMainPage> {
     final response = await http.post(url);
     if (response.statusCode == 302 || response.statusCode == 200) {
       _fetchApplications();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('삭제 실패')));
-    }
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('삭제 실패')),
+        );
+        }
+
   }
 
   Future<bool> _showDeleteDialog() async {

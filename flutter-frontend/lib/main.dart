@@ -50,34 +50,11 @@ class _ApplicantFormAppState extends State<ApplicantFormApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: _isAdmin
-          ? (_adminView == AdminPageView.main
-              ? AdminMainPage(
-                  onLogout: _logoutAdmin,
-                  onEdit: _goToAdminEdit,
-                )
-              : AdminEditPage(
-                  application: _editingApp!,
-                  onSaved: _goToAdminMain,
-                ))
-          : Navigator(
-              pages: [
-                MaterialPage(child: ApplicantFormPage(onAdminTap: () {
-                  setState(() {
-                    _adminView = AdminPageView.login;
-                  });
-                })),
-                if (_adminView == AdminPageView.login)
-                  MaterialPage(child: AdminLoginPage(onLoginSuccess: _goToAdminMain)),
-              ],
-              onPopPage: (route, result) {
-                if (!route.didPop(result)) return false;
-                setState(() {
-                  _adminView = AdminPageView.none;
-                });
-                return true;
-              },
-            ),
+      home: ApplicantFormPage(onAdminTap: () {
+        setState(() {
+          _adminView = AdminPageView.login;
+        });
+      }),
     );
   }
 }
@@ -111,7 +88,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
       _message = null;
     });
 
-    final url = Uri.parse('http://localhost:8080');
+    final url = Uri.parse('http://localhost:8080/api/applications');
     final response = await http.post(
       url,
       body: {
@@ -182,7 +159,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) return '학번을 입력하세요.';
-                      if (!RegExp(r'^\d{10} 0$').hasMatch(value)) return '학번은 숫자 10자리로 입력하세요.';
+                      if (!RegExp(r'^\d{10}$').hasMatch(value)) return '학번은 숫자 10자리로 입력하세요.';
                       return null;
                     },
                   ),
@@ -192,7 +169,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) return '전화번호를 입력하세요.';
-                      if (!RegExp(r'^[0-9\-]+ 0$').hasMatch(value)) return '전화번호는 숫자와 -만 입력하세요.';
+                      if (!RegExp(r'^[0-9\-]+$').hasMatch(value)) return '전화번호는 숫자와 -만 입력하세요.';
                       if (value.length < 8 || value.length > 14) return '전화번호는 8~14자 이내로 입력하세요.';
                       return null;
                     },
