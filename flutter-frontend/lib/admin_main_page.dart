@@ -62,7 +62,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
       _loading = true;
       _error = null;
     });
-    final url = Uri.parse('http://localhost:8080/api/applications');
+    final url = Uri.parse('http://10.0.2.2:8080/api/applications');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -79,7 +79,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
   }
 
   Future<void> _changeStatus(int id, String status) async {
-    final url = Uri.parse('http://localhost:8080/admin/approve/$id');
+    final url = Uri.parse('http://10.0.2.2:8080/admin/approve/$id');
     final response = await http.post(url, body: {'status': status});
     if (response.statusCode == 302 || response.statusCode == 200) {
       _fetchApplications();
@@ -92,7 +92,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
   }
 
   Future<void> _deleteApplication(int id) async {
-    final url = Uri.parse('http://localhost:8080/admin/delete/$id');
+    final url = Uri.parse('http://10.0.2.2:8080/admin/delete/$id');
     final response = await http.post(url);
     if (response.statusCode == 302 || response.statusCode == 200) {
       _fetchApplications();

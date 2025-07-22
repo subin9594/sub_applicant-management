@@ -21,7 +21,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       _isSubmitting = true;
       _error = null;
     });
-    final url = Uri.parse('http://localhost:8080/admin/login');
+    final url = Uri.parse('http://10.0.2.2:8080/admin/login');
     final response = await http.post(
       url,
       body: {'password': _passwordController.text.trim()},
