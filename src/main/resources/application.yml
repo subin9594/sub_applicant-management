@@ -27,10 +27,10 @@ spring:
 
   # 이메일 설정
   mail:
-    host: smtp.worksmobile.com
+    host: smtp.gmail.com
     port: 587
-    username: subo3os2@korea.ac.kr
-    password: yU2QAUPjGwHq
+    username: koreauniv.kuhas@gmail.com
+    password: qdgo jjuo ldny xixs
     properties:
       mail:
         smtp:
