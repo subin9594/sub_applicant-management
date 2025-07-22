@@ -8,40 +8,8 @@ void main() {
   runApp(const ApplicantFormApp());
 }
 
-class ApplicantFormApp extends StatefulWidget {
+class ApplicantFormApp extends StatelessWidget {
   const ApplicantFormApp({super.key});
-
-  @override
-  State<ApplicantFormApp> createState() => _ApplicantFormAppState();
-}
-
-class _ApplicantFormAppState extends State<ApplicantFormApp> {
-  bool _isAdmin = false;
-  AdminPageView _adminView = AdminPageView.login;
-  ApplicationForm? _editingApp;
-
-  void _goToAdminMain() {
-    setState(() {
-      _isAdmin = true;
-      _adminView = AdminPageView.main;
-      _editingApp = null;
-    });
-  }
-
-  void _goToAdminEdit(ApplicationForm app) {
-    setState(() {
-      _adminView = AdminPageView.edit;
-      _editingApp = app;
-    });
-  }
-
-  void _logoutAdmin() {
-    setState(() {
-      _isAdmin = false;
-      _adminView = AdminPageView.login;
-      _editingApp = null;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +18,13 @@ class _ApplicantFormAppState extends State<ApplicantFormApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ApplicantFormPage(onAdminTap: () {
-        setState(() {
-          _adminView = AdminPageView.login;
-        });
-      }),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => ApplicantFormPage(),
+        '/admin-login': (context) => AdminLoginPage(onLoginSuccess: () {
+          Navigator.of(context).pop();
+        }),
+      },
     );
   }
 }
@@ -235,11 +205,12 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (widget.onAdminTap != null)
-                    TextButton(
-                      onPressed: widget.onAdminTap,
-                      child: const Text('관리자 페이지'),
-                    ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/admin-login');
+                    },
+                    child: const Text('관리자 페이지'),
+                  ),
                 ],
               ),
             ),
