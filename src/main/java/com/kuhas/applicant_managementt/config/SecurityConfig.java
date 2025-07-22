@@ -14,7 +14,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-            .allowedOrigins("http://10.0.2.2:8080", "http://localhost:8080", "http://localhost:53608") // 실제 앱/웹 주소로 수정
+            .allowedOriginPatterns("*") // allowCredentials와 함께 사용 가능
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .allowCredentials(true);
