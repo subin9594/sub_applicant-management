@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AdminLoginPage extends StatefulWidget {
   final void Function() onLoginSuccess;
@@ -28,10 +29,18 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     );
     setState(() {
       _isSubmitting = false;
-      if (response.statusCode == 302 || response.statusCode == 200) {
-        widget.onLoginSuccess();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          widget.onLoginSuccess();
+        } else {
+          _error = '알 수 없는 오류가 발생했습니다.';
+        }
+      } else if (response.statusCode == 401) {
+        final data = json.decode(response.body);
+        _error = data['error'] ?? '비밀번호가 올바르지 않습니다.';
       } else {
-        _error = '비밀번호가 올바르지 않습니다.';
+        _error = '서버 오류가 발생했습니다.';
       }
     });
   }

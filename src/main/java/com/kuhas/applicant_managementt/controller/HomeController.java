@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import com.kuhas.applicant_managementt.entity.ApplicationForm;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class HomeController {
@@ -37,13 +40,14 @@ public class HomeController {
     }
 
     @PostMapping("/admin/login")
-    public String adminLogin(@RequestParam String password, HttpSession session, Model model) {
+    @ResponseBody
+    public ResponseEntity<?> adminLogin(@RequestParam String password, HttpSession session) {
         if (ADMIN_PASSWORD.equals(password)) {
             session.setAttribute("admin", true);
-            return "redirect:/admin";
+            return ResponseEntity.ok().body("{\"success\":true}");
         } else {
-            model.addAttribute("error", "비밀번호가 올바르지 않습니다.");
-            return "admin_login";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("{\"success\":false, \"error\":\"비밀번호가 올바르지 않습니다.\"}");
         }
     }
 

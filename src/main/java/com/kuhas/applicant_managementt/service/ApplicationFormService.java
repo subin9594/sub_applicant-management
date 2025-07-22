@@ -45,7 +45,9 @@ public class ApplicationFormService {
         ApplicationForm savedForm = applicationFormRepository.save(applicationForm);
 
         // 지원 완료 이메일 발송
+        System.out.println("이메일 발송 시도 전");
         emailService.sendApplicationReceivedEmail(savedForm);
+        System.out.println("이메일 발송 시도 후");
 
         return new ApplicationFormResponse(savedForm);
     }

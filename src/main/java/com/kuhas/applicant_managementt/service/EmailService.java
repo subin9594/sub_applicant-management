@@ -78,7 +78,7 @@ public class EmailService {
     
             helper.setText(plainText, htmlContent);
             mailSender.send(mimeMessage);
-            System.out.println("이미지 포함 이메일 발송 완료: " + applicationForm.getEmail());
+            System.out.println("이메일 발송 완료: " + applicationForm.getEmail());
     
         } catch (MessagingException | UnsupportedEncodingException e) {
             System.err.println("이메일 발송 실패: " + e.getMessage());
