@@ -40,3 +40,28 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# Flutter
+flutter-frontend/.dart_tool/
+flutter-frontend/.packages
+flutter-frontend/.flutter-plugins
+flutter-frontend/.flutter-plugins-dependencies
+flutter-frontend/.idea/
+flutter-frontend/build/
+flutter-frontend/generated_plugin_registrant.dart
+
+# Android
+flutter-frontend/android/.gradle/
+flutter-frontend/android/local.properties
+flutter-frontend/android/.idea/
+flutter-frontend/android/build/
+
+# iOS (만약 iOS도 나중에 추가한다면)
+flutter-frontend/ios/Flutter/Generated.xcconfig
+flutter-frontend/ios/.symlinks/
+flutter-frontend/ios/Pods/
+flutter-frontend/ios/build/
+flutter-frontend/ios/.generated/
+
+# 기타
+**/*.log
