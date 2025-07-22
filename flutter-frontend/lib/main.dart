@@ -77,6 +77,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
         _message = '지원이 성공적으로 제출되었습니다!';
         _formKey.currentState?.reset();
       } else {
+        print('지원서 제출 실패: statusCode = ${response.statusCode}, body = ${response.body}');
         _error = '제출에 실패했습니다. 다시 시도해 주세요.';
       }
     });
