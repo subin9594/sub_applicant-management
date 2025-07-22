@@ -58,7 +58,8 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
       _message = null;
     });
 
-    final url = Uri.parse('http://localhost:8080/api/applications');
+    // Android 에뮬레이터에서는 10.0.2.2가 PC의 localhost를 가리킴
+    final url = Uri.parse('http://10.0.2.2:8080/api/applications');
     final response = await http.post(
       url,
       body: {
