@@ -41,9 +41,9 @@ public class ApplicationFormController {
     }
 
     // Flutter 등 외부 API용 JSON 지원서 제출
-    @PostMapping("/api")
+    @PostMapping(consumes = "application/json")
     @ResponseBody
-    public ResponseEntity<?> submitApplicationApi(@RequestBody ApplicationFormRequest request) {
+    public ResponseEntity<?> submitApplicationJson(@RequestBody ApplicationFormRequest request) {
         try {
             applicationFormService.submitApplication(request);
             return ResponseEntity.ok().body("{\"message\":\"지원이 성공적으로 제출되었습니다!\"}");
