@@ -73,18 +73,18 @@ class _AdminMainPageState extends State<AdminMainPage> {
     });
     if (_category == ApplicationCategory.member) {
       final url = Uri.parse('http://10.0.2.2:8080/api/applications/list');
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          _applications = data.map((e) => ApplicationForm.fromJson(e)).toList();
-          _loading = false;
-        });
-      } else {
-        setState(() {
-          _error = '목록을 불러오지 못했습니다.';
-          _loading = false;
-        });
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _applications = data.map((e) => ApplicationForm.fromJson(e)).toList();
+        _loading = false;
+      });
+    } else {
+      setState(() {
+        _error = '목록을 불러오지 못했습니다.';
+        _loading = false;
+      });
       }
     } else {
       final url = Uri.parse('http://10.0.2.2:8080/api/executive-applications');
@@ -262,8 +262,8 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                                               Text(
                                                 app.name,
                                                 style: const TextStyle(
@@ -306,7 +306,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                             ),
                                           ),
                                         ),
-                                      ],
+                          ],
                                     ),
                                     const SizedBox(height: 16),
                                     
@@ -346,7 +346,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                     const Text(
                                       '지원동기',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                                         fontSize: 14,
                                       ),
                                     ),
@@ -368,10 +368,10 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                     
                                     // 액션 버튼들
                                     Row(
-                                      children: [
+                          children: [
                                         Expanded(
                                           child: ElevatedButton.icon(
-                                            onPressed: () => _changeStatus(app.id, 'ACCEPTED'),
+                              onPressed: () => _changeStatus(app.id, 'ACCEPTED'),
                                             icon: const Icon(Icons.check, size: 16),
                                             label: const Text('합격'),
                                             style: ElevatedButton.styleFrom(
@@ -379,11 +379,11 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                               foregroundColor: Colors.white,
                                             ),
                                           ),
-                                        ),
+                            ),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: ElevatedButton.icon(
-                                            onPressed: () => _changeStatus(app.id, 'REJECTED'),
+                              onPressed: () => _changeStatus(app.id, 'REJECTED'),
                                             icon: const Icon(Icons.close, size: 16),
                                             label: const Text('불합격'),
                                             style: ElevatedButton.styleFrom(
@@ -393,7 +393,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                           ),
                                         ),
                                       ],
-                                    ),
+                            ),
                                     const SizedBox(height: 8),
                                     Row(
                                       children: [
@@ -419,14 +419,14 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                               foregroundColor: Colors.blue,
                                             ),
                                           ),
-                                        ),
+                            ),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: OutlinedButton.icon(
-                                            onPressed: () async {
-                                              final ok = await _showDeleteDialog();
-                                              if (ok) _deleteApplication(app.id);
-                                            },
+                              onPressed: () async {
+                                final ok = await _showDeleteDialog();
+                                if (ok) _deleteApplication(app.id);
+                              },
                                             icon: const Icon(Icons.delete, size: 16),
                                             label: const Text('삭제'),
                                             style: OutlinedButton.styleFrom(
@@ -491,7 +491,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                             );
                           },
                         ))
-              ),
+                ),
     );
   }
 } 
