@@ -3,8 +3,9 @@ import 'package:http/http.dart' as http;
 import 'admin_login_page.dart';
 import 'dart:convert'; // Added for json.encode
 import 'admin_main_page.dart';
-import 'admin_edit_page.dart'; // Added for AdminEditPage
+// Added for AdminEditPage
 import 'package:lottie/lottie.dart';
+import 'executive_form_page.dart'; // Added for ExecutiveFormPage
 
 void main() {
   runApp(const ApplicantFormApp());
@@ -133,6 +134,51 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff7f8fa),
+      appBar: AppBar(
+        title: const Text('KUHAS'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.assignment),
+            tooltip: '지원서 선택',
+            onPressed: () {
+              ApplicationCategory? selected = ApplicationCategory.executive;
+              showDialog(
+                context: context,
+                barrierColor: Colors.black.withOpacity(0.7),
+                builder: (context) => AlertDialog(
+                  title: const Text('지원서 양식 선택'),
+                  content: StatefulBuilder(
+                    builder: (context, setState) => DropdownButton<ApplicationCategory>(
+                      value: selected,
+                      items: [
+                        DropdownMenuItem(value: ApplicationCategory.executive, child: Text('KUHAS 운영진 모집 지원서')),
+                        // 다른 양식 추가 가능
+                      ],
+                      onChanged: (v) => setState(() => selected = v),
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        if (selected == ApplicationCategory.executive) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => ExecutiveFormPage()),
+                          );
+                        }
+                        // 다른 양식 추가 시 else if ...
+                      },
+                      child: const Text('확인'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
