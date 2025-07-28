@@ -63,6 +63,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
   bool _isSubmitting = false;
   String? _message;
   String? _error;
+  bool _showSuccess = false;
 
   Future<void> _submitForm() async {
     setState(() {
@@ -90,6 +91,15 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
       if (response.statusCode == 200) {
         _message = '지원이 성공적으로 제출되었습니다!';
         _formKey.currentState?.reset();
+        _showSuccess = true;
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() {
+              _message = null;
+              _showSuccess = false;
+            });
+          }
+        });
       } else {
         String errorMsg = '제출에 실패했습니다. 다시 시도해 주세요.';
         try {
@@ -139,7 +149,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
               ],
             ),
             width: 380,
-            child: _message != null
+            child: _showSuccess && _message != null
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
