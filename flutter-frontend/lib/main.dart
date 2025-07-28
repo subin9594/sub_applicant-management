@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'admin_login_page.dart';
+import 'dart:convert'; // Added for json.encode
 import 'admin_main_page.dart';
-import 'admin_edit_page.dart';
+import 'admin_edit_page.dart'; // Added for AdminEditPage
 
 void main() {
   runApp(const ApplicantFormApp());
@@ -22,7 +23,30 @@ class ApplicantFormApp extends StatelessWidget {
       routes: {
         '/': (context) => ApplicantFormPage(),
         '/admin-login': (context) => AdminLoginPage(onLoginSuccess: () {
-          Navigator.of(context).pop();
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => AdminMainPage(
+                onLogout: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => ApplicantFormPage()),
+                    (route) => false,
+                  );
+                },
+                onEdit: (application) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => AdminEditPage(
+                        application: application,
+                        onSaved: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
         }),
       },
     );
@@ -59,16 +83,17 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
     });
 
     // Android 에뮬레이터에서는 10.0.2.2가 PC의 localhost를 가리킴
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications');
+    final url = Uri.parse('http://localhost:8080/api/applications/api');
     final response = await http.post(
       url,
-      body: {
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
         'name': _nameController.text.trim(),
         'studentId': _studentIdController.text.trim(),
         'phoneNumber': _phoneController.text.trim(),
         'email': _emailController.text.trim(),
         'motivation': _motivationController.text.trim(),
-      },
+      }),
     );
 
     setState(() {
@@ -77,10 +102,32 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
         _message = '지원이 성공적으로 제출되었습니다!';
         _formKey.currentState?.reset();
       } else {
-        print('지원서 제출 실패: statusCode = ${response.statusCode}, body = ${response.body}');
-        _error = '제출에 실패했습니다. 다시 시도해 주세요.';
+        String errorMsg = '제출에 실패했습니다. 다시 시도해 주세요.';
+        try {
+          final data = json.decode(response.body);
+          if (data['error'] != null) errorMsg = data['error'];
+        } catch (_) {}
+        print('지원서 제출 실패: statusCode =  [response.statusCode], body =  [response.body]');
+        _error = errorMsg;
       }
     });
+  }
+
+  Future<String?> _checkDuplicate() async {
+    final studentId = _studentIdController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final url = Uri.parse('http://localhost:8080/api/applications/exists?studentId=$studentId&email=$email&phoneNumber=$phone');
+    final res = await http.get(url);
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body);
+      String msg = '';
+      if (data['studentId'] == true) msg += '이미 사용 중인 학번입니다.\n';
+      if (data['email'] == true) msg += '이미 사용 중인 이메일입니다.\n';
+      if (data['phoneNumber'] == true) msg += '이미 사용 중인 전화번호입니다.\n';
+      return msg.isEmpty ? null : msg.trim();
+    }
+    return null;
   }
 
   @override
@@ -115,7 +162,15 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                   if (_message != null)
                     Text(_message!, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
                   if (_error != null)
-                    Text(_error!, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        softWrap: true,
+                        maxLines: null,
+                      ),
+                    ),
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(labelText: '이름'),
@@ -173,8 +228,15 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                     child: ElevatedButton(
                       onPressed: _isSubmitting
                           ? null
-                          : () {
+                          : () async {
                               if (_formKey.currentState?.validate() ?? false) {
+                                final duplicateMsg = await _checkDuplicate();
+                                if (duplicateMsg != null) {
+                                  setState(() {
+                                    _error = duplicateMsg;
+                                  });
+                                  return;
+                                }
                                 showDialog(
                                   context: context,
                                   builder: (ctx) => AlertDialog(

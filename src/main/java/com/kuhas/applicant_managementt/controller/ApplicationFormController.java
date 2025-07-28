@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/api/applications")
-@CrossOrigin(origins = "*")
 public class ApplicationFormController {
 
     private final ApplicationFormService applicationFormService;
@@ -36,6 +37,18 @@ public class ApplicationFormController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             return "home";
+        }
+    }
+
+    // Flutter 등 외부 API용 JSON 지원서 제출
+    @PostMapping("/api")
+    @ResponseBody
+    public ResponseEntity<?> submitApplicationApi(@RequestBody ApplicationFormRequest request) {
+        try {
+            applicationFormService.submitApplication(request);
+            return ResponseEntity.ok().body("{\"message\":\"지원이 성공적으로 제출되었습니다!\"}");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
@@ -113,6 +126,26 @@ public class ApplicationFormController {
         }
     }
 
+    // 지원서 수정 (JSON)
+    @PutMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<?> updateApplication(@PathVariable Long id, @RequestBody ApplicationFormRequest request) {
+        try {
+            applicationFormService.updateApplicationByAdmin(
+                id,
+                request.getName(),
+                request.getStudentId(),
+                request.getPhoneNumber(),
+                request.getEmail(),
+                request.getMotivation(),
+                request.getStatus() != null ? request.getStatus() : "PENDING"
+            );
+            return ResponseEntity.ok().body("{\"message\":\"수정이 완료되었습니다.\"}");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("{\"error\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
     // 지원서 삭제
     @DeleteMapping("/{id}")
     @ResponseBody
@@ -131,5 +164,26 @@ public class ApplicationFormController {
     public ResponseEntity<ApplicationFormService.ApplicationStatistics> getStatistics() {
         ApplicationFormService.ApplicationStatistics statistics = applicationFormService.getStatistics();
         return ResponseEntity.ok(statistics);
+    }
+
+    // 중복 체크 API
+    @GetMapping("/exists")
+    @ResponseBody
+    public Map<String, Boolean> checkDuplicate(
+        @RequestParam(required = false) String studentId,
+        @RequestParam(required = false) String email,
+        @RequestParam(required = false) String phoneNumber
+    ) {
+        Map<String, Boolean> result = new HashMap<>();
+        if (studentId != null) {
+            result.put("studentId", applicationFormService.isStudentIdExists(studentId));
+        }
+        if (email != null) {
+            result.put("email", applicationFormService.isEmailExists(email));
+        }
+        if (phoneNumber != null) {
+            result.put("phoneNumber", applicationFormService.isPhoneNumberExists(phoneNumber));
+        }
+        return result;
     }
 }

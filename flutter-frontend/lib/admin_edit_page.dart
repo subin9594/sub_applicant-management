@@ -40,7 +40,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
   Future<void> _checkStudentId() async {
     final studentId = _studentIdController.text.trim();
     if (studentId.isEmpty) return;
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications/student/$studentId');
+    final url = Uri.parse('http://localhost:8080/api/applications/student/$studentId');
     final res = await http.get(url);
     if (res.statusCode == 200) {
       final data = json.decode(res.body);
@@ -55,7 +55,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
   Future<void> _checkEmail() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) return;
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications?email=$email');
+    final url = Uri.parse('http://localhost:8080/api/applications?email=$email');
     final res = await http.get(url);
     if (res.statusCode == 200) {
       final data = json.decode(res.body);
@@ -70,7 +70,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
   Future<void> _checkPhone() async {
     final phone = _phoneController.text.trim();
     if (phone.isEmpty) return;
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications?phoneNumber=$phone');
+    final url = Uri.parse('http://localhost:8080/api/applications?phoneNumber=$phone');
     final res = await http.get(url);
     if (res.statusCode == 200) {
       final data = json.decode(res.body);
@@ -87,7 +87,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
       _isSubmitting = true;
       _error = null;
     });
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications/${widget.application.id}');
+    final url = Uri.parse('http://localhost:8080/api/applications/${widget.application.id}');
     final response = await http.put(
       url,
       headers: {'Content-Type': 'application/json'},

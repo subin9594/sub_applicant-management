@@ -28,10 +28,18 @@ public class ApplicationFormService {
     // 지원서 제출
     public ApplicationFormResponse submitApplication(ApplicationFormRequest request) {
         // 중복 지원 확인 (학번, 이메일, 전화번호 기준)
-        if (applicationFormRepository.findByStudentId(request.getStudentId()).isPresent() ||
-                applicationFormRepository.findByEmail(request.getEmail()).isPresent() ||
-                applicationFormRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
-            throw new IllegalArgumentException("동일한 이메일, 학번 또는 전화번호로 이미 지원하셨습니다. 지원서 수정은 관리자에게 문의 바랍니다.");
+        StringBuilder duplicateMsg = new StringBuilder();
+        if (applicationFormRepository.findByStudentId(request.getStudentId()).isPresent()) {
+            duplicateMsg.append("이미 사용 중인 학번입니다.\n");
+        }
+        if (applicationFormRepository.findByEmail(request.getEmail()).isPresent()) {
+            duplicateMsg.append("이미 사용 중인 이메일입니다.\n");
+        }
+        if (applicationFormRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
+            duplicateMsg.append("이미 사용 중인 전화번호입니다.\n");
+        }
+        if (duplicateMsg.length() > 0) {
+            throw new IllegalArgumentException(duplicateMsg.toString().trim());
         }
 
         ApplicationForm applicationForm = new ApplicationForm(
@@ -192,5 +200,15 @@ public class ApplicationFormService {
         public long getPendingCount() { return pendingCount; }
         public long getAcceptedCount() { return acceptedCount; }
         public long getRejectedCount() { return rejectedCount; }
+    }
+
+    public boolean isStudentIdExists(String studentId) {
+        return applicationFormRepository.findByStudentId(studentId).isPresent();
+    }
+    public boolean isEmailExists(String email) {
+        return applicationFormRepository.findByEmail(email).isPresent();
+    }
+    public boolean isPhoneNumberExists(String phoneNumber) {
+        return applicationFormRepository.findByPhoneNumber(phoneNumber).isPresent();
     }
 }

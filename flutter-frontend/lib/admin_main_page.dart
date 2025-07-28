@@ -62,7 +62,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
       _loading = true;
       _error = null;
     });
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications');
+    final url = Uri.parse('http://localhost:8080/api/applications/list');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -79,30 +79,29 @@ class _AdminMainPageState extends State<AdminMainPage> {
   }
 
   Future<void> _changeStatus(int id, String status) async {
-    final url = Uri.parse('http://10.0.2.2:8080/admin/approve/$id');
-    final response = await http.post(url, body: {'status': status});
-    if (response.statusCode == 302 || response.statusCode == 200) {
+    final url = Uri.parse('http://localhost:8080/api/applications/$id/status?status=$status');
+    final response = await http.put(url);
+    if (response.statusCode == 200) {
       _fetchApplications();
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('상태 변경 실패')),
-        );
-        }
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('상태 변경 실패')),
+      );
+    }
   }
 
   Future<void> _deleteApplication(int id) async {
-    final url = Uri.parse('http://10.0.2.2:8080/admin/delete/$id');
-    final response = await http.post(url);
-    if (response.statusCode == 302 || response.statusCode == 200) {
+    final url = Uri.parse('http://localhost:8080/api/applications/$id');
+    final response = await http.delete(url);
+    if (response.statusCode == 204) {
       _fetchApplications();
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('삭제 실패')),
-        );
-        }
-
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('삭제 실패')),
+      );
+    }
   }
 
   Future<bool> _showDeleteDialog() async {
@@ -110,7 +109,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('삭제 확인'),
-            content: const Text('삭제하시겠습니까?\nENTER를 누르면 삭제 됩니다.\n취소하려면 ESC를 눌러주세요'),
+            content: const Text('삭제하시겠습니까?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
@@ -123,6 +122,16 @@ class _AdminMainPageState extends State<AdminMainPage> {
             ],
           ),
         ) ?? false;
+  }
+
+  String _wrapMotivation(String text) {
+    if (text.length <= 16) return text;
+    final buffer = StringBuffer();
+    for (int i = 0; i < text.length; i += 16) {
+      buffer.write(text.substring(i, i + 16 > text.length ? text.length : i + 16));
+      if (i + 16 < text.length) buffer.write('\n');
+    }
+    return buffer.toString();
   }
 
   @override
@@ -174,7 +183,15 @@ class _AdminMainPageState extends State<AdminMainPage> {
                         DataCell(Text(app.studentId)),
                         DataCell(Text(app.phoneNumber)),
                         DataCell(Text(app.email)),
-                        DataCell(SizedBox(width: 200, child: Text(app.motivation, maxLines: 5, overflow: TextOverflow.ellipsis))),
+                        DataCell(
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 300, maxHeight: 80),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: Text(_wrapMotivation(app.motivation)),
+                            ),
+                          ),
+                        ),
                         DataCell(Text(app.status, style: TextStyle(
                           color: app.status == 'PENDING' ? Color(0xfff59e42) : app.status == 'ACCEPTED' ? Color(0xff22c55e) : Color(0xffef4444),
                           fontWeight: FontWeight.bold,
@@ -183,19 +200,19 @@ class _AdminMainPageState extends State<AdminMainPage> {
                           children: [
                             ElevatedButton(
                               onPressed: () => _changeStatus(app.id, 'ACCEPTED'),
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff22c55e)),
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff22c55e)), // 초록
                               child: const Text('합격'),
                             ),
                             const SizedBox(width: 4),
                             ElevatedButton(
                               onPressed: () => _changeStatus(app.id, 'REJECTED'),
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffef4444)),
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffef4444)), // 빨강
                               child: const Text('불합격'),
                             ),
                             const SizedBox(width: 4),
                             ElevatedButton(
                               onPressed: () => widget.onEdit(app),
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xfffde68a)),
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffffe066)), // 노랑
                               child: const Text('수정', style: TextStyle(color: Colors.black)),
                             ),
                             const SizedBox(width: 4),
@@ -204,7 +221,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                 final ok = await _showDeleteDialog();
                                 if (ok) _deleteApplication(app.id);
                               },
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xffef4444)),
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff6b7280)), // 회색
                               child: const Text('삭제'),
                             ),
                           ],

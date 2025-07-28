@@ -26,6 +26,9 @@ public class ApplicationFormRequest {
     @Size(max = 2000, message = "지원동기는 2000자 이하여야 합니다")
     private String motivation;
 
+    @Size(max = 20, message = "상태는 20자 이하여야 합니다")
+    private String status;
+
     // 생성자
     public ApplicationFormRequest() {}
 
@@ -76,5 +79,12 @@ public class ApplicationFormRequest {
 
     public void setMotivation(String motivation) {
         this.motivation = motivation;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
