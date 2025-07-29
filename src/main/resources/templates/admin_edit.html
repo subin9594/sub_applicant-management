@@ -216,7 +216,44 @@
       // 모든 유효성 통과 시에만 팝업
       const ok = await showModal('수정하시겠습니까?');
       if (ok) {
-        e.target.submit();
+        // 모달 닫기
+        document.getElementById('customModal').style.display = 'none';
+        
+        // 폼 제출 전에 로딩 상태 표시
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '저장 중...';
+        submitBtn.disabled = true;
+        
+        // 폼 데이터 수집
+        const formData = new FormData(e.target);
+        
+        // fetch를 사용하여 폼 제출
+        try {
+          const response = await fetch(e.target.action, {
+            method: 'POST',
+            body: formData
+          });
+          
+          console.log('Response status:', response.status);
+          console.log('Response redirected:', response.redirected);
+          
+          if (response.status === 302 || response.redirected) {
+            // 리다이렉트가 있는 경우
+            const redirectUrl = response.headers.get('Location') || '/admin';
+            window.location.href = redirectUrl;
+          } else if (response.ok) {
+            // 성공적으로 처리된 경우 admin 페이지로 이동
+            window.location.href = '/admin';
+          } else {
+            // 에러가 있는 경우 페이지 새로고침
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('폼 제출 중 오류:', error);
+          // 에러 발생 시 페이지 새로고침
+          window.location.reload();
+        }
       }
     });
     function checkStudentId() {

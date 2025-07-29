@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'admin_main_page.dart';
 
 class AdminEditPage extends StatefulWidget {
-  final ApplicationForm application;
+  final Map<String, dynamic> application;
   final VoidCallback onSaved;
   const AdminEditPage({super.key, required this.application, required this.onSaved});
 
@@ -23,44 +22,38 @@ class _AdminEditPageState extends State<AdminEditPage> {
   late TextEditingController _curriculumReasonController;
   late TextEditingController _wishController;
   late TextEditingController _careerController;
-  late TextEditingController _languageController;
+  late TextEditingController _languageExpController;
+  late TextEditingController _languageDetailController;
+  late TextEditingController _wishActivitiesController;
+  late TextEditingController _interviewDateController;
   String _status = 'PENDING';
-  String? _languageExp;
   String? _gradeDropdownValue;
-  List<String> _wishActivities = [];
-  String? _selectedInterviewDate;
-  String? _selectedAttendType;
-  String? _privacyValue;
+  String? _attendTypeValue;
+  String? _privacyAgreementValue;
   bool _isSubmitting = false;
   String? _error;
-  String? _studentIdError;
-  String? _emailError;
-  String? _phoneError;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.application.name);
-    _studentIdController = TextEditingController(text: widget.application.studentId);
-    _phoneController = TextEditingController(text: widget.application.phoneNumber);
-    _emailController = TextEditingController(text: widget.application.email);
-    _motivationController = TextEditingController(text: widget.application.motivation);
-    _otherActivityController = TextEditingController(text: widget.application.otherActivity ?? '');
-    _curriculumReasonController = TextEditingController(text: widget.application.curriculumReason ?? '');
-    _wishController = TextEditingController(text: widget.application.wish ?? '');
-    _careerController = TextEditingController(text: widget.application.career ?? '');
-    _languageController = TextEditingController(text: widget.application.languageDetail ?? '');
-    _status = widget.application.status;
-    _languageExp = widget.application.languageExp;
-    _gradeDropdownValue = widget.application.grade;
-    _selectedInterviewDate = widget.application.interviewDate;
-    _selectedAttendType = widget.application.attendType;
-    _privacyValue = widget.application.privacyAgreement;
     
-    // 희망 활동 파싱
-    if (widget.application.wishActivities != null && widget.application.wishActivities!.isNotEmpty) {
-      _wishActivities = widget.application.wishActivities!.split(',').map((e) => e.trim()).toList();
-    }
+    _nameController = TextEditingController(text: widget.application['name'] ?? '');
+    _studentIdController = TextEditingController(text: widget.application['studentId'] ?? '');
+    _phoneController = TextEditingController(text: widget.application['phoneNumber'] ?? '');
+    _emailController = TextEditingController(text: widget.application['email'] ?? '');
+    _motivationController = TextEditingController(text: widget.application['motivation'] ?? '');
+    _otherActivityController = TextEditingController(text: widget.application['otherActivity'] ?? '');
+    _curriculumReasonController = TextEditingController(text: widget.application['curriculumReason'] ?? '');
+    _wishController = TextEditingController(text: widget.application['wish'] ?? '');
+    _careerController = TextEditingController(text: widget.application['career'] ?? '');
+    _languageExpController = TextEditingController(text: widget.application['languageExp'] ?? '');
+    _languageDetailController = TextEditingController(text: widget.application['languageDetail'] ?? '');
+    _wishActivitiesController = TextEditingController(text: widget.application['wishActivities'] ?? '');
+    _interviewDateController = TextEditingController(text: widget.application['interviewDate'] ?? '');
+    _status = widget.application['status'] ?? 'PENDING';
+    _gradeDropdownValue = widget.application['grade'];
+    _attendTypeValue = widget.application['attendType'];
+    _privacyAgreementValue = widget.application['privacyAgreement'];
   }
 
   @override
@@ -74,53 +67,11 @@ class _AdminEditPageState extends State<AdminEditPage> {
     _curriculumReasonController.dispose();
     _wishController.dispose();
     _careerController.dispose();
-    _languageController.dispose();
+    _languageExpController.dispose();
+    _languageDetailController.dispose();
+    _wishActivitiesController.dispose();
+    _interviewDateController.dispose();
     super.dispose();
-  }
-
-  Future<void> _checkStudentId() async {
-    final studentId = _studentIdController.text.trim();
-    if (studentId.isEmpty) return;
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications/student/$studentId');
-    final res = await http.get(url);
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      if (data['id'] != widget.application.id) {
-        setState(() { _studentIdError = '이미 사용 중인 학번입니다.'; });
-        return;
-      }
-    }
-    setState(() { _studentIdError = null; });
-  }
-
-  Future<void> _checkEmail() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) return;
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications?email=$email');
-    final res = await http.get(url);
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      if (data is List && data.isNotEmpty && data[0]['id'] != widget.application.id) {
-        setState(() { _emailError = '이미 사용 중인 이메일입니다.'; });
-        return;
-      }
-    }
-    setState(() { _emailError = null; });
-  }
-
-  Future<void> _checkPhone() async {
-    final phone = _phoneController.text.trim();
-    if (phone.isEmpty) return;
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications?phoneNumber=$phone');
-    final res = await http.get(url);
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      if (data is List && data.isNotEmpty && data[0]['id'] != widget.application.id) {
-        setState(() { _phoneError = '이미 사용 중인 전화번호입니다.'; });
-        return;
-      }
-    }
-    setState(() { _phoneError = null; });
   }
 
   Future<void> _save() async {
@@ -128,40 +79,75 @@ class _AdminEditPageState extends State<AdminEditPage> {
       _isSubmitting = true;
       _error = null;
     });
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications/${widget.application.id}');
-    final response = await http.put(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'name': _nameController.text.trim(),
-        'studentId': _studentIdController.text.trim(),
-        'phoneNumber': _phoneController.text.trim(),
-        'email': _emailController.text.trim(),
-        'motivation': _motivationController.text.trim(),
-        'otherActivity': _otherActivityController.text.trim(),
-        'curriculumReason': _curriculumReasonController.text.trim(),
-        'wish': _wishController.text.trim(),
-        'career': _careerController.text.trim(),
-        'languageExp': _languageExp,
-        'languageDetail': _languageController.text.trim(),
-        'wishActivities': _wishActivities.join(','),
-        'interviewDate': _selectedInterviewDate,
-        'attendType': _selectedAttendType,
-        'privacyAgreement': _privacyValue,
-        'grade': _gradeDropdownValue,
-        'status': _status,
-      }),
-    );
-    setState(() {
-      _isSubmitting = false;
+    
+    final id = widget.application['id'];
+    if (id == null) {
+      setState(() {
+        _isSubmitting = false;
+        _error = '지원서 ID를 찾을 수 없습니다.';
+      });
+      return;
+    }
+    
+    final url = Uri.parse('http://10.0.2.2:8080/api/applications/$id');
+    print('Saving application with ID: $id');
+    
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': _nameController.text.trim(),
+          'studentId': _studentIdController.text.trim(),
+          'grade': _gradeDropdownValue,
+          'email': _emailController.text.trim(),
+          'phoneNumber': _phoneController.text.trim(),
+          'motivation': _motivationController.text.trim(),
+          'otherActivity': _otherActivityController.text.trim(),
+          'curriculumReason': _curriculumReasonController.text.trim(),
+          'wish': _wishController.text.trim(),
+          'career': _careerController.text.trim(),
+          'languageExp': _languageExpController.text.trim(),
+          'languageDetail': _languageDetailController.text.trim(),
+          'wishActivities': _wishActivitiesController.text.trim(),
+          'interviewDate': _interviewDateController.text.trim(),
+          'attendType': _attendTypeValue,
+          'privacyAgreement': _privacyAgreementValue,
+          'status': _status,
+        }),
+      );
+      
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      
       if (response.statusCode == 200) {
         widget.onSaved();
-        Navigator.of(context).pop(); // 편집 페이지 닫기
-        Navigator.of(context).pop(); // 상세 페이지 닫기 (목록으로 돌아가기)
+        
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+          
+          Navigator.of(context).pop(); // 편집 페이지 닫기
+          
+          await Future.delayed(const Duration(milliseconds: 300));
+          if (mounted) {
+            Navigator.of(context).pop(); // 상세 페이지 닫기
+          }
+        }
       } else {
-        _error = '저장에 실패했습니다.';
+        setState(() {
+          _isSubmitting = false;
+          _error = '저장에 실패했습니다. (상태 코드: ${response.statusCode})';
+        });
       }
-    });
+    } catch (e) {
+      print('Error saving application: $e');
+      setState(() {
+        _isSubmitting = false;
+        _error = '저장 중 오류가 발생했습니다: $e';
+      });
+    }
   }
 
   Future<bool> _showSaveDialog() async {
@@ -187,7 +173,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('지원서 수정')),
+      appBar: AppBar(title: const Text('부원 지원서 수정')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -205,43 +191,10 @@ class _AdminEditPageState extends State<AdminEditPage> {
               ),
               TextFormField(
                 controller: _studentIdController,
-                decoration: InputDecoration(labelText: '학번', errorText: _studentIdError),
-                onChanged: (_) => _checkStudentId(),
+                decoration: const InputDecoration(labelText: '학번'),
                 validator: (value) {
                   if (value == null || value.isEmpty) return '학번을 입력하세요.';
                   if (!RegExp(r'^\d{10}$').hasMatch(value)) return '학번은 숫자 10자리로 입력하세요.';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(labelText: '전화번호', errorText: _phoneError),
-                onChanged: (_) => _checkPhone(),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '전화번호를 입력하세요.';
-                  if (!RegExp(r'^[0-9\-]+$').hasMatch(value)) return '전화번호는 숫자와 -만 입력하세요.';
-                  if (value.length < 8 || value.length > 14) return '전화번호는 8~14자 이내로 입력하세요.';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: '이메일', errorText: _emailError),
-                onChanged: (_) => _checkEmail(),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '이메일을 입력하세요.';
-                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) return '이메일 형식이 올바르지 않습니다.';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _motivationController,
-                decoration: const InputDecoration(labelText: '지원동기'),
-                minLines: 3,
-                maxLines: 8,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '지원동기를 입력하세요.';
-                  if (value.length < 50) return '지원동기는 50자 이상 입력하세요.';
                   return null;
                 },
               ),
@@ -252,6 +205,36 @@ class _AdminEditPageState extends State<AdminEditPage> {
                 ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                 onChanged: (v) => setState(() => _gradeDropdownValue = v),
                 decoration: const InputDecoration(labelText: '학년'),
+              ),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: '이메일'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return '이메일을 입력하세요.';
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) return '이메일 형식이 올바르지 않습니다.';
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: '전화번호'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return '전화번호를 입력하세요.';
+                  if (!RegExp(r'^[0-9\-]+$').hasMatch(value)) return '전화번호는 숫자와 -만 입력하세요.';
+                  if (value.length < 8 || value.length > 13) return '전화번호는 8~13자 이내로 입력하세요.';
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _motivationController,
+                decoration: const InputDecoration(labelText: '지원 동기'),
+                minLines: 3,
+                maxLines: 8,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return '지원 동기를 입력하세요.';
+                  if (value.trim().length < 50) return '50자 이상 입력하세요.';
+                  return null;
+                },
               ),
               TextFormField(
                 controller: _otherActivityController,
@@ -277,115 +260,47 @@ class _AdminEditPageState extends State<AdminEditPage> {
                 minLines: 2,
                 maxLines: 4,
               ),
-              const Text('프로그래밍 언어 경험', style: TextStyle(fontWeight: FontWeight.bold)),
-              RadioListTile<String>(
-                title: const Text('있음'),
-                value: 'O',
-                groupValue: _languageExp,
-                onChanged: (v) => setState(() => _languageExp = v),
-              ),
-              RadioListTile<String>(
-                title: const Text('없음'),
-                value: 'X',
-                groupValue: _languageExp,
-                onChanged: (v) => setState(() => _languageExp = v),
+              TextFormField(
+                controller: _languageExpController,
+                decoration: const InputDecoration(labelText: '프로그래밍 언어 경험'),
+                minLines: 2,
+                maxLines: 4,
               ),
               TextFormField(
-                controller: _languageController,
+                controller: _languageDetailController,
                 decoration: const InputDecoration(labelText: '경험한 언어'),
                 minLines: 2,
                 maxLines: 4,
               ),
-              const Text('희망 활동', style: TextStyle(fontWeight: FontWeight.bold)),
-              CheckboxListTile(
-                title: const Text('활동 1'),
-                value: _wishActivities.contains('활동 1'),
-                onChanged: (checked) {
-                  setState(() {
-                    if (checked == true) {
-                      _wishActivities.add('활동 1');
-                    } else {
-                      _wishActivities.remove('활동 1');
-                    }
-                  });
-                },
+              TextFormField(
+                controller: _wishActivitiesController,
+                decoration: const InputDecoration(labelText: '희망 활동'),
+                minLines: 2,
+                maxLines: 4,
               ),
-              CheckboxListTile(
-                title: const Text('활동 2'),
-                value: _wishActivities.contains('활동 2'),
-                onChanged: (checked) {
-                  setState(() {
-                    if (checked == true) {
-                      _wishActivities.add('활동 2');
-                    } else {
-                      _wishActivities.remove('활동 2');
-                    }
-                  });
-                },
+              TextFormField(
+                controller: _interviewDateController,
+                decoration: const InputDecoration(labelText: '면접 희망 날짜'),
               ),
-              CheckboxListTile(
-                title: const Text('활동 3'),
-                value: _wishActivities.contains('활동 3'),
-                onChanged: (checked) {
-                  setState(() {
-                    if (checked == true) {
-                      _wishActivities.add('활동 3');
-                    } else {
-                      _wishActivities.remove('활동 3');
-                    }
-                  });
-                },
-              ),
-              const Text('대면 면접 희망 날짜', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('개강총회 참석', style: TextStyle(fontWeight: FontWeight.bold)),
               RadioListTile<String>(
-                title: const Text('9월 1일(화)'),
-                value: '9월 1일(화)',
-                groupValue: _selectedInterviewDate,
-                onChanged: (v) => setState(() => _selectedInterviewDate = v),
+                title: const Text('참석'),
+                value: '참석',
+                groupValue: _attendTypeValue,
+                onChanged: (v) => setState(() => _attendTypeValue = v),
               ),
               RadioListTile<String>(
-                title: const Text('9월 2일(수)'),
-                value: '9월 2일(수)',
-                groupValue: _selectedInterviewDate,
-                onChanged: (v) => setState(() => _selectedInterviewDate = v),
-              ),
-              RadioListTile<String>(
-                title: const Text('9월 3일(목)'),
-                value: '9월 3일(목)',
-                groupValue: _selectedInterviewDate,
-                onChanged: (v) => setState(() => _selectedInterviewDate = v),
-              ),
-              RadioListTile<String>(
-                title: const Text('9월 4일(금)'),
-                value: '9월 4일(금)',
-                groupValue: _selectedInterviewDate,
-                onChanged: (v) => setState(() => _selectedInterviewDate = v),
-              ),
-              const Text('개강총회 참석 여부', style: TextStyle(fontWeight: FontWeight.bold)),
-              RadioListTile<String>(
-                title: const Text('개강총회만 참석'),
-                value: '개강총회만 참석',
-                groupValue: _selectedAttendType,
-                onChanged: (v) => setState(() => _selectedAttendType = v),
-              ),
-              RadioListTile<String>(
-                title: const Text('뒷풀이만 참석'),
-                value: '뒷풀이만 참석',
-                groupValue: _selectedAttendType,
-                onChanged: (v) => setState(() => _selectedAttendType = v),
-              ),
-              RadioListTile<String>(
-                title: const Text('둘 다 참석'),
-                value: '둘 다 참석',
-                groupValue: _selectedAttendType,
-                onChanged: (v) => setState(() => _selectedAttendType = v),
+                title: const Text('불참석'),
+                value: '불참석',
+                groupValue: _attendTypeValue,
+                onChanged: (v) => setState(() => _attendTypeValue = v),
               ),
               const Text('개인정보 제공 동의', style: TextStyle(fontWeight: FontWeight.bold)),
               RadioListTile<String>(
                 title: const Text('예'),
                 value: '예',
-                groupValue: _privacyValue,
-                onChanged: (v) => setState(() => _privacyValue = v),
+                groupValue: _privacyAgreementValue,
+                onChanged: (v) => setState(() => _privacyAgreementValue = v),
               ),
               DropdownButtonFormField<String>(
                 value: _status,
@@ -406,9 +321,13 @@ class _AdminEditPageState extends State<AdminEditPage> {
                           ? null
                           : () async {
                               if (_formKey.currentState?.validate() ?? false) {
-                                if (_studentIdError != null || _emailError != null || _phoneError != null) return;
                                 final ok = await _showSaveDialog();
-                                if (ok) _save();
+                                if (ok) {
+                                  await Future.delayed(const Duration(milliseconds: 100));
+                                  if (mounted) {
+                                    await _save();
+                                  }
+                                }
                               }
                             },
                       child: _isSubmitting

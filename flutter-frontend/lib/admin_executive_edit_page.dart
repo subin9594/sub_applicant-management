@@ -115,16 +115,30 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
       print('Response status: ${response.statusCode}'); // 디버깅용
       print('Response body: ${response.body}'); // 디버깅용
       
-      setState(() {
-        _isSubmitting = false;
-        if (response.statusCode == 200) {
-          widget.onSaved();
+      if (response.statusCode == 200) {
+        // 성공 시 콜백 호출
+        widget.onSaved();
+        
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+          
+          // 안전한 네비게이션 처리
           Navigator.of(context).pop(); // 편집 페이지 닫기
-          Navigator.of(context).pop(); // 상세 페이지 닫기 (목록으로 돌아가기)
-        } else {
-          _error = '저장에 실패했습니다. (상태 코드: ${response.statusCode})';
+          
+          // 추가 지연 후 상세 페이지도 닫기
+          await Future.delayed(const Duration(milliseconds: 300));
+          if (mounted) {
+            Navigator.of(context).pop(); // 상세 페이지 닫기 (목록으로 돌아가기)
+          }
         }
-      });
+      } else {
+        setState(() {
+          _isSubmitting = false;
+          _error = '저장에 실패했습니다. (상태 코드: ${response.statusCode})';
+        });
+      }
     } catch (e) {
       print('Error saving executive application: $e'); // 디버깅용
       setState(() {
@@ -337,7 +351,13 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                           : () async {
                               if (_formKey.currentState?.validate() ?? false) {
                                 final ok = await _showSaveDialog();
-                                if (ok) _save();
+                                if (ok) {
+                                  // 다이얼로그가 완전히 닫힌 후 저장 실행
+                                  await Future.delayed(const Duration(milliseconds: 100));
+                                  if (mounted) {
+                                    await _save(); // await 추가
+                                  }
+                                }
                               }
                             },
                       child: _isSubmitting

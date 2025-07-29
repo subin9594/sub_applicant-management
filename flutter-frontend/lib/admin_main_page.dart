@@ -103,6 +103,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
   String? _error;
   final bool _showSidePanel = false;
   ApplicationCategory? _sidePanelCategory;
+  String? _successMessage; // 성공 메시지 추가
 
   @override
   void initState() {
@@ -113,6 +114,22 @@ class _AdminMainPageState extends State<AdminMainPage> {
   // 외부에서 호출할 수 있는 새로고침 메서드
   void refresh() {
     _fetchApplications();
+  }
+
+  // 성공 메시지 표시 메서드
+  void _showSuccessMessage(String message) {
+    setState(() {
+      _successMessage = message;
+    });
+    
+    // 3초 후 자동으로 제거
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _successMessage = null;
+        });
+      }
+    });
   }
 
   Future<void> _fetchApplications() async {
@@ -264,10 +281,32 @@ class _AdminMainPageState extends State<AdminMainPage> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => AdminApplicationDetailPage(
-                    application: app,
+                    application: {
+                      'id': app.id,
+                      'name': app.name,
+                      'studentId': app.studentId,
+                      'phoneNumber': app.phoneNumber,
+                      'email': app.email,
+                      'motivation': app.motivation,
+                      'status': app.status,
+                      'createdAt': app.createdAt.toIso8601String(),
+                      'otherActivity': app.otherActivity,
+                      'curriculumReason': app.curriculumReason,
+                      'wish': app.wish,
+                      'career': app.career,
+                      'languageExp': app.languageExp,
+                      'languageDetail': app.languageDetail,
+                      'wishActivities': app.wishActivities,
+                      'interviewDate': app.interviewDate,
+                      'attendType': app.attendType,
+                      'privacyAgreement': app.privacyAgreement,
+                      'grade': app.grade,
+                    },
                     onSaved: () {
                       Navigator.of(context).pop();
                       _fetchApplications();
+                      // 성공 메시지 표시
+                      _showSuccessMessage('부원 지원서가 성공적으로 수정되었습니다.');
                     },
                   ),
                 ),
@@ -429,6 +468,8 @@ class _AdminMainPageState extends State<AdminMainPage> {
                     onSaved: () {
                       Navigator.of(context).pop();
                       _fetchApplications();
+                      // 성공 메시지 표시
+                      _showSuccessMessage('운영진 지원서가 성공적으로 수정되었습니다.');
                     },
                   ),
                 ),
@@ -669,6 +710,48 @@ class _AdminMainPageState extends State<AdminMainPage> {
                               ),
                             )
                           : _buildExecutiveList())),
+          
+          // 성공 메시지 표시
+          if (_successMessage != null)
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _successMessage!,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                      onPressed: () {
+                        setState(() {
+                          _successMessage = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
           // 사이드 패널 + 오버레이
           // if (_showSidePanel) ...[
           //   GestureDetector(

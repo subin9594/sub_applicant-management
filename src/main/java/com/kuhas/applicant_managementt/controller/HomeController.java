@@ -76,6 +76,8 @@ public class HomeController {
         }
             try {
                 applicationFormService.updateApplicationByAdmin(id, name, studentId, phoneNumber, email, motivation, status, otherActivity, curriculumReason, wish, career, languageExp, languageDetail, wishActivities, interviewDate, attendType, privacyAgreement, grade);
+                // 성공 시 세션에 성공 메시지 저장
+                session.setAttribute("editSuccess", "지원서가 성공적으로 수정되었습니다.");
                 return "redirect:/admin";
             } catch (IllegalArgumentException e) {
                 model.addAttribute("error", e.getMessage());

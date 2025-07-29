@@ -110,6 +110,14 @@ class _AdminExecutiveDetailPageState extends State<AdminExecutiveDetailPage> {
                     onSaved: () {
                       Navigator.of(context).pop();
                       widget.onSaved();
+                      // 성공 메시지 표시 (메인 페이지에서 처리)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('운영진 지원서가 성공적으로 수정되었습니다.'),
+                          backgroundColor: Colors.green,
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
                     },
                   ),
                 ),

@@ -269,6 +269,7 @@ public class EmailService {
             helper.setSubject("[KUHAS 운영진 모집 지원서 접수 확인] " + execApp.getName() + "님의 지원서가 접수되었습니다");
 
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
+            // 지원동기만 줄바꿈 처리 (나머지는 직접 표시)
             String motivationHtml = insertLineBreaks(execApp.getMotivation(), 30, true);
             String motivationPlain = insertLineBreaks(execApp.getMotivation(), 30, false);
 
@@ -288,28 +289,16 @@ public class EmailService {
                 "<tr><td><b>전화번호</b></td><td style='padding-left:16px;'>" + execApp.getPhoneNumber() + "</td></tr>" +
                 "<tr><td><b>휴학 계획</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getLeavePlan()) + "</td></tr>" +
                 "<tr><td><b>활동 기간</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getPeriod()) + "</td></tr>" +
+                "<tr><td><b>활동 목표</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getGoal()) + "</td></tr>" +
+                "<tr><td><b>위기 극복 경험</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getCrisis()) + "</td></tr>" +
                 "<tr><td><b>회의 참석</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getMeeting()) + "</td></tr>" +
+                "<tr><td><b>각오 한 마디</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getResolution()) + "</td></tr>" +
                 "<tr><td><b>개인정보 동의</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getPrivacy()) + "</td></tr>" +
                 "</table>" +
                 // 지원동기
                 "<div style='text-align:center; margin-top:16px;'>" +
                 "<b>지원동기</b>" +
                 "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + motivationHtml + "</div>" +
-                "</div>" +
-                // 활동 목표
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>운영진 활동 목표</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(execApp.getGoal(), 30, true) + "</div>" +
-                "</div>" +
-                // 위기 극복 경험
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>위기 극복 경험</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(execApp.getCrisis(), 30, true) + "</div>" +
-                "</div>" +
-                // 각오 한 마디
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>각오 한 마디</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(execApp.getResolution(), 30, true) + "</div>" +
                 "</div>" +
                 // 상태
                 "<div style='text-align:center; margin-top:16px; font-size:1.1em;'><b>현재 상태: " + execApp.getStatus().getDisplayName() + "</b></div>" +
@@ -330,12 +319,12 @@ public class EmailService {
                 "전화번호: " + execApp.getPhoneNumber() + "\n" +
                 "휴학 계획: " + nullToDash(execApp.getLeavePlan()) + "\n" +
                 "활동 기간: " + nullToDash(execApp.getPeriod()) + "\n" +
+                "활동 목표: " + nullToDash(execApp.getGoal()) + "\n" +
+                "위기 극복 경험: " + nullToDash(execApp.getCrisis()) + "\n" +
                 "회의 참석: " + nullToDash(execApp.getMeeting()) + "\n" +
+                "각오 한 마디: " + nullToDash(execApp.getResolution()) + "\n" +
                 "개인정보 동의: " + nullToDash(execApp.getPrivacy()) + "\n" +
                 "지원동기: " + motivationPlain + "\n" +
-                "운영진 활동 목표: " + insertLineBreaks(execApp.getGoal(), 30, false) + "\n" +
-                "위기 극복 경험: " + insertLineBreaks(execApp.getCrisis(), 30, false) + "\n" +
-                "각오 한 마디: " + insertLineBreaks(execApp.getResolution(), 30, false) + "\n" +
                 "현재 상태: " + execApp.getStatus().getDisplayName() + "\n\n" +
                 "결과는 이메일로 안내드릴 예정입니다. 감사합니다.\n" +
                 "KUHAS Notion 바로가기: " + infoUrl + "\n" +
@@ -353,30 +342,23 @@ public class EmailService {
         if (oldVal == null) oldVal = "";
         if (newVal == null) newVal = "";
         if (!oldVal.equals(newVal)) {
-            return "<span style=\"color:#2563eb; font-weight:bold;\">" + escapeHtml(newVal) + "</span>";
+            return "<span style=\"color:#2563eb; font-weight:bold;\">" + newVal + "</span>";
         } else {
-            return escapeHtml(newVal);
+            return newVal;
         }
     }
+    
     private String escapeHtml(String s) {
+        if (s == null) return "";
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
-    // 줄바꿈 함수 추가
+    // 줄바꿈 함수 수정 - 한글 텍스트 처리 개선
     private String insertLineBreaks(String text, int maxLen, boolean html) {
         if (text == null) return "";
-        StringBuilder sb = new StringBuilder();
-        int count = 0;
-        for (int i = 0; i < text.length(); i++) {
-            sb.append(text.charAt(i));
-            count++;
-            if (count >= maxLen && (i + 1 < text.length())) {
-                sb.append(html ? "<br>" : "\n");
-                count = 0;
-            }
-        }
-        return sb.toString();
+        // 한글 텍스트는 줄바꿈 없이 그대로 반환
+        return text;
     }
 
     private String nullToDash(String s) {
@@ -385,6 +367,15 @@ public class EmailService {
     
     // 운영진 지원서 수정 안내 메일 발송
     public void sendExecutiveApplicationModifiedEmail(ExecutiveApplication before, ExecutiveApplicationRequest request) {
+        // 디버깅용: 메일 발송 시 받은 데이터 출력
+        System.out.println("Sending executive application modified email:");
+        System.out.println("  Before - goal: " + before.getGoal());
+        System.out.println("  Request - goal: " + request.getGoal());
+        System.out.println("  Before - crisis: " + before.getCrisis());
+        System.out.println("  Request - crisis: " + request.getCrisis());
+        System.out.println("  Before - resolution: " + before.getResolution());
+        System.out.println("  Request - resolution: " + request.getResolution());
+        
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -393,6 +384,7 @@ public class EmailService {
             helper.setSubject("[KUHAS 운영진 모집 지원서 수정 안내] " + request.getName() + "님의 지원서가 수정되었습니다");
 
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
+            // 지원동기만 줄바꿈 처리 (나머지는 highlightIfChanged 사용)
             String motivationHtml = insertLineBreaks(request.getMotivation(), 30, true);
             String motivationPlain = insertLineBreaks(request.getMotivation(), 30, false);
 
@@ -412,28 +404,16 @@ public class EmailService {
                 "<tr><td><b>전화번호</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getPhoneNumber(), request.getPhoneNumber()) + "</td></tr>" +
                 "<tr><td><b>휴학 계획</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getLeavePlan(), request.getLeavePlan()) + "</td></tr>" +
                 "<tr><td><b>활동 기간</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getPeriod(), request.getPeriod()) + "</td></tr>" +
+                "<tr><td><b>활동 목표</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getGoal(), request.getGoal()) + "</td></tr>" +
+                "<tr><td><b>위기 극복 경험</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getCrisis(), request.getCrisis()) + "</td></tr>" +
                 "<tr><td><b>회의 참석</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getMeeting(), request.getMeeting()) + "</td></tr>" +
+                "<tr><td><b>각오 한 마디</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getResolution(), request.getResolution()) + "</td></tr>" +
                 "<tr><td><b>개인정보 동의</b></td><td style='padding-left:16px;'>" + highlightIfChanged(before.getPrivacy(), request.getPrivacy()) + "</td></tr>" +
                 "</table>" +
                 // 지원동기
                 "<div style='text-align:center; margin-top:16px;'>" +
                 "<b>지원동기</b>" +
                 "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + motivationHtml + "</div>" +
-                "</div>" +
-                // 활동 목표
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>운영진 활동 목표</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(request.getGoal(), 30, true) + "</div>" +
-                "</div>" +
-                // 위기 극복 경험
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>위기 극복 경험</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(request.getCrisis(), 30, true) + "</div>" +
-                "</div>" +
-                // 각오 한 마디
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>각오 한 마디</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(request.getResolution(), 30, true) + "</div>" +
                 "</div>" +
                 "</div>" +
                 // 하단
@@ -452,12 +432,12 @@ public class EmailService {
                 "전화번호: " + request.getPhoneNumber() + "\n" +
                 "휴학 계획: " + nullToDash(request.getLeavePlan()) + "\n" +
                 "활동 기간: " + nullToDash(request.getPeriod()) + "\n" +
+                "활동 목표: " + nullToDash(request.getGoal()) + "\n" +
+                "위기 극복 경험: " + nullToDash(request.getCrisis()) + "\n" +
                 "회의 참석: " + nullToDash(request.getMeeting()) + "\n" +
+                "각오 한 마디: " + nullToDash(request.getResolution()) + "\n" +
                 "개인정보 동의: " + nullToDash(request.getPrivacy()) + "\n" +
-                "지원동기: " + motivationPlain + "\n" +
-                "운영진 활동 목표: " + insertLineBreaks(request.getGoal(), 30, false) + "\n" +
-                "위기 극복 경험: " + insertLineBreaks(request.getCrisis(), 30, false) + "\n" +
-                "각오 한 마디: " + insertLineBreaks(request.getResolution(), 30, false) + "\n\n" +
+                "지원동기: " + motivationPlain + "\n\n" +
                 "결과는 이메일로 안내드릴 예정입니다. 감사합니다.\n" +
                 "KUHAS Notion 바로가기: " + infoUrl + "\n" +
                 "© 2025 KUHAS. All rights reserved.";
@@ -483,6 +463,7 @@ public class EmailService {
             helper.setSubject(subject);
 
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
+            // 지원동기만 줄바꿈 처리 (나머지는 직접 표시)
             String motivationHtml = insertLineBreaks(execApp.getMotivation(), 30, true);
             String motivationPlain = insertLineBreaks(execApp.getMotivation(), 30, false);
 
@@ -514,28 +495,16 @@ public class EmailService {
                 "<tr><td><b>전화번호</b></td><td style='padding-left:16px;'>" + execApp.getPhoneNumber() + "</td></tr>" +
                 "<tr><td><b>휴학 계획</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getLeavePlan()) + "</td></tr>" +
                 "<tr><td><b>활동 기간</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getPeriod()) + "</td></tr>" +
+                "<tr><td><b>활동 목표</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getGoal()) + "</td></tr>" +
+                "<tr><td><b>위기 극복 경험</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getCrisis()) + "</td></tr>" +
                 "<tr><td><b>회의 참석</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getMeeting()) + "</td></tr>" +
+                "<tr><td><b>각오 한 마디</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getResolution()) + "</td></tr>" +
                 "<tr><td><b>개인정보 동의</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getPrivacy()) + "</td></tr>" +
                 "</table>" +
                 // 지원동기
                 "<div style='text-align:center; margin-top:16px;'>" +
                 "<b>지원동기</b>" +
                 "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + motivationHtml + "</div>" +
-                "</div>" +
-                // 활동 목표
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>운영진 활동 목표</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(execApp.getGoal(), 30, true) + "</div>" +
-                "</div>" +
-                // 위기 극복 경험
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>위기 극복 경험</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(execApp.getCrisis(), 30, true) + "</div>" +
-                "</div>" +
-                // 각오 한 마디
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>각오 한 마디</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + insertLineBreaks(execApp.getResolution(), 30, true) + "</div>" +
                 "</div>" +
                 "</div>" +
                 // 하단
@@ -556,12 +525,12 @@ public class EmailService {
                 "전화번호: " + execApp.getPhoneNumber() + "\n" +
                 "휴학 계획: " + nullToDash(execApp.getLeavePlan()) + "\n" +
                 "활동 기간: " + nullToDash(execApp.getPeriod()) + "\n" +
+                "활동 목표: " + nullToDash(execApp.getGoal()) + "\n" +
+                "위기 극복 경험: " + nullToDash(execApp.getCrisis()) + "\n" +
                 "회의 참석: " + nullToDash(execApp.getMeeting()) + "\n" +
+                "각오 한 마디: " + nullToDash(execApp.getResolution()) + "\n" +
                 "개인정보 동의: " + nullToDash(execApp.getPrivacy()) + "\n" +
-                "지원동기: " + motivationPlain + "\n" +
-                "운영진 활동 목표: " + insertLineBreaks(execApp.getGoal(), 30, false) + "\n" +
-                "위기 극복 경험: " + insertLineBreaks(execApp.getCrisis(), 30, false) + "\n" +
-                "각오 한 마디: " + insertLineBreaks(execApp.getResolution(), 30, false) + "\n\n" +
+                "지원동기: " + motivationPlain + "\n\n" +
                 "감사합니다.\n" +
                 "KUHAS Notion 바로가기: " + infoUrl + "\n" +
                 "© 2025 KUHAS. All rights reserved.";

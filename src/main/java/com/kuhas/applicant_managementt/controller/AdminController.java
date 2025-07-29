@@ -45,6 +45,14 @@ public class AdminController {
             List<ApplicationFormResponse> applications = applicationFormService.getAllApplications();
             model.addAttribute("applications", applications);
             model.addAttribute("executiveApplications", executiveApplicationService.getAll());
+            
+            // 성공 메시지가 있으면 모델에 추가하고 세션에서 제거
+            Object editSuccess = session.getAttribute("editSuccess");
+            if (editSuccess != null) {
+                model.addAttribute("editSuccess", editSuccess);
+                session.removeAttribute("editSuccess");
+            }
+            
             return "admin";
         } else {
             return "admin_login";
