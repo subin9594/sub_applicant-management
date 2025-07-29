@@ -60,11 +60,38 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _motivationController = TextEditingController();
+  // Add controllers and state for new fields
+  final _otherActivityController = TextEditingController();
+  final _curriculumReasonController = TextEditingController();
+  final _wishController = TextEditingController();
+  final _careerController = TextEditingController();
+  final _languageController = TextEditingController();
+  String? _languageExp; // 'O' or 'X'
+
+  // Add state for wishActivities, interviewDate, attendType
+  List<String> _wishActivities = [];
+  String? _selectedInterviewDate;
+  String? _selectedAttendType;
 
   bool _isSubmitting = false;
   String? _message;
   String? _error;
   bool _showSuccess = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _studentIdController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _motivationController.dispose();
+    _otherActivityController.dispose();
+    _curriculumReasonController.dispose();
+    _wishController.dispose();
+    _careerController.dispose();
+    _languageController.dispose();
+    super.dispose();
+  }
 
   Future<void> _submitForm() async {
     setState(() {
@@ -84,6 +111,15 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
         'phoneNumber': _phoneController.text.trim(),
         'email': _emailController.text.trim(),
         'motivation': _motivationController.text.trim(),
+        'otherActivity': _otherActivityController.text.trim(),
+        'curriculumReason': _curriculumReasonController.text.trim(),
+        'wish': _wishController.text.trim(),
+        'career': _careerController.text.trim(),
+        'languageExp': _languageExp,
+        'languageDetail': _languageController.text.trim(),
+        'wishActivities': _wishActivities.join(','),
+        'interviewDate': _selectedInterviewDate,
+        'attendType': _selectedAttendType,
       }),
     );
 
@@ -212,6 +248,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                     key: _formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text('KUHAS', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
@@ -229,16 +266,24 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           ),
                         TextFormField(
                           controller: _nameController,
-                          decoration: const InputDecoration(labelText: '이름'),
+                          decoration: const InputDecoration(
+                            labelText: '이름',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) return '이름을 입력하세요.';
                             if (!RegExp(r'^[가-힣a-zA-Z\s]+$').hasMatch(value)) return '이름은 한글 또는 영문만 입력하세요.';
                             return null;
                           },
                         ),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _studentIdController,
-                          decoration: const InputDecoration(labelText: '학번'),
+                          decoration: const InputDecoration(
+                            labelText: '학번',
+                            hintText: 'ex) 20XX270XXX',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) return '학번을 입력하세요.';
@@ -246,9 +291,13 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _phoneController,
-                          decoration: const InputDecoration(labelText: '전화번호'),
+                          decoration: const InputDecoration(
+                            labelText: '전화번호',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           keyboardType: TextInputType.phone,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) return '전화번호를 입력하세요.';
@@ -257,9 +306,14 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _emailController,
-                          decoration: const InputDecoration(labelText: '이메일'),
+                          decoration: const InputDecoration(
+                            labelText: '이메일',
+                            hintText: 'ex) xxx@gmail.com 또는 xxx@korea.ac.kr',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) return '이메일을 입력하세요.';
@@ -267,16 +321,175 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _motivationController,
-                          decoration: const InputDecoration(labelText: '지원동기'),
+                          decoration: const InputDecoration(
+                            labelText: '지원동기',
+                            hintText: 'KUHAS 지원 동기를 작성해주세요. (100자 이상)',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           minLines: 4,
                           maxLines: 8,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) return '지원동기를 입력하세요.';
-                            if (value.length < 50) return '지원동기는 50자 이상 입력하세요.';
+                            if (value.length < 100) return '지원동기는 100자 이상 입력하세요.';
                             return null;
                           },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _otherActivityController,
+                          decoration: const InputDecoration(
+                            labelText: '기타 활동',
+                            hintText: '쿠하스 이외의 소모임, 동아리 지원한 것과 진행하고 있는 활동을 작성해주세요.',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
+                          minLines: 3,
+                          maxLines: 6,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _curriculumReasonController,
+                          decoration: const InputDecoration(
+                            labelText: '커리큘럼 이수 가능 이유',
+                            hintText: '쿠하스 커리큘럼 진행 및 강의를 동시에 수강 시 개인차에 따라 어려움이 있을 수 있습니다. 커리큘럼을 성실히 이수할 수 있다면 그 이유는 무엇인가요?',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
+                          minLines: 3,
+                          maxLines: 6,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _wishController,
+                          decoration: const InputDecoration(
+                            labelText: 'KUHAS에서 얻고 싶은 것',
+                            hintText: '쿠하스에 들어와서 얻고 싶거나 하고 싶은 것을 작성해주세요.',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
+                          minLines: 3,
+                          maxLines: 6,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _careerController,
+                          decoration: const InputDecoration(
+                            labelText: '진로',
+                            hintText: '본인이 생각하고 있는 진로를 작성해주세요.',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
+                          minLines: 2,
+                          maxLines: 4,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('프로그래밍 언어 경험 여부', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Radio<String>(
+                                  value: 'O',
+                                  groupValue: _languageExp,
+                                  onChanged: (v) => setState(() => _languageExp = v),
+                                ),
+                                const Text('O'),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _languageController,
+                                    enabled: _languageExp == 'O',
+                                    decoration: const InputDecoration(
+                                      hintText: '경험한 언어를 작성해주세요',
+                                      hintStyle: TextStyle(color: Colors.grey),
+                                      border: UnderlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Radio<String>(
+                                  value: 'X',
+                                  groupValue: _languageExp,
+                                  onChanged: (v) => setState(() => _languageExp = v),
+                                ),
+                                const Text('X'),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('희망 활동 (중복 선택 가능)', style: TextStyle(fontWeight: FontWeight.bold)),
+                        CheckboxListTile(
+                          title: const Text('활동 1'),
+                          value: false,
+                          onChanged: (v) {},
+                        ),
+                        CheckboxListTile(
+                          title: const Text('활동 2'),
+                          value: false,
+                          onChanged: (v) {},
+                        ),
+                        CheckboxListTile(
+                          title: const Text('활동 3'),
+                          value: false,
+                          onChanged: (v) {},
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('대면 면접 희망 날짜', style: TextStyle(fontWeight: FontWeight.bold)),
+                        RadioListTile<String>(
+                          title: const Text('9월 1일(화)'),
+                          value: '9월 1일(화)',
+                          groupValue: null, // 나중에 상태 관리로 변경
+                          onChanged: (v) {},
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('9월 2일(수)'),
+                          value: '9월 2일(수)',
+                          groupValue: null, // 나중에 상태 관리로 변경
+                          onChanged: (v) {},
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('9월 3일(목)'),
+                          value: '9월 3일(목)',
+                          groupValue: null, // 나중에 상태 관리로 변경
+                          onChanged: (v) {},
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('9월 4일(금)'),
+                          value: '9월 4일(금)',
+                          groupValue: null, // 나중에 상태 관리로 변경
+                          onChanged: (v) {},
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('개강총회 참석 여부', style: TextStyle(fontWeight: FontWeight.bold)),
+                        RadioListTile<String>(
+                          title: const Text('개강총회만 참석'),
+                          value: '개강총회만 참석',
+                          groupValue: null, // 나중에 상태 관리로 변경
+                          onChanged: (v) {},
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('뒷풀이만 참석'),
+                          value: '뒷풀이만 참석',
+                          groupValue: null, // 나중에 상태 관리로 변경
+                          onChanged: (v) {},
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('둘 다 참석'),
+                          value: '둘 다 참석',
+                          groupValue: null, // 나중에 상태 관리로 변경
+                          onChanged: (v) {},
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('제출 시 개인정보 제공에 동의하는 것으로 간주합니다. 개인정보 동의를 하지 않으실 경우 해당 설문을 제출하지 않으시면 됩니다.', style: TextStyle(fontSize: 13)),
+                        RadioListTile<String>(
+                          title: const Text('예'),
+                          value: '예',
+                          groupValue: null,
+                          onChanged: (v) {},
                         ),
                         const SizedBox(height: 20),
                         SizedBox(

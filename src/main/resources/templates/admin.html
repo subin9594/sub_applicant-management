@@ -123,6 +123,15 @@
       <th>전화번호</th>
       <th>이메일</th>
       <th>지원동기</th>
+      <th>기타 활동</th>
+      <th>커리큘럼 이수 가능 이유</th>
+      <th>KUHAS에서 얻고 싶은 것</th>
+      <th>진로</th>
+      <th>프로그래밍 언어 경험</th>
+      <th>경험한 언어</th>
+      <th>희망 활동</th>
+      <th>면접 희망 날짜</th>
+      <th>개강총회 참석</th>
       <th>상태</th>
       <th>처리</th>
     </tr>
@@ -139,6 +148,15 @@
       <td th:text="${app.phoneNumber}"></td>
       <td th:text="${app.email}"></td>
       <td th:utext="${#strings.replace(app.motivation, '(.{30})', '$1<wbr>')}" class="motivation-cell"></td>
+      <td th:text="${app.otherActivity}"></td>
+      <td th:text="${app.curriculumReason}"></td>
+      <td th:text="${app.wish}"></td>
+      <td th:text="${app.career}"></td>
+      <td th:text="${app.languageExp}"></td>
+      <td th:text="${app.languageDetail}"></td>
+      <td th:text="${app.wishActivities}"></td>
+      <td th:text="${app.interviewDate}"></td>
+      <td th:text="${app.attendType}"></td>
       <td th:text="${app.status}" th:classappend="'status-' + ${app.status.toString().toLowerCase()}"></td>
       <td>
         <div style="display:flex; gap:6px;">

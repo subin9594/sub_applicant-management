@@ -154,7 +154,10 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           ),
                         TextFormField(
                           controller: _nameController,
-                          decoration: const InputDecoration(labelText: '이름'),
+                          decoration: const InputDecoration(
+                            labelText: '이름',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '이름을 입력하세요.';
                             if (!RegExp(r'^[가-힣a-zA-Z\s]+$').hasMatch(v.trim())) return '이름은 한글 또는 영문만 입력하세요.';
@@ -162,48 +165,51 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _studentIdController,
-                          decoration: const InputDecoration(labelText: '학번'),
+                          decoration: const InputDecoration(
+                            labelText: '학번',
+                            hintText: 'ex) 20XX270XXX',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '학번을 입력하세요.';
                             if (!RegExp(r'^\d{10}$').hasMatch(v.trim())) return '학번은 숫자 10자리로 입력하세요.';
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: _gradeDropdownValue,
                           items: [
-                            '1학년', '2학년', '3학년', '4학년', '기타'
+                            '1학년', '2학년', '3학년', '4학년'
                           ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                           onChanged: (v) => setState(() => _gradeDropdownValue = v),
                           decoration: const InputDecoration(labelText: '학년'),
                           validator: (v) => v == null ? '학년을 선택하세요.' : null,
                         ),
-                        if (_gradeDropdownValue == '기타')
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: TextFormField(
-                              controller: _gradeController,
-                              decoration: const InputDecoration(labelText: '학년(기타)'),
-                            ),
-                          ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _emailController,
-                          decoration: const InputDecoration(labelText: '이메일'),
+                          decoration: const InputDecoration(
+                            labelText: '이메일',
+                            hintText: 'ex) xxx@gmail.com 또는 xxx@korea.ac.kr',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '이메일을 입력하세요.';
                             if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v.trim())) return '이메일 형식이 올바르지 않습니다.';
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _phoneController,
-                          decoration: const InputDecoration(labelText: '전화번호'),
+                          decoration: const InputDecoration(
+                            labelText: '전화번호',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '전화번호를 입력하세요.';
                             if (!RegExp(r'^[0-9\-]+$').hasMatch(v.trim())) return '전화번호는 숫자와 -만 입력하세요.';
@@ -211,14 +217,22 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _leavePlanController,
-                          decoration: const InputDecoration(labelText: '추후에 휴학 하실 계획이 있으신가요? 있다면 구체적으로 작성해주시기 바랍니다.'),
+                          decoration: const InputDecoration(
+                            labelText: '휴학 계획',
+                            hintText: '추후에 휴학 하실 계획이 있으신가요? 있다면 구체적으로 작성해주시기 바랍니다.',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           minLines: 2,
                           maxLines: 4,
+                          style: const TextStyle(
+                            decoration: TextDecoration.none,
+                            decorationThickness: 0,
+                          ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         const Text('운영진 활동 기간', style: TextStyle(fontWeight: FontWeight.bold)),
                         Column(
                           children: [
@@ -243,15 +257,19 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             RadioListTile<String>(
                               title: Row(
                                 children: [
-                                  const Text('기타'),
+                                  const Text('기타:'),
                                   const SizedBox(width: 8),
-                                  if (_periodValue == '기타')
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: _periodEtcController,
-                                        decoration: const InputDecoration(hintText: '직접 입력'),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _periodEtcController,
+                                      enabled: _periodValue == '기타',
+                                      decoration: const InputDecoration(
+                                        hintText: '직접 입력',
+                                        hintStyle: TextStyle(color: Colors.grey),
+                                        border: UnderlineInputBorder(),
                                       ),
                                     ),
+                                  ),
                                 ],
                               ),
                               value: '기타',
@@ -260,12 +278,20 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _motivationController,
-                          decoration: const InputDecoration(labelText: '지원 동기 (50자 이상, 300자 내외)'),
+                          decoration: const InputDecoration(
+                            labelText: '지원 동기',
+                            hintText: 'KUHAS 운영진에 지원하게 된 동기를 작성해주세요.(300자 내외)',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           minLines: 3,
                           maxLines: 8,
+                          style: const TextStyle(
+                            decoration: TextDecoration.none,
+                            decorationThickness: 0,
+                          ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '지원 동기를 입력하세요.';
                             if (v.trim().length < 50) return '50자 이상 입력하세요.';
@@ -273,12 +299,20 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _goalController,
-                          decoration: const InputDecoration(labelText: 'KUHAS 운영진으로 활동하면서 얻고자 하는 것 (50자 이상, 300자 내외)'),
+                          decoration: const InputDecoration(
+                            labelText: 'KUHAS 운영진 활동 목표',
+                            hintText: 'KUHAS 운영진으로 활동하면서 얻고자 하는 것을 적어주세요.(300자 내외)',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           minLines: 3,
                           maxLines: 8,
+                          style: const TextStyle(
+                            decoration: TextDecoration.none,
+                            decorationThickness: 0,
+                          ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '입력하세요.';
                             if (v.trim().length < 50) return '50자 이상 입력하세요.';
@@ -286,22 +320,31 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _crisisController,
-                          decoration: const InputDecoration(labelText: '살아오면서 위기를 극복한 경험이 있다면 구체적으로 서술. 없으시다면 "없음"이라고 작성. (50자 이상, 300자 내외)'),
+                          decoration: const InputDecoration(
+                            labelText: '위기 극복 경험',
+                            hintText: '살아오면서 위기를 극복한 경험이 있다면 구체적으로 서술해주세요. 없으시다면 \'없음\'이라고 작성해주세요.',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           minLines: 3,
                           maxLines: 8,
+                          style: const TextStyle(
+                            decoration: TextDecoration.none,
+                            decorationThickness: 0,
+                          ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty) return '입력하세요.';
-                            if (v.trim() == '없음') return null;
-                            if (v.trim().length < 50) return '50자 이상 입력하세요.';
+                            if (v == null || v.trim().isEmpty) return null; // 공란 허용
                             if (v.trim().length > 350) return '300자 내외로 입력하세요.';
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
-                        const Text('학기 중 대면 회의 참석 여부 (매주 목요일 오후 10시, 방학 중 온라인)', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '학기 중 대면 회의 참석 여부 (방학 중에는 온라인으로 진행)\n회의 참석은 필수이며, 매주 목요일 오후 10시(시간 변동 가능)입니다.',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         RadioListTile<String>(
                           title: const Text('가능'),
                           value: '가능',
@@ -314,25 +357,26 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           groupValue: _meetingValue,
                           onChanged: (v) => setState(() => _meetingValue = v),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _resolutionController,
-                          decoration: const InputDecoration(labelText: '각오 한 마디'),
+                          decoration: const InputDecoration(
+                            labelText: '각오 한 마디',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
                           minLines: 2,
                           maxLines: 4,
+                          style: const TextStyle(
+                            decoration: TextDecoration.none,
+                            decorationThickness: 0,
+                          ),
                           validator: (v) => (v == null || v.trim().isEmpty) ? '입력하세요.' : null,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         const Text('제출 시 개인정보 제공에 동의하는 것으로 간주합니다. 개인정보 동의를 하지 않으실 경우 해당 설문을 제출하지 않으시면 됩니다.', style: TextStyle(fontSize: 13)),
                         RadioListTile<String>(
                           title: const Text('예'),
                           value: '예',
-                          groupValue: _privacyValue,
-                          onChanged: (v) => setState(() => _privacyValue = v),
-                        ),
-                        RadioListTile<String>(
-                          title: const Text('아니요'),
-                          value: '아니요',
                           groupValue: _privacyValue,
                           onChanged: (v) => setState(() => _privacyValue = v),
                         ),

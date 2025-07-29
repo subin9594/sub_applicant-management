@@ -49,7 +49,16 @@ public class ApplicationFormService {
                 request.getEmail(),
                 request.getMotivation()
         );
-
+        // Set new fields
+        applicationForm.setOtherActivity(request.getOtherActivity());
+        applicationForm.setCurriculumReason(request.getCurriculumReason());
+        applicationForm.setWish(request.getWish());
+        applicationForm.setCareer(request.getCareer());
+        applicationForm.setLanguageExp(request.getLanguageExp());
+        applicationForm.setLanguageDetail(request.getLanguageDetail());
+        applicationForm.setWishActivities(request.getWishActivities());
+        applicationForm.setInterviewDate(request.getInterviewDate());
+        applicationForm.setAttendType(request.getAttendType());
         ApplicationForm savedForm = applicationFormRepository.save(applicationForm);
 
         // 지원 완료 이메일 발송

@@ -40,6 +40,25 @@ public class ApplicationForm {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String motivation;
 
+    @Column
+    private String otherActivity;
+    @Column
+    private String curriculumReason;
+    @Column
+    private String wish;
+    @Column
+    private String career;
+    @Column
+    private String languageExp;
+    @Column
+    private String languageDetail;
+    @Column
+    private String wishActivities;
+    @Column
+    private String interviewDate;
+    @Column
+    private String attendType;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationStatus status = ApplicationStatus.PENDING;
@@ -108,6 +127,78 @@ public class ApplicationForm {
 
     public void setMotivation(String motivation) {
         this.motivation = motivation;
+    }
+
+    public String getOtherActivity() {
+        return otherActivity;
+    }
+
+    public void setOtherActivity(String otherActivity) {
+        this.otherActivity = otherActivity;
+    }
+
+    public String getCurriculumReason() {
+        return curriculumReason;
+    }
+
+    public void setCurriculumReason(String curriculumReason) {
+        this.curriculumReason = curriculumReason;
+    }
+
+    public String getWish() {
+        return wish;
+    }
+
+    public void setWish(String wish) {
+        this.wish = wish;
+    }
+
+    public String getCareer() {
+        return career;
+    }
+
+    public void setCareer(String career) {
+        this.career = career;
+    }
+
+    public String getLanguageExp() {
+        return languageExp;
+    }
+
+    public void setLanguageExp(String languageExp) {
+        this.languageExp = languageExp;
+    }
+
+    public String getLanguageDetail() {
+        return languageDetail;
+    }
+
+    public void setLanguageDetail(String languageDetail) {
+        this.languageDetail = languageDetail;
+    }
+
+    public String getWishActivities() {
+        return wishActivities;
+    }
+
+    public void setWishActivities(String wishActivities) {
+        this.wishActivities = wishActivities;
+    }
+
+    public String getInterviewDate() {
+        return interviewDate;
+    }
+
+    public void setInterviewDate(String interviewDate) {
+        this.interviewDate = interviewDate;
+    }
+
+    public String getAttendType() {
+        return attendType;
+    }
+
+    public void setAttendType(String attendType) {
+        this.attendType = attendType;
     }
 
     public ApplicationStatus getStatus() {
