@@ -4,6 +4,7 @@ import com.kuhas.applicant_managementt.dto.ExecutiveApplicationRequest;
 import com.kuhas.applicant_managementt.dto.ExecutiveApplicationResponse;
 import com.kuhas.applicant_managementt.entity.ExecutiveApplication;
 import com.kuhas.applicant_managementt.repository.ExecutiveApplicationRepository;
+import com.kuhas.applicant_managementt.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +16,12 @@ import java.util.stream.Collectors;
 @Transactional
 public class ExecutiveApplicationService {
     private final ExecutiveApplicationRepository repository;
+    private final EmailService emailService;
 
     @Autowired
-    public ExecutiveApplicationService(ExecutiveApplicationRepository repository) {
+    public ExecutiveApplicationService(ExecutiveApplicationRepository repository, EmailService emailService) {
         this.repository = repository;
+        this.emailService = emailService;
     }
 
     public ExecutiveApplicationResponse submitApplication(ExecutiveApplicationRequest request) {
@@ -37,6 +40,7 @@ public class ExecutiveApplicationService {
         entity.setResolution(request.getResolution());
         entity.setPrivacy(request.getPrivacy());
         ExecutiveApplication saved = repository.save(entity);
+        emailService.sendExecutiveApplicationReceivedEmail(saved);
         return new ExecutiveApplicationResponse(saved);
     }
 

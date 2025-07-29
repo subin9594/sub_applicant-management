@@ -1,6 +1,7 @@
 package com.kuhas.applicant_managementt.service;
 
 import com.kuhas.applicant_managementt.entity.ApplicationForm;
+import com.kuhas.applicant_managementt.entity.ExecutiveApplication;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -49,13 +50,24 @@ public class EmailService {
                 "<tr><td><b>학번</b></td><td style='padding-left:16px;'>" + applicationForm.getStudentId() + "</td></tr>" +
                 "<tr><td><b>전화번호</b></td><td style='padding-left:16px;'>" + applicationForm.getPhoneNumber() + "</td></tr>" +
                 "<tr><td><b>이메일</b></td><td style='padding-left:16px;'>" + applicationForm.getEmail() + "</td></tr>" +
-                "<tr><td><b>상태</b></td><td style='padding-left:16px;'>" + applicationForm.getStatus().getDisplayName() + "</td></tr>" +
+                // 추가 항목들
+                "<tr><td><b>기타 활동</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getOtherActivity()) + "</td></tr>" +
+                "<tr><td><b>커리큘럼 이수 가능 이유</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getCurriculumReason()) + "</td></tr>" +
+                "<tr><td><b>KUHAS에서 얻고 싶은 것</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getWish()) + "</td></tr>" +
+                "<tr><td><b>진로</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getCareer()) + "</td></tr>" +
+                "<tr><td><b>프로그래밍 언어 경험</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getLanguageExp()) + "</td></tr>" +
+                "<tr><td><b>경험한 언어</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getLanguageDetail()) + "</td></tr>" +
+                "<tr><td><b>희망 활동</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getWishActivities()) + "</td></tr>" +
+                "<tr><td><b>대면 면접 희망 날짜</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getInterviewDate()) + "</td></tr>" +
+                "<tr><td><b>개강총회 참석</b></td><td style='padding-left:16px;'>" + nullToDash(applicationForm.getAttendType()) + "</td></tr>" +
                 "</table>" +
                 // 지원동기
                 "<div style='text-align:center; margin-top:16px;'>" +
                 "<b>지원동기</b>" +
                 "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + motivationHtml + "</div>" +
                 "</div>" +
+                // 상태
+                "<div style='text-align:center; margin-top:16px; font-size:1.1em;'><b>현재 상태: " + applicationForm.getStatus().getDisplayName() + "</b></div>" +
                 "</div>" +
                 // 하단
                 "<div style='text-align:center; margin-top:32px;'><a href='" + infoUrl + "' style='color:#3b82f6; text-decoration:underline;'>KUHAS Notion 바로가기</a></div>" +
@@ -70,6 +82,16 @@ public class EmailService {
                 "학번: " + applicationForm.getStudentId() + "\n" +
                 "이메일: " + applicationForm.getEmail() + "\n" +
                 "전화번호: " + applicationForm.getPhoneNumber() + "\n" +
+                // 추가 항목들
+                "기타 활동: " + nullToDash(applicationForm.getOtherActivity()) + "\n" +
+                "커리큘럼 이수 가능 이유: " + nullToDash(applicationForm.getCurriculumReason()) + "\n" +
+                "KUHAS에서 얻고 싶은 것: " + nullToDash(applicationForm.getWish()) + "\n" +
+                "진로: " + nullToDash(applicationForm.getCareer()) + "\n" +
+                "프로그래밍 언어 경험: " + nullToDash(applicationForm.getLanguageExp()) + "\n" +
+                "경험한 언어: " + nullToDash(applicationForm.getLanguageDetail()) + "\n" +
+                "희망 활동: " + nullToDash(applicationForm.getWishActivities()) + "\n" +
+                "대면 면접 희망 날짜: " + nullToDash(applicationForm.getInterviewDate()) + "\n" +
+                "개강총회 참석: " + nullToDash(applicationForm.getAttendType()) + "\n" +
                 "지원동기: " + motivationPlain + "\n" +
                 "현재 상태: " + applicationForm.getStatus().getDisplayName() + "\n\n" +
                 "결과는 이메일로 안내드릴 예정입니다. 감사합니다.\n" +
@@ -213,6 +235,70 @@ public class EmailService {
         }
     }
     
+    // 운영진 모집 지원서 접수 확인 이메일 발송
+    public void sendExecutiveApplicationReceivedEmail(ExecutiveApplication execApp) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(execApp.getEmail());
+            helper.setFrom(new InternetAddress("koreauniv.kuhas@gmail.com", "KUHAS"));
+            helper.setSubject("[KUHAS 운영진 모집 지원서 접수 확인] " + execApp.getName() + "님의 지원서가 접수되었습니다");
+
+            String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
+
+            String htmlContent =
+                "<html><body style='font-family:Arial,sans-serif; color:#222;'>" +
+                "<div style='max-width:600px; margin:0 auto; background:#fff; border:1px solid #ccc; padding:20px;'>" +
+                "<h2 style='text-align:center; margin-bottom:16px;'>KUHAS 운영진 지원서 접수 안내</h2>" +
+                "<div style='text-align:center; font-size:1.1em; margin-bottom:24px;'><b>지원이 정상적으로 접수되었습니다!</b></div>" +
+                "<table style='margin:0 auto 24px auto; text-align:left;'>" +
+                "<tr><td><b>이름</b></td><td style='padding-left:16px;'>" + execApp.getName() + "</td></tr>" +
+                "<tr><td><b>학번</b></td><td style='padding-left:16px;'>" + execApp.getStudentId() + "</td></tr>" +
+                "<tr><td><b>학년</b></td><td style='padding-left:16px;'>" + execApp.getGrade() + "</td></tr>" +
+                "<tr><td><b>이메일</b></td><td style='padding-left:16px;'>" + execApp.getEmail() + "</td></tr>" +
+                "<tr><td><b>전화번호</b></td><td style='padding-left:16px;'>" + execApp.getPhoneNumber() + "</td></tr>" +
+                "<tr><td><b>휴학 계획</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getLeavePlan()) + "</td></tr>" +
+                "<tr><td><b>활동 기간</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getPeriod()) + "</td></tr>" +
+                "<tr><td><b>지원 동기</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getMotivation()) + "</td></tr>" +
+                "<tr><td><b>활동 목표</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getGoal()) + "</td></tr>" +
+                "<tr><td><b>위기 극복 경험</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getCrisis()) + "</td></tr>" +
+                "<tr><td><b>회의 참석</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getMeeting()) + "</td></tr>" +
+                "<tr><td><b>각오 한 마디</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getResolution()) + "</td></tr>" +
+                "<tr><td><b>개인정보 동의</b></td><td style='padding-left:16px;'>" + nullToDash(execApp.getPrivacy()) + "</td></tr>" +
+                "</table>" +
+                "</div>" +
+                "<div style='text-align:center; margin-top:32px;'><a href='" + infoUrl + "' style='color:#3b82f6; text-decoration:underline;'>KUHAS Notion 바로가기</a></div>" +
+                "<div style='text-align:center; color:#888; font-size:13px; margin-top:8px;'>© 2025 KUHAS. All rights reserved.</div>" +
+                "</body></html>";
+
+            String plainText =
+                "[KUHAS 운영진 지원서 접수 확인]\n" +
+                execApp.getName() + "님, 안녕하세요.\n" +
+                "지원서가 접수되었습니다.\n\n" +
+                "이름: " + execApp.getName() + "\n" +
+                "학번: " + execApp.getStudentId() + "\n" +
+                "학년: " + execApp.getGrade() + "\n" +
+                "이메일: " + execApp.getEmail() + "\n" +
+                "전화번호: " + execApp.getPhoneNumber() + "\n" +
+                "휴학 계획: " + nullToDash(execApp.getLeavePlan()) + "\n" +
+                "활동 기간: " + nullToDash(execApp.getPeriod()) + "\n" +
+                "지원 동기: " + nullToDash(execApp.getMotivation()) + "\n" +
+                "활동 목표: " + nullToDash(execApp.getGoal()) + "\n" +
+                "위기 극복 경험: " + nullToDash(execApp.getCrisis()) + "\n" +
+                "회의 참석: " + nullToDash(execApp.getMeeting()) + "\n" +
+                "각오 한 마디: " + nullToDash(execApp.getResolution()) + "\n" +
+                "개인정보 동의: " + nullToDash(execApp.getPrivacy()) + "\n" +
+                "\n결과는 이메일로 안내드릴 예정입니다. 감사합니다.\n" +
+                "KUHAS Notion 바로가기: " + infoUrl + "\n" +
+                "© 2025 KUHAS. All rights reserved.";
+
+            helper.setText(plainText, htmlContent);
+            mailSender.send(mimeMessage);
+            System.out.println("운영진 지원서 이메일 발송 완료: " + execApp.getEmail());
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            System.err.println("운영진 지원서 이메일 발송 실패: " + e.getMessage());
+        }
+    }
 
     private String highlightIfChanged(String oldVal, String newVal) {
         if (oldVal == null) oldVal = "";
@@ -242,5 +328,9 @@ public class EmailService {
             }
         }
         return sb.toString();
+    }
+
+    private String nullToDash(String s) {
+        return (s == null || s.trim().isEmpty()) ? "-" : s;
     }
 }

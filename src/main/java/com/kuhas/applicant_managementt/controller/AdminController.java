@@ -14,6 +14,12 @@ import com.kuhas.applicant_managementt.service.ApplicationFormService;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import org.springframework.stereotype.Controller;
+import java.util.Map;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+
 
 @Controller
 @RequestMapping("/admin")
@@ -46,11 +52,13 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session) {
-        if ("admin".equals(username) && "admin".equals(password)) {
-            session.setAttribute("admin", "true");
-            return "redirect:/api/admin/admin";
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest, HttpSession session) {
+        String password = loginRequest.get("password");
+        if ("admin1234".equals(password)) {
+            session.setAttribute("admin", true);
+            return ResponseEntity.ok(Map.of("success", true)); // 로그인 성공 시 JSON 응답
         }
-        return "admin_login";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "비밀번호가 틀렸습니다.")); // 비밀번호 오류 시 JSON 응답
     }
+    
 }

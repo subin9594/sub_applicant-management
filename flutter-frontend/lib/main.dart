@@ -72,6 +72,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
   List<String> _wishActivities = [];
   String? _selectedInterviewDate;
   String? _selectedAttendType;
+  String? _privacyValue;
 
   bool _isSubmitting = false;
   String? _message;
@@ -120,6 +121,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
         'wishActivities': _wishActivities.join(','),
         'interviewDate': _selectedInterviewDate,
         'attendType': _selectedAttendType,
+        'privacyAgreement': _privacyValue,
       }),
     );
 
@@ -424,72 +426,96 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                         const Text('희망 활동 (중복 선택 가능)', style: TextStyle(fontWeight: FontWeight.bold)),
                         CheckboxListTile(
                           title: const Text('활동 1'),
-                          value: false,
-                          onChanged: (v) {},
+                          value: _wishActivities.contains('활동 1'),
+                          onChanged: (checked) {
+                            setState(() {
+                              if (checked == true) {
+                                _wishActivities.add('활동 1');
+                              } else {
+                                _wishActivities.remove('활동 1');
+                              }
+                            });
+                          },
                         ),
                         CheckboxListTile(
                           title: const Text('활동 2'),
-                          value: false,
-                          onChanged: (v) {},
+                          value: _wishActivities.contains('활동 2'),
+                          onChanged: (checked) {
+                            setState(() {
+                              if (checked == true) {
+                                _wishActivities.add('활동 2');
+                              } else {
+                                _wishActivities.remove('활동 2');
+                              }
+                            });
+                          },
                         ),
                         CheckboxListTile(
                           title: const Text('활동 3'),
-                          value: false,
-                          onChanged: (v) {},
+                          value: _wishActivities.contains('활동 3'),
+                          onChanged: (checked) {
+                            setState(() {
+                              if (checked == true) {
+                                _wishActivities.add('활동 3');
+                              } else {
+                                _wishActivities.remove('활동 3');
+                              }
+                            });
+                          },
                         ),
                         const SizedBox(height: 16),
                         const Text('대면 면접 희망 날짜', style: TextStyle(fontWeight: FontWeight.bold)),
                         RadioListTile<String>(
                           title: const Text('9월 1일(화)'),
                           value: '9월 1일(화)',
-                          groupValue: null, // 나중에 상태 관리로 변경
-                          onChanged: (v) {},
+                          groupValue: _selectedInterviewDate,
+                          onChanged: (v) => setState(() => _selectedInterviewDate = v),
                         ),
                         RadioListTile<String>(
                           title: const Text('9월 2일(수)'),
                           value: '9월 2일(수)',
-                          groupValue: null, // 나중에 상태 관리로 변경
-                          onChanged: (v) {},
+                          groupValue: _selectedInterviewDate,
+                          onChanged: (v) => setState(() => _selectedInterviewDate = v),
                         ),
                         RadioListTile<String>(
                           title: const Text('9월 3일(목)'),
                           value: '9월 3일(목)',
-                          groupValue: null, // 나중에 상태 관리로 변경
-                          onChanged: (v) {},
+                          groupValue: _selectedInterviewDate,
+                          onChanged: (v) => setState(() => _selectedInterviewDate = v),
                         ),
                         RadioListTile<String>(
                           title: const Text('9월 4일(금)'),
                           value: '9월 4일(금)',
-                          groupValue: null, // 나중에 상태 관리로 변경
-                          onChanged: (v) {},
+                          groupValue: _selectedInterviewDate,
+                          onChanged: (v) => setState(() => _selectedInterviewDate = v),
                         ),
                         const SizedBox(height: 16),
                         const Text('개강총회 참석 여부', style: TextStyle(fontWeight: FontWeight.bold)),
                         RadioListTile<String>(
                           title: const Text('개강총회만 참석'),
                           value: '개강총회만 참석',
-                          groupValue: null, // 나중에 상태 관리로 변경
-                          onChanged: (v) {},
+                          groupValue: _selectedAttendType,
+                          onChanged: (v) => setState(() => _selectedAttendType = v),
                         ),
                         RadioListTile<String>(
                           title: const Text('뒷풀이만 참석'),
                           value: '뒷풀이만 참석',
-                          groupValue: null, // 나중에 상태 관리로 변경
-                          onChanged: (v) {},
+                          groupValue: _selectedAttendType,
+                          onChanged: (v) => setState(() => _selectedAttendType = v),
                         ),
                         RadioListTile<String>(
                           title: const Text('둘 다 참석'),
                           value: '둘 다 참석',
-                          groupValue: null, // 나중에 상태 관리로 변경
-                          onChanged: (v) {},
+                          groupValue: _selectedAttendType,
+                          onChanged: (v) => setState(() => _selectedAttendType = v),
                         ),
                         const SizedBox(height: 16),
                         const Text('제출 시 개인정보 제공에 동의하는 것으로 간주합니다. 개인정보 동의를 하지 않으실 경우 해당 설문을 제출하지 않으시면 됩니다.', style: TextStyle(fontSize: 13)),
                         RadioListTile<String>(
                           title: const Text('예'),
                           value: '예',
-                          groupValue: null,
-                          onChanged: (v) {},
+                          groupValue: _privacyValue,
+                          onChanged: (v) => setState(() => _privacyValue = v),
                         ),
                         const SizedBox(height: 20),
                         SizedBox(

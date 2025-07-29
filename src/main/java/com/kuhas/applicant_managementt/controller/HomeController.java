@@ -28,35 +28,6 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping("/admin")
-    public String adminPage(HttpSession session, Model model) {
-        if (session.getAttribute("admin") != null) {
-            List<ApplicationFormResponse> applications = applicationFormService.getAllApplications();
-            model.addAttribute("applications", applications);
-            return "admin";
-        } else {
-            return "admin_login";
-        }
-    }
-
-    @PostMapping("/admin/login")
-    @ResponseBody
-    public ResponseEntity<?> adminLogin(@RequestParam String password, HttpSession session) {
-        if (ADMIN_PASSWORD.equals(password)) {
-            session.setAttribute("admin", true);
-            return ResponseEntity.ok().body("{\"success\":true}");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("{\"success\":false, \"error\":\"비밀번호가 올바르지 않습니다.\"}");
-        }
-    }
-
-    @GetMapping("/admin/logout")
-    public String adminLogout(HttpSession session) {
-        session.removeAttribute("admin");
-        return "redirect:/admin";
-    }
-
     @PostMapping("/admin/approve/{id}")
     public String approveApplication(@PathVariable Long id, @RequestParam String status, HttpSession session, Model model) {
         if (session.getAttribute("admin") == null) {
