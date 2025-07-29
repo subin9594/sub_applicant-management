@@ -19,7 +19,18 @@ class _AdminEditPageState extends State<AdminEditPage> {
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
   late TextEditingController _motivationController;
+  late TextEditingController _otherActivityController;
+  late TextEditingController _curriculumReasonController;
+  late TextEditingController _wishController;
+  late TextEditingController _careerController;
+  late TextEditingController _languageController;
   String _status = 'PENDING';
+  String? _languageExp;
+  String? _gradeDropdownValue;
+  List<String> _wishActivities = [];
+  String? _selectedInterviewDate;
+  String? _selectedAttendType;
+  String? _privacyValue;
   bool _isSubmitting = false;
   String? _error;
   String? _studentIdError;
@@ -34,7 +45,37 @@ class _AdminEditPageState extends State<AdminEditPage> {
     _phoneController = TextEditingController(text: widget.application.phoneNumber);
     _emailController = TextEditingController(text: widget.application.email);
     _motivationController = TextEditingController(text: widget.application.motivation);
+    _otherActivityController = TextEditingController(text: widget.application.otherActivity ?? '');
+    _curriculumReasonController = TextEditingController(text: widget.application.curriculumReason ?? '');
+    _wishController = TextEditingController(text: widget.application.wish ?? '');
+    _careerController = TextEditingController(text: widget.application.career ?? '');
+    _languageController = TextEditingController(text: widget.application.languageDetail ?? '');
     _status = widget.application.status;
+    _languageExp = widget.application.languageExp;
+    _gradeDropdownValue = widget.application.grade;
+    _selectedInterviewDate = widget.application.interviewDate;
+    _selectedAttendType = widget.application.attendType;
+    _privacyValue = widget.application.privacyAgreement;
+    
+    // 희망 활동 파싱
+    if (widget.application.wishActivities != null && widget.application.wishActivities!.isNotEmpty) {
+      _wishActivities = widget.application.wishActivities!.split(',').map((e) => e.trim()).toList();
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _studentIdController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _motivationController.dispose();
+    _otherActivityController.dispose();
+    _curriculumReasonController.dispose();
+    _wishController.dispose();
+    _careerController.dispose();
+    _languageController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkStudentId() async {
@@ -97,6 +138,17 @@ class _AdminEditPageState extends State<AdminEditPage> {
         'phoneNumber': _phoneController.text.trim(),
         'email': _emailController.text.trim(),
         'motivation': _motivationController.text.trim(),
+        'otherActivity': _otherActivityController.text.trim(),
+        'curriculumReason': _curriculumReasonController.text.trim(),
+        'wish': _wishController.text.trim(),
+        'career': _careerController.text.trim(),
+        'languageExp': _languageExp,
+        'languageDetail': _languageController.text.trim(),
+        'wishActivities': _wishActivities.join(','),
+        'interviewDate': _selectedInterviewDate,
+        'attendType': _selectedAttendType,
+        'privacyAgreement': _privacyValue,
+        'grade': _gradeDropdownValue,
         'status': _status,
       }),
     );
@@ -104,6 +156,8 @@ class _AdminEditPageState extends State<AdminEditPage> {
       _isSubmitting = false;
       if (response.statusCode == 200) {
         widget.onSaved();
+        Navigator.of(context).pop(); // 편집 페이지 닫기
+        Navigator.of(context).pop(); // 상세 페이지 닫기 (목록으로 돌아가기)
       } else {
         _error = '저장에 실패했습니다.';
       }
@@ -190,6 +244,148 @@ class _AdminEditPageState extends State<AdminEditPage> {
                   if (value.length < 50) return '지원동기는 50자 이상 입력하세요.';
                   return null;
                 },
+              ),
+              DropdownButtonFormField<String>(
+                value: _gradeDropdownValue,
+                items: [
+                  '1학년', '2학년', '3학년', '4학년'
+                ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                onChanged: (v) => setState(() => _gradeDropdownValue = v),
+                decoration: const InputDecoration(labelText: '학년'),
+              ),
+              TextFormField(
+                controller: _otherActivityController,
+                decoration: const InputDecoration(labelText: '기타 활동'),
+                minLines: 2,
+                maxLines: 4,
+              ),
+              TextFormField(
+                controller: _curriculumReasonController,
+                decoration: const InputDecoration(labelText: '커리큘럼 이수 가능 이유'),
+                minLines: 2,
+                maxLines: 4,
+              ),
+              TextFormField(
+                controller: _wishController,
+                decoration: const InputDecoration(labelText: 'KUHAS에서 얻고 싶은 것'),
+                minLines: 2,
+                maxLines: 4,
+              ),
+              TextFormField(
+                controller: _careerController,
+                decoration: const InputDecoration(labelText: '진로'),
+                minLines: 2,
+                maxLines: 4,
+              ),
+              const Text('프로그래밍 언어 경험', style: TextStyle(fontWeight: FontWeight.bold)),
+              RadioListTile<String>(
+                title: const Text('있음'),
+                value: 'O',
+                groupValue: _languageExp,
+                onChanged: (v) => setState(() => _languageExp = v),
+              ),
+              RadioListTile<String>(
+                title: const Text('없음'),
+                value: 'X',
+                groupValue: _languageExp,
+                onChanged: (v) => setState(() => _languageExp = v),
+              ),
+              TextFormField(
+                controller: _languageController,
+                decoration: const InputDecoration(labelText: '경험한 언어'),
+                minLines: 2,
+                maxLines: 4,
+              ),
+              const Text('희망 활동', style: TextStyle(fontWeight: FontWeight.bold)),
+              CheckboxListTile(
+                title: const Text('활동 1'),
+                value: _wishActivities.contains('활동 1'),
+                onChanged: (checked) {
+                  setState(() {
+                    if (checked == true) {
+                      _wishActivities.add('활동 1');
+                    } else {
+                      _wishActivities.remove('활동 1');
+                    }
+                  });
+                },
+              ),
+              CheckboxListTile(
+                title: const Text('활동 2'),
+                value: _wishActivities.contains('활동 2'),
+                onChanged: (checked) {
+                  setState(() {
+                    if (checked == true) {
+                      _wishActivities.add('활동 2');
+                    } else {
+                      _wishActivities.remove('활동 2');
+                    }
+                  });
+                },
+              ),
+              CheckboxListTile(
+                title: const Text('활동 3'),
+                value: _wishActivities.contains('활동 3'),
+                onChanged: (checked) {
+                  setState(() {
+                    if (checked == true) {
+                      _wishActivities.add('활동 3');
+                    } else {
+                      _wishActivities.remove('활동 3');
+                    }
+                  });
+                },
+              ),
+              const Text('대면 면접 희망 날짜', style: TextStyle(fontWeight: FontWeight.bold)),
+              RadioListTile<String>(
+                title: const Text('9월 1일(화)'),
+                value: '9월 1일(화)',
+                groupValue: _selectedInterviewDate,
+                onChanged: (v) => setState(() => _selectedInterviewDate = v),
+              ),
+              RadioListTile<String>(
+                title: const Text('9월 2일(수)'),
+                value: '9월 2일(수)',
+                groupValue: _selectedInterviewDate,
+                onChanged: (v) => setState(() => _selectedInterviewDate = v),
+              ),
+              RadioListTile<String>(
+                title: const Text('9월 3일(목)'),
+                value: '9월 3일(목)',
+                groupValue: _selectedInterviewDate,
+                onChanged: (v) => setState(() => _selectedInterviewDate = v),
+              ),
+              RadioListTile<String>(
+                title: const Text('9월 4일(금)'),
+                value: '9월 4일(금)',
+                groupValue: _selectedInterviewDate,
+                onChanged: (v) => setState(() => _selectedInterviewDate = v),
+              ),
+              const Text('개강총회 참석 여부', style: TextStyle(fontWeight: FontWeight.bold)),
+              RadioListTile<String>(
+                title: const Text('개강총회만 참석'),
+                value: '개강총회만 참석',
+                groupValue: _selectedAttendType,
+                onChanged: (v) => setState(() => _selectedAttendType = v),
+              ),
+              RadioListTile<String>(
+                title: const Text('뒷풀이만 참석'),
+                value: '뒷풀이만 참석',
+                groupValue: _selectedAttendType,
+                onChanged: (v) => setState(() => _selectedAttendType = v),
+              ),
+              RadioListTile<String>(
+                title: const Text('둘 다 참석'),
+                value: '둘 다 참석',
+                groupValue: _selectedAttendType,
+                onChanged: (v) => setState(() => _selectedAttendType = v),
+              ),
+              const Text('개인정보 제공 동의', style: TextStyle(fontWeight: FontWeight.bold)),
+              RadioListTile<String>(
+                title: const Text('예'),
+                value: '예',
+                groupValue: _privacyValue,
+                onChanged: (v) => setState(() => _privacyValue = v),
               ),
               DropdownButtonFormField<String>(
                 value: _status,

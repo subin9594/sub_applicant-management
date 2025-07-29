@@ -20,26 +20,48 @@ public class ExecutiveApplication {
     private String email;
     @Column(nullable = false)
     private String phoneNumber;
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String leavePlan;
     @Column
     private String period;
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String motivation;
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String goal;
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String crisis;
     @Column
     private String meeting;
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String resolution;
     @Column
     private String privacy;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ApplicationStatus status = ApplicationStatus.PENDING;
+    
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     @Column
     private LocalDateTime updatedAt;
+
+    // ApplicationStatus enum 정의
+    public enum ApplicationStatus {
+        PENDING("대기"),
+        ACCEPTED("합격"),
+        REJECTED("불합격");
+
+        private final String displayName;
+
+        ApplicationStatus(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
 
     // Getters and setters for all fields
     public Long getId() { return id; }
@@ -70,6 +92,8 @@ public class ExecutiveApplication {
     public void setResolution(String resolution) { this.resolution = resolution; }
     public String getPrivacy() { return privacy; }
     public void setPrivacy(String privacy) { this.privacy = privacy; }
+    public ApplicationStatus getStatus() { return status; }
+    public void setStatus(ApplicationStatus status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

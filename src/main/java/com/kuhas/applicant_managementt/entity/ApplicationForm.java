@@ -35,6 +35,9 @@ public class ApplicationForm {
     @Column(nullable = false)
     private String email;
 
+    @Column
+    private String grade;
+
     @NotBlank(message = "지원동기는 필수입니다")
     @Size(max = 2000, message = "지원동기는 2000자 이하여야 합니다")
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -58,6 +61,8 @@ public class ApplicationForm {
     private String interviewDate;
     @Column
     private String attendType;
+    @Column
+    private String privacyAgreement;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -119,6 +124,14 @@ public class ApplicationForm {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     public String getMotivation() {
@@ -199,6 +212,14 @@ public class ApplicationForm {
 
     public void setAttendType(String attendType) {
         this.attendType = attendType;
+    }
+
+    public String getPrivacyAgreement() {
+        return privacyAgreement;
+    }
+
+    public void setPrivacyAgreement(String privacyAgreement) {
+        this.privacyAgreement = privacyAgreement;
     }
 
     public ApplicationStatus getStatus() {

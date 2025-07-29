@@ -12,6 +12,7 @@ public class ApplicationFormResponse {
     private String studentId;
     private String phoneNumber;
     private String email;
+    private String grade;
     private String motivation;
     private String status;
     private String statusDisplayName;
@@ -24,6 +25,7 @@ public class ApplicationFormResponse {
     private String wishActivities;
     private String interviewDate;
     private String attendType;
+    private String privacyAgreement;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
@@ -40,9 +42,20 @@ public class ApplicationFormResponse {
         this.studentId = applicationForm.getStudentId();
         this.phoneNumber = applicationForm.getPhoneNumber();
         this.email = applicationForm.getEmail();
+        this.grade = applicationForm.getGrade();
         this.motivation = applicationForm.getMotivation();
         this.status = applicationForm.getStatus().name();
         this.statusDisplayName = applicationForm.getStatus().getDisplayName();
+        this.otherActivity = applicationForm.getOtherActivity();
+        this.curriculumReason = applicationForm.getCurriculumReason();
+        this.wish = applicationForm.getWish();
+        this.career = applicationForm.getCareer();
+        this.languageExp = applicationForm.getLanguageExp();
+        this.languageDetail = applicationForm.getLanguageDetail();
+        this.wishActivities = applicationForm.getWishActivities();
+        this.interviewDate = applicationForm.getInterviewDate();
+        this.attendType = applicationForm.getAttendType();
+        this.privacyAgreement = applicationForm.getPrivacyAgreement();
         this.createdAt = applicationForm.getCreatedAt();
         this.updatedAt = applicationForm.getUpdatedAt();
     }
@@ -86,6 +99,14 @@ public class ApplicationFormResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     public String getMotivation() {
@@ -182,6 +203,14 @@ public class ApplicationFormResponse {
 
     public void setAttendType(String attendType) {
         this.attendType = attendType;
+    }
+
+    public String getPrivacyAgreement() {
+        return privacyAgreement;
+    }
+
+    public void setPrivacyAgreement(String privacyAgreement) {
+        this.privacyAgreement = privacyAgreement;
     }
 
     public LocalDateTime getCreatedAt() {

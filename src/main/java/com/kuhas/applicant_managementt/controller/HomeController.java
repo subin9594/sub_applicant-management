@@ -58,13 +58,24 @@ public class HomeController {
                                         @RequestParam String email,
                                         @RequestParam String motivation,
                                         @RequestParam String status,
+                                        @RequestParam(required = false) String otherActivity,
+                                        @RequestParam(required = false) String curriculumReason,
+                                        @RequestParam(required = false) String wish,
+                                        @RequestParam(required = false) String career,
+                                        @RequestParam(required = false) String languageExp,
+                                        @RequestParam(required = false) String languageDetail,
+                                        @RequestParam(required = false) String wishActivities,
+                                        @RequestParam(required = false) String interviewDate,
+                                        @RequestParam(required = false) String attendType,
+                                        @RequestParam(required = false) String privacyAgreement,
+                                        @RequestParam(required = false) String grade,
                                         HttpSession session,
                                         Model model) {
         if (session.getAttribute("admin") == null) {
             return "redirect:/admin";
         }
             try {
-                applicationFormService.updateApplicationByAdmin(id, name, studentId, phoneNumber, email, motivation, status);
+                applicationFormService.updateApplicationByAdmin(id, name, studentId, phoneNumber, email, motivation, status, otherActivity, curriculumReason, wish, career, languageExp, languageDetail, wishActivities, interviewDate, attendType, privacyAgreement, grade);
                 return "redirect:/admin";
             } catch (IllegalArgumentException e) {
                 model.addAttribute("error", e.getMessage());
@@ -74,6 +85,17 @@ public class HomeController {
                 model.addAttribute("email", email);
                 model.addAttribute("motivation", motivation);
                 model.addAttribute("status", status);
+                model.addAttribute("otherActivity", otherActivity);
+                model.addAttribute("curriculumReason", curriculumReason);
+                model.addAttribute("wish", wish);
+                model.addAttribute("career", career);
+                model.addAttribute("languageExp", languageExp);
+                model.addAttribute("languageDetail", languageDetail);
+                model.addAttribute("wishActivities", wishActivities);
+                model.addAttribute("interviewDate", interviewDate);
+                model.addAttribute("attendType", attendType);
+                model.addAttribute("privacyAgreement", privacyAgreement);
+                model.addAttribute("grade", grade);
                 model.addAttribute("id", id); // 항상 id 추가
                 return "admin_edit";
             }

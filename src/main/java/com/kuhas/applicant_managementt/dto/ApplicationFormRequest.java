@@ -35,6 +35,8 @@ public class ApplicationFormRequest {
     private String wishActivities;
     private String interviewDate;
     private String attendType;
+    private String privacyAgreement;
+    private String grade;
 
     @Size(max = 20, message = "상태는 20자 이하여야 합니다")
     private String status;
@@ -109,6 +111,10 @@ public class ApplicationFormRequest {
     public void setInterviewDate(String interviewDate) { this.interviewDate = interviewDate; }
     public String getAttendType() { return attendType; }
     public void setAttendType(String attendType) { this.attendType = attendType; }
+    public String getPrivacyAgreement() { return privacyAgreement; }
+    public void setPrivacyAgreement(String privacyAgreement) { this.privacyAgreement = privacyAgreement; }
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
 
     public String getStatus() {
         return status;

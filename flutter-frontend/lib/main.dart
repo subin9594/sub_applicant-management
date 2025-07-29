@@ -79,6 +79,18 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
   String? _message;
   String? _error;
   bool _showSuccess = false;
+  bool _hasSubmitted = false;
+  bool _showNameError = false;
+  bool _showStudentIdError = false;
+  bool _showGradeError = false;
+  bool _showPhoneError = false;
+  bool _showEmailError = false;
+  bool _showMotivationError = false;
+  bool _showOtherActivityError = false;
+  bool _showCurriculumReasonError = false;
+  bool _showWishError = false;
+  bool _showCareerError = false;
+  bool _showPrivacyError = false;
 
   @override
   void dispose() {
@@ -100,37 +112,23 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
       _isSubmitting = true;
       _error = null;
       _message = null;
+      _hasSubmitted = true;
+      _showNameError = _nameController.text.trim().isEmpty;
+      _showStudentIdError = _studentIdController.text.trim().isEmpty;
+      _showGradeError = _gradeDropdownValue == null || _gradeDropdownValue!.trim().isEmpty;
+      _showPhoneError = _phoneController.text.trim().isEmpty;
+      _showEmailError = _emailController.text.trim().isEmpty;
+      _showMotivationError = _motivationController.text.trim().isEmpty;
+      _showOtherActivityError = _otherActivityController.text.trim().isEmpty;
+      _showCurriculumReasonError = _curriculumReasonController.text.trim().isEmpty;
+      _showWishError = _wishController.text.trim().isEmpty;
+      _showCareerError = _careerController.text.trim().isEmpty;
+      _showPrivacyError = _privacyValue == null || _privacyValue!.trim().isEmpty;
     });
 
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate() || _showNameError || _showStudentIdError || _showGradeError || _showPhoneError || _showEmailError || _showMotivationError || _showOtherActivityError || _showCurriculumReasonError || _showWishError || _showCareerError || _showPrivacyError) {
       setState(() {
         _isSubmitting = false;
-      });
-      return;
-    }
-
-    // 모든 주요 입력값이 공란인지 체크
-    final allEmpty =
-      _nameController.text.trim().isEmpty &&
-      _studentIdController.text.trim().isEmpty &&
-      _phoneController.text.trim().isEmpty &&
-      _emailController.text.trim().isEmpty &&
-      _motivationController.text.trim().isEmpty &&
-      _otherActivityController.text.trim().isEmpty &&
-      _curriculumReasonController.text.trim().isEmpty &&
-      _wishController.text.trim().isEmpty &&
-      _careerController.text.trim().isEmpty &&
-      (_languageExp == null || _languageExp!.isEmpty) &&
-      _languageController.text.trim().isEmpty &&
-      (_wishActivities.isEmpty) &&
-      (_selectedInterviewDate == null || _selectedInterviewDate!.isEmpty) &&
-      (_selectedAttendType == null || _selectedAttendType!.isEmpty) &&
-      (_privacyValue == null || _privacyValue!.isEmpty) &&
-      (_gradeDropdownValue == null || _gradeDropdownValue!.isEmpty);
-    if (allEmpty) {
-      setState(() {
-        _isSubmitting = false;
-        _error = '최소 한 항목은 입력해야 제출할 수 있습니다.';
       });
       return;
     }
@@ -181,8 +179,24 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
         if (mounted) {
           setState(() {
             _showSuccess = false;
+            // 폼 초기화
+            _nameController.clear();
+            _studentIdController.clear();
+            _phoneController.clear();
+            _emailController.clear();
+            _motivationController.clear();
+            _otherActivityController.clear();
+            _curriculumReasonController.clear();
+            _wishController.clear();
+            _careerController.clear();
+            _languageController.clear();
+            _gradeDropdownValue = null;
+            _languageExp = null;
+            _wishActivities.clear();
+            _selectedInterviewDate = null;
+            _selectedAttendType = null;
+            _privacyValue = null;
           });
-          Navigator.of(context).pop();
         }
       }
     } catch (e) {
@@ -201,11 +215,14 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
     final res = await http.get(url);
     if (res.statusCode == 200) {
       final data = json.decode(res.body);
-      String msg = '';
-      if (data['studentId'] == true) msg += '이미 사용 중인 학번입니다.\n';
-      if (data['email'] == true) msg += '이미 사용 중인 이메일입니다.\n';
-      if (data['phoneNumber'] == true) msg += '이미 사용 중인 전화번호입니다.\n';
-      return msg.isEmpty ? null : msg.trim();
+      List<String> duplicates = [];
+      if (data['studentId'] == true) duplicates.add('학번');
+      if (data['email'] == true) duplicates.add('이메일');
+      if (data['phoneNumber'] == true) duplicates.add('전화번호');
+      
+      if (duplicates.isNotEmpty) {
+        return '이미 사용 중인 ${duplicates.join(', ')}입니다.';
+      }
     }
     return null;
   }
@@ -325,10 +342,16 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) return '이름을 입력하세요.';
-                            if (!RegExp(r'^[가-힣a-zA-Z\s]+$').hasMatch(value)) return '이름은 한글 또는 영문만 입력하세요.';
+                            if (!RegExp(r'^[가-힣a-zA-Z\s]+$').hasMatch(value.trim())) return '이름은 한글 또는 영문만 입력하세요.';
+                            if (value.length > 100) return '이름은 100자 이하여야 합니다.';
                             return null;
                           },
                         ),
+                        if (_showNameError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('이름을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _studentIdController,
@@ -344,16 +367,26 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        if (_showStudentIdError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('학번을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: _gradeDropdownValue,
                           items: [
-                            '1학년', '2학년', '3학년', '4학년', '5학년 이상'
+                            '1학년', '2학년', '3학년', '4학년'
                           ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                           onChanged: (v) => setState(() => _gradeDropdownValue = v),
                           decoration: const InputDecoration(labelText: '학년'),
                           validator: (v) => v == null ? '학년을 선택하세요.' : null,
                         ),
+                        if (_showGradeError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('학년을 선택하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _phoneController,
@@ -365,10 +398,15 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) return '전화번호를 입력하세요.';
                             if (!RegExp(r'^[0-9\-]+$').hasMatch(value)) return '전화번호는 숫자와 -만 입력하세요.';
-                            if (value.length < 8 || value.length > 14) return '전화번호는 8~14자 이내로 입력하세요.';
+                            if (value.length < 8 || value.length > 13) return '전화번호는 8~13자 이내로 입력하세요.';
                             return null;
                           },
                         ),
+                        if (_showPhoneError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('전화번호를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _emailController,
@@ -384,6 +422,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        if (_showEmailError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('이메일을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _motivationController,
@@ -400,6 +443,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        if (_showMotivationError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('지원동기를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _otherActivityController,
@@ -415,6 +463,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        if (_showOtherActivityError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('기타 활동을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _curriculumReasonController,
@@ -430,6 +483,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        if (_showCurriculumReasonError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('커리큘럼 이수 가능 이유를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _wishController,
@@ -445,6 +503,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        if (_showWishError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('KUHAS에서 얻고 싶은 것을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _careerController,
@@ -460,6 +523,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
+                        if (_showCareerError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('진로를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         const Text('프로그래밍 언어 경험 여부', style: TextStyle(fontWeight: FontWeight.bold)),
                         Column(
@@ -594,6 +662,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           groupValue: _privacyValue,
                           onChanged: (v) => setState(() => _privacyValue = v),
                         ),
+                        if (_showPrivacyError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('제출 시 개인정보 제공에 동의하는 것으로 간주합니다. 개인정보 동의를 하지 않으실 경우 해당 설문을 제출하지 않으시면 됩니다.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,

@@ -51,6 +51,18 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff7f8fa),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.home, color: Colors.black),
+          tooltip: '홈으로',
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: const Text('관리자 로그인'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Container(

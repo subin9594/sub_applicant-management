@@ -29,6 +29,20 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
   String? _privacyValue;
   String? _error;
   bool _showSuccess = false;
+  bool _hasSubmitted = false;
+  bool _isSubmitting = false;
+  bool _showGradeError = false;
+  bool _showPeriodError = false;
+  bool _showMeetingError = false;
+  bool _showPrivacyError = false;
+  bool _showCrisisError = false;
+  bool _showLeavePlanError = false;
+  bool _showNameError = false;
+  bool _showStudentIdError = false;
+  bool _showPhoneError = false;
+  bool _showEmailError = false;
+  bool _showMotivationError = false;
+  bool _showGoalError = false;
 
   @override
   void dispose() {
@@ -47,30 +61,37 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
   }
 
   Future<void> _submitForm() async {
-    setState(() => _error = null);
-    // 추가 검증: grade, period, meeting, privacy
-    if (_gradeDropdownValue == null || _gradeDropdownValue!.trim().isEmpty) {
-      setState(() => _error = '학년을 선택하세요.');
+    setState(() {
+      _isSubmitting = true;
+      _error = null;
+      _hasSubmitted = true;
+      _showGradeError = _gradeDropdownValue == null || _gradeDropdownValue!.trim().isEmpty;
+      _showPeriodError = _periodValue == null || _periodValue!.trim().isEmpty || (_periodValue == '기타' && _periodEtcController.text.trim().isEmpty);
+      _showMeetingError = _meetingValue == null || _meetingValue!.trim().isEmpty;
+      _showPrivacyError = _privacyValue == null || _privacyValue!.trim().isEmpty;
+      _showCrisisError = _crisisController.text.trim().isEmpty;
+      _showLeavePlanError = _leavePlanController.text.trim().isEmpty;
+      _showNameError = _nameController.text.trim().isEmpty;
+      _showStudentIdError = _studentIdController.text.trim().isEmpty;
+      _showPhoneError = _phoneController.text.trim().isEmpty;
+      _showEmailError = _emailController.text.trim().isEmpty;
+      _showMotivationError = _motivationController.text.trim().isEmpty;
+      _showGoalError = _goalController.text.trim().isEmpty;
+    });
+    if (!_formKey.currentState!.validate() || _showGradeError || _showPeriodError || _showMeetingError || _showPrivacyError || _showCrisisError || _showLeavePlanError || _showNameError || _showStudentIdError || _showPhoneError || _showEmailError || _showMotivationError || _showGoalError) {
+      setState(() {
+        _isSubmitting = false;
+      });
       return;
     }
-    if (_periodValue == null || _periodValue!.trim().isEmpty || (_periodValue == '기타' && _periodEtcController.text.trim().isEmpty)) {
-      setState(() => _error = '운영진 활동 기간을 선택하거나 기타 항목을 입력하세요.');
-      return;
-    }
-    if (_meetingValue == null || _meetingValue!.trim().isEmpty) {
-      setState(() => _error = '회의 참석 가능 여부를 선택하세요.');
-      return;
-    }
-    if (_privacyValue == null || _privacyValue!.trim().isEmpty) {
-      setState(() => _error = '개인정보 제공 동의를 선택하세요.');
-      return;
-    }
-    if (!_formKey.currentState!.validate()) return;
     try {
     final url = Uri.parse('http://10.0.2.2:8080/api/executive-applications');
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: json.encode({
         'name': _nameController.text.trim(),
         'studentId': _studentIdController.text.trim(),
@@ -90,6 +111,7 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
     if (response.statusCode == 200) {
       setState(() {
         _showSuccess = true;
+        _isSubmitting = false;
       });
       await Future.delayed(const Duration(seconds: 3));
       if (mounted) {
@@ -99,10 +121,22 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
         Navigator.of(context).pop();
       }
     } else {
-        setState(() => _error = '제출에 실패했습니다. 다시 시도해 주세요. (서버 오류: \n${response.statusCode}\n${response.body})');
-      }
+      String errorMsg = '제출에 실패했습니다. 다시 시도해 주세요. (서버 오류: \n${response.statusCode}\n${response.body})';
+      try {
+        final data = json.decode(response.body);
+        if (data['error'] != null) errorMsg = data['error'];
+      } catch (_) {}
+      print('운영진 지원서 제출 실패: statusCode = ${response.statusCode}, body = ${response.body}');
+      setState(() {
+        _error = errorMsg;
+        _isSubmitting = false;
+      });
+    }
     } catch (e) {
-      setState(() => _error = '제출 중 오류가 발생했습니다.\n${e.toString()}');
+      setState(() {
+        _error = '제출 중 오류가 발생했습니다.\n${e.toString()}';
+        _isSubmitting = false;
+      });
     }
   }
 
@@ -154,7 +188,7 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                         const SizedBox(height: 8),
                         const Text('운영진 모집 지원서 제출', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 24),
-                        if (_error != null)
+                        if (_error != null && _hasSubmitted)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Text(
@@ -177,6 +211,11 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             return null;
                           },
                         ),
+                        if (_showNameError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('이름을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _studentIdController,
@@ -185,12 +224,18 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             hintText: 'ex) 20XX270XXX',
                             hintStyle: TextStyle(color: Colors.grey),
                           ),
+                          keyboardType: TextInputType.number,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '학번을 입력하세요.';
                             if (!RegExp(r'^\d{10}$').hasMatch(v.trim())) return '학번은 숫자 10자리로 입력하세요.';
                             return null;
                           },
                         ),
+                        if (_showStudentIdError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('학번을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: _gradeDropdownValue,
@@ -199,8 +244,13 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                           onChanged: (v) => setState(() => _gradeDropdownValue = v),
                           decoration: const InputDecoration(labelText: '학년'),
-                          validator: (v) => v == null || v.trim().isEmpty ? '학년을 선택하세요.' : null,
+                          validator: (v) => v == null ? '학년을 선택하세요.' : null,
                         ),
+                        if (_showGradeError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('학년을 선택하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _emailController,
@@ -209,12 +259,18 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             hintText: 'ex) xxx@gmail.com 또는 xxx@korea.ac.kr',
                             hintStyle: TextStyle(color: Colors.grey),
                           ),
+                          keyboardType: TextInputType.emailAddress,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '이메일을 입력하세요.';
                             if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v.trim())) return '이메일 형식이 올바르지 않습니다.';
                             return null;
                           },
                         ),
+                        if (_showEmailError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('이메일을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _phoneController,
@@ -222,13 +278,19 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             labelText: '전화번호',
                             hintStyle: TextStyle(color: Colors.grey),
                           ),
+                          keyboardType: TextInputType.phone,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '전화번호를 입력하세요.';
                             if (!RegExp(r'^[0-9\-]+$').hasMatch(v.trim())) return '전화번호는 숫자와 -만 입력하세요.';
-                            if (v.length < 8 || v.length > 14) return '전화번호는 8~14자 이내로 입력하세요.';
+                            if (v.length < 8 || v.length > 13) return '전화번호는 8~13자 이내로 입력하세요.';
                             return null;
                           },
                         ),
+                        if (_showPhoneError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('전화번호를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _leavePlanController,
@@ -243,7 +305,17 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             decoration: TextDecoration.none,
                             decorationThickness: 0,
                           ),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return '휴학 계획을 입력하세요. (없다면 \'없음\'이라고 작성해주세요.)';
+                            if (v.trim().length > 350) return '300자 내외로 입력하세요.';
+                            return null;
+                          },
                         ),
+                        if (_showLeavePlanError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('휴학 계획을 입력하세요. (없다면 \'없음\'이라고 작성해주세요.)', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         const Text('운영진 활동 기간', style: TextStyle(fontWeight: FontWeight.bold)),
                         Column(
@@ -290,7 +362,7 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             ),
                           ],
                         ),
-                        if (_periodValue == null || _periodValue!.trim().isEmpty || (_periodValue == '기타' && _periodEtcController.text.trim().isEmpty))
+                        if (_showPeriodError)
                           const Padding(
                             padding: EdgeInsets.only(top: 4, bottom: 8),
                             child: Text('운영진 활동 기간을 선택하거나 기타 항목을 입력하세요.', style: TextStyle(color: Colors.red)),
@@ -311,11 +383,16 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return '지원 동기를 입력하세요.';
-                            if (v.trim().length < 50) return '50자 이상 입력하세요.';
+                            if (v.trim().length < 100) return '100자 이상 입력하세요.';
                             if (v.trim().length > 350) return '300자 내외로 입력하세요.';
                             return null;
                           },
                         ),
+                        if (_showMotivationError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('지원 동기를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _goalController,
@@ -331,12 +408,17 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             decorationThickness: 0,
                           ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty) return '입력하세요.';
-                            if (v.trim().length < 50) return '50자 이상 입력하세요.';
+                            if (v == null || v.trim().isEmpty) return '운영진 활동 목표를 입력하세요.';
+                            if (v.trim().length < 100) return '100자 이상 입력하세요.';
                             if (v.trim().length > 350) return '300자 내외로 입력하세요.';
                             return null;
                           },
                         ),
+                        if (_showGoalError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('운영진 활동 목표를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _crisisController,
@@ -352,11 +434,16 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             decorationThickness: 0,
                           ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty) return null; // 공란 허용
+                            if (v == null || v.trim().isEmpty) return '위기 극복 경험을 입력하세요. (없다면 \'없음\'이라고 작성해주세요.)';
                             if (v.trim().length > 350) return '300자 내외로 입력하세요.';
                             return null;
                           },
                         ),
+                        if (_showCrisisError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('위기 극복 경험을 입력하세요. (없다면 \'없음\'이라고 작성해주세요.)', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         const Text(
                           '학기 중 대면 회의 참석 여부 (방학 중에는 온라인으로 진행)\n회의 참석은 필수이며, 매주 목요일 오후 10시(시간 변동 가능)입니다.',
@@ -374,7 +461,7 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           groupValue: _meetingValue,
                           onChanged: (v) => setState(() => _meetingValue = v),
                         ),
-                        if (_meetingValue == null || _meetingValue!.trim().isEmpty)
+                        if (_showMeetingError)
                           const Padding(
                             padding: EdgeInsets.only(top: 4, bottom: 8),
                             child: Text('회의 참석 가능 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
@@ -402,15 +489,49 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           groupValue: _privacyValue,
                           onChanged: (v) => setState(() => _privacyValue = v),
                         ),
-                        if (_privacyValue == null || _privacyValue!.trim().isEmpty)
+                        if (_showPrivacyError)
                           const Padding(
                             padding: EdgeInsets.only(top: 4, bottom: 8),
                             child: Text('개인정보 제공 동의를 선택하세요.', style: TextStyle(color: Colors.red)),
                           ),
                         const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _submitForm,
-                          child: const Text('제출'),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isSubmitting
+                                ? null
+                                : () async {
+                                    if (_formKey.currentState?.validate() ?? false) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text('제출 확인'),
+                                          content: const Text('운영진 지원서를 제출하시겠습니까?\n확인을 누르면 제출이 됩니다.\n수정을 원하시면 취소를 눌러주세요.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(ctx).pop(),
+                                              child: const Text('취소'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.of(ctx).pop();
+                                                _submitForm();
+                                              },
+                                              child: const Text('확인'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  },
+                            child: _isSubmitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  )
+                                : const Text('운영진 지원서 제출'),
+                          ),
                         ),
                       ],
                     ),

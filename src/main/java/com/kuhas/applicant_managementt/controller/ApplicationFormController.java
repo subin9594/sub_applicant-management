@@ -138,7 +138,18 @@ public class ApplicationFormController {
                 request.getPhoneNumber(),
                 request.getEmail(),
                 request.getMotivation(),
-                request.getStatus() != null ? request.getStatus() : "PENDING"
+                request.getStatus() != null ? request.getStatus() : "PENDING",
+                request.getOtherActivity(),
+                request.getCurriculumReason(),
+                request.getWish(),
+                request.getCareer(),
+                request.getLanguageExp(),
+                request.getLanguageDetail(),
+                request.getWishActivities(),
+                request.getInterviewDate(),
+                request.getAttendType(),
+                request.getPrivacyAgreement(),
+                request.getGrade()
             );
             return ResponseEntity.ok().body("{\"message\":\"수정이 완료되었습니다.\"}");
         } catch (IllegalArgumentException e) {

@@ -138,7 +138,7 @@ public class ApplicationFormService {
     }
 
     // 관리자 지원서 수정
-    public void updateApplicationByAdmin(Long id, String name, String studentId, String phoneNumber, String email, String motivation, String status) {
+    public void updateApplicationByAdmin(Long id, String name, String studentId, String phoneNumber, String email, String motivation, String status, String otherActivity, String curriculumReason, String wish, String career, String languageExp, String languageDetail, String wishActivities, String interviewDate, String attendType, String privacyAgreement, String grade) {
         ApplicationForm before = applicationFormRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("지원서를 찾을 수 없습니다: " + id));
         // 중복 학번, 이메일, 전화번호 체크 (본인 제외)
@@ -172,11 +172,22 @@ public class ApplicationFormService {
         before.setPhoneNumber(phoneNumber);
         before.setEmail(email);
         before.setMotivation(motivation);
+        before.setOtherActivity(otherActivity);
+        before.setCurriculumReason(curriculumReason);
+        before.setWish(wish);
+        before.setCareer(career);
+        before.setLanguageExp(languageExp);
+        before.setLanguageDetail(languageDetail);
+        before.setWishActivities(wishActivities);
+        before.setInterviewDate(interviewDate);
+        before.setAttendType(attendType);
+        before.setPrivacyAgreement(privacyAgreement);
+        before.setGrade(grade);
         before.setStatus(ApplicationForm.ApplicationStatus.valueOf(status));
         applicationFormRepository.save(before);
 
         // 지원서 수정 안내 메일 발송 (수정 전/후 모두 전달)
-        emailService.sendApplicationModifiedEmail(before, name, studentId, phoneNumber, email, motivation, status);
+        emailService.sendApplicationModifiedEmail(before, name, studentId, phoneNumber, email, motivation, status, otherActivity, curriculumReason, wish, career, languageExp, languageDetail, wishActivities, interviewDate, attendType, privacyAgreement, grade);
     }
 
     // 통계 정보 조회

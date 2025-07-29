@@ -38,6 +38,11 @@ spring:
           starttls:
             enable: true
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: NON_NULL
+
 # 서버 설정
 server:
   port: 8080

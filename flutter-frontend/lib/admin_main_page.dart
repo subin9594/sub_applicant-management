@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'admin_edit_page.dart';
+import 'main.dart'; // Import ApplicantFormPage from main.dart
+import 'admin_application_detail_page.dart'; // Import AdminApplicationDetailPage
+import 'admin_executive_detail_page.dart'; // Import AdminExecutiveDetailPage
 
 enum ApplicationCategory { member, executive }
 
@@ -25,6 +27,7 @@ class ApplicationForm {
   final String? interviewDate;
   final String? attendType;
   final String? privacyAgreement;
+  final String? grade; // Added for member applications
 
   ApplicationForm({
     required this.id,
@@ -45,6 +48,7 @@ class ApplicationForm {
     this.interviewDate,
     this.attendType,
     this.privacyAgreement,
+    this.grade, // Added for member applications
   });
 
   factory ApplicationForm.fromJson(Map<String, dynamic> json) {
@@ -54,6 +58,7 @@ class ApplicationForm {
       studentId: json['studentId'],
       phoneNumber: json['phoneNumber'],
       email: json['email'],
+      grade: json['grade'],
       motivation: json['motivation'],
       status: json['status'],
       createdAt: DateTime.parse(json['createdAt']),
@@ -68,6 +73,17 @@ class ApplicationForm {
       attendType: json['attendType'],
       privacyAgreement: json['privacyAgreement'],
     );
+  }
+
+  String get formattedCreatedAt {
+    final year = createdAt.year.toString();
+    final month = createdAt.month.toString().padLeft(2, '0');
+    final day = createdAt.day.toString().padLeft(2, '0');
+    final hour = createdAt.hour.toString().padLeft(2, '0');
+    final minute = createdAt.minute.toString().padLeft(2, '0');
+    final second = createdAt.second.toString().padLeft(2, '0');
+    
+    return '$year-$month-$day\n$hour:$minute:$second';
   }
 }
 
@@ -85,7 +101,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
   List<Map<String, dynamic>> _executiveApplications = [];
   bool _loading = true;
   String? _error;
-  bool _showSidePanel = false;
+  final bool _showSidePanel = false;
   ApplicationCategory? _sidePanelCategory;
 
   @override
@@ -99,38 +115,56 @@ class _AdminMainPageState extends State<AdminMainPage> {
     _fetchApplications();
   }
 
-  void _fetchApplications() async {
+  Future<void> _fetchApplications() async {
     setState(() {
       _loading = true;
       _error = null;
     });
+
     if (_category == ApplicationCategory.member) {
-      final url = Uri.parse('http://10.0.2.2:8080/api/applications/list');
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      setState(() {
-        _applications = data.map((e) => ApplicationForm.fromJson(e)).toList();
-        _loading = false;
-      });
-    } else {
-      setState(() {
-        _error = '목록을 불러오지 못했습니다.';
-        _loading = false;
-      });
-      }
-    } else {
-      final url = Uri.parse('http://10.0.2.2:8080/api/executive-applications');
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+      try {
+        final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/applications/list'));
+        if (response.statusCode == 200) {
+          final List<dynamic> data = json.decode(response.body);
+          setState(() {
+            _applications = data.map((json) => ApplicationForm.fromJson(json)).toList();
+            _loading = false;
+          });
+        } else {
+          setState(() {
+            _error = '부원 지원서 목록을 불러오지 못했습니다.';
+            _loading = false;
+          });
+        }
+      } catch (e) {
         setState(() {
-          _executiveApplications = List<Map<String, dynamic>>.from(data);
+          _error = '부원 지원서 목록을 불러오지 못했습니다: $e';
           _loading = false;
         });
-      } else {
+      }
+    } else {
+      try {
+        final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/executive-applications'));
+        print('Executive applications response status: ${response.statusCode}'); // 디버깅용
+        print('Executive applications response body: ${response.body}'); // 디버깅용
+        
+        if (response.statusCode == 200) {
+          final List<dynamic> data = json.decode(response.body);
+          print('Parsed executive applications data: $data'); // 디버깅용
+          
+          setState(() {
+            _executiveApplications = List<Map<String, dynamic>>.from(data);
+            _loading = false;
+          });
+        } else {
+          setState(() {
+            _error = '운영진 지원서 목록을 불러오지 못했습니다.';
+            _loading = false;
+          });
+        }
+      } catch (e) {
         setState(() {
-          _error = '운영진 지원서 목록을 불러오지 못했습니다.';
+          _error = '운영진 지원서 목록을 불러오지 못했습니다: $e';
           _loading = false;
         });
       }
@@ -139,6 +173,19 @@ class _AdminMainPageState extends State<AdminMainPage> {
 
   Future<void> _changeStatus(int id, String status) async {
     final url = Uri.parse('http://10.0.2.2:8080/api/applications/$id/status?status=$status');
+    final response = await http.put(url);
+    if (response.statusCode == 200) {
+      _fetchApplications();
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('상태 변경 실패')),
+        );
+        }
+  }
+
+  Future<void> _changeExecutiveStatus(int id, String status) async {
+    final url = Uri.parse('http://10.0.2.2:8080/api/executive-applications/$id/status?status=$status');
     final response = await http.put(url);
     if (response.statusCode == 200) {
       _fetchApplications();
@@ -197,110 +244,124 @@ class _AdminMainPageState extends State<AdminMainPage> {
   // _buildCustomTable 및 관련 Table, TableRow, Row 등 표 관련 코드 삭제
 
   Widget _buildMemberList() {
+    // Sort applications by createdAt in ascending order
+    final sortedApplications = List<ApplicationForm>.from(_applications);
+    sortedApplications.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _applications.length,
+      itemCount: sortedApplications.length,
       itemBuilder: (context, index) {
-        final app = _applications[index];
+        final app = sortedApplications[index];
+        final sequenceNumber = index + 1;
+        
         return Card(
           margin: const EdgeInsets.only(bottom: 20),
           elevation: 4,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.blue.shade100,
-                      child: Text(app.name.isNotEmpty ? app.name[0] : '?'),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(app.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                          Text('학번: ${app.studentId}', style: const TextStyle(color: Colors.grey)),
-                        ],
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => AdminApplicationDetailPage(
+                    application: app,
+                    onSaved: () {
+                      Navigator.of(context).pop();
+                      _fetchApplications();
+                    },
+                  ),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.blue.shade100,
+                        child: Text(app.name.isNotEmpty ? app.name[0] : '?'),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: (app.status == 'PENDING')
-                            ? Colors.orange.shade100
-                            : app.status == 'ACCEPTED'
-                                ? Colors.green.shade100
-                                : Colors.red.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        app.status == 'PENDING'
-                            ? '대기'
-                            : app.status == 'ACCEPTED'
-                                ? '합격'
-                                : '불합격',
-                        style: TextStyle(
-                          color: (app.status == 'PENDING')
-                              ? Colors.orange
-                              : app.status == 'ACCEPTED'
-                                  ? Colors.green
-                                  : Colors.red,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(app.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Text('학번: ${app.studentId}', style: const TextStyle(color: Colors.grey)),
+                            if (app.grade != null && app.grade!.isNotEmpty)
+                              Text('학년: ${app.grade}', style: const TextStyle(color: Colors.grey)),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const Divider(height: 24, thickness: 1.2),
-                _buildMemberField('이메일', app.email),
-                _buildMemberField('전화번호', app.phoneNumber),
-                _buildMemberField('지원 동기', app.motivation),
-                _buildMemberField('기타 활동', app.otherActivity),
-                _buildMemberField('커리큘럼 이수 가능 이유', app.curriculumReason),
-                _buildMemberField('KUHAS에서 얻고 싶은 것', app.wish),
-                _buildMemberField('진로', app.career),
-                _buildMemberField('프로그래밍 언어 경험', app.languageExp),
-                _buildMemberField('경험한 언어', app.languageDetail),
-                _buildMemberField('희망 활동', app.wishActivities),
-                _buildMemberField('면접 희망 날짜', app.interviewDate),
-                _buildMemberField('개강총회 참석', app.attendType),
-                _buildMemberField('개인정보 동의', app.privacyAgreement),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      tooltip: '수정',
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => AdminEditPage(
-                              application: app,
-                              onSaved: () {
-                                Navigator.of(context).pop();
-                                _fetchApplications();
-                              },
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: (app.status == 'PENDING')
+                              ? Colors.orange.shade100
+                              : app.status == 'ACCEPTED'
+                                  ? Colors.green.shade100
+                                  : Colors.red.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          app.status == 'PENDING'
+                              ? '대기'
+                              : app.status == 'ACCEPTED'
+                                  ? '합격'
+                                  : '불합격',
+                          style: TextStyle(
+                            color: (app.status == 'PENDING')
+                                ? Colors.orange
+                                : app.status == 'ACCEPTED'
+                                    ? Colors.green
+                                    : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24, thickness: 1.2),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildMemberField('이메일', app.email),
+                            _buildMemberField('전화번호', app.phoneNumber),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '순번: $sequenceNumber',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.grey,
                             ),
                           ),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      tooltip: '삭제',
-                      onPressed: () async {
-                        final ok = await _showDeleteDialog();
-                        if (ok) _deleteApplication(app.id);
-                      },
-                    ),
-                  ],
-                ),
-              ],
+                          const SizedBox(height: 8),
+                          Text(
+                            app.formattedCreatedAt,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -328,91 +389,159 @@ class _AdminMainPageState extends State<AdminMainPage> {
   }
 
   Widget _buildExecutiveList() {
+    // Sort executive applications by createdAt in ascending order
+    final sortedExecutiveApplications = List<Map<String, dynamic>>.from(_executiveApplications);
+    sortedExecutiveApplications.sort((a, b) {
+      final aDate = DateTime.parse(a['createdAt']);
+      final bDate = DateTime.parse(b['createdAt']);
+      return aDate.compareTo(bDate);
+    });
+    
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _executiveApplications.length,
+      itemCount: sortedExecutiveApplications.length,
       itemBuilder: (context, index) {
-        final app = _executiveApplications[index];
+        final app = sortedExecutiveApplications[index];
+        final sequenceNumber = index + 1;
+        final createdAt = DateTime.parse(app['createdAt']);
+        
+        String formatCreatedAt(DateTime date) {
+          final year = date.year.toString();
+          final month = date.month.toString().padLeft(2, '0');
+          final day = date.day.toString().padLeft(2, '0');
+          final hour = date.hour.toString().padLeft(2, '0');
+          final minute = date.minute.toString().padLeft(2, '0');
+          final second = date.second.toString().padLeft(2, '0');
+          
+          return '$year-$month-$day\n$hour:$minute:$second';
+        }
+        
         return Card(
           margin: const EdgeInsets.only(bottom: 20),
           elevation: 4,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.blue.shade100,
-                      child: Text(app['name'] != null && app['name'].isNotEmpty ? app['name'][0] : '?'),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(app['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                          Text('학번: ${app['studentId'] ?? ''}', style: const TextStyle(color: Colors.grey)),
-                        ],
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => AdminExecutiveDetailPage(
+                    application: app,
+                    onSaved: () {
+                      Navigator.of(context).pop();
+                      _fetchApplications();
+                    },
+                  ),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.blue.shade100,
+                        child: Text(app['name'] != null && app['name'].isNotEmpty ? app['name'][0] : '?'),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: (app['status'] == 'PENDING')
-                            ? Colors.orange.shade100
-                            : app['status'] == 'ACCEPTED'
-                                ? Colors.green.shade100
-                                : Colors.red.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        app['status'] == 'PENDING'
-                            ? '대기'
-                            : app['status'] == 'ACCEPTED'
-                                ? '합격'
-                                : '불합격',
-                        style: TextStyle(
-                          color: (app['status'] == 'PENDING')
-                              ? Colors.orange
-                              : app['status'] == 'ACCEPTED'
-                                  ? Colors.green
-                                  : Colors.red,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(app['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Text('학번: ${app['studentId'] ?? ''}', style: const TextStyle(color: Colors.grey)),
+                            if (app['grade'] != null && app['grade'].toString().isNotEmpty)
+                              Text('학년: ${app['grade']}', style: const TextStyle(color: Colors.grey)),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const Divider(height: 24, thickness: 1.2),
-                _buildExecutiveField('이메일', app['email']),
-                _buildExecutiveField('전화번호', app['phoneNumber']),
-                _buildExecutiveField('학년', app['grade']),
-                _buildExecutiveField('휴학 계획', app['leavePlan']),
-                _buildExecutiveField('운영진 활동 기간', app['period']),
-                _buildExecutiveField('지원 동기', app['motivation']),
-                _buildExecutiveField('운영진으로 얻고자 하는 것', app['goal']),
-                _buildExecutiveField('위기 극복 경험', app['crisis']),
-                _buildExecutiveField('회의 참석', app['meeting']),
-                _buildExecutiveField('각오 한 마디', app['resolution']),
-                _buildExecutiveField('개인정보 동의', app['privacy']),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      tooltip: '삭제',
-                      onPressed: () async {
-                        final ok = await _showDeleteDialog();
-                        if (ok) _deleteApplication(app['id']);
-                      },
-                    ),
-                  ],
-                ),
-              ],
+                      PopupMenuButton<String>(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: (app['status'] == 'PENDING')
+                                ? Colors.orange.shade100
+                                : app['status'] == 'ACCEPTED'
+                                    ? Colors.green.shade100
+                                    : Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            app['status'] == 'PENDING'
+                                ? '대기'
+                                : app['status'] == 'ACCEPTED'
+                                    ? '합격'
+                                    : '불합격',
+                            style: TextStyle(
+                              color: (app['status'] == 'PENDING')
+                                  ? Colors.orange
+                                  : app['status'] == 'ACCEPTED'
+                                      ? Colors.green
+                                      : Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'PENDING',
+                            child: Text('대기'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'ACCEPTED',
+                            child: Text('합격'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'REJECTED',
+                            child: Text('불합격'),
+                          ),
+                        ],
+                        onSelected: (value) {
+                          _changeExecutiveStatus(app['id'], value);
+                        },
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24, thickness: 1.2),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildExecutiveField('이메일', app['email']),
+                            _buildExecutiveField('전화번호', app['phoneNumber']),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '순번: $sequenceNumber',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            formatCreatedAt(createdAt),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -445,10 +574,48 @@ class _AdminMainPageState extends State<AdminMainPage> {
     return Scaffold(
       backgroundColor: const Color(0xfff7f8fa),
       appBar: AppBar(
-        title: Text(_category == ApplicationCategory.member ? 'KUHAS 부원 모집 지원서 목록' : 'KUHAS 운영진 모집 지원서 목록'),
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.home, color: Colors.black),
+          tooltip: '홈으로',
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => ApplicantFormPage()),
+              (route) => false,
+            );
+          },
+        ),
+        title: Text(
+          _category == ApplicationCategory.member ? '부원 지원서 목록' : '운영진 지원서 목록',
+          style: const TextStyle(fontSize: 16),
+          overflow: TextOverflow.ellipsis,
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _category == ApplicationCategory.member ? 'member' : 'executive',
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              items: const [
+                DropdownMenuItem(
+                  value: 'member',
+                  child: Text('부원 모집 지원서'),
+                ),
+                DropdownMenuItem(
+                  value: 'executive',
+                  child: Text('운영진 모집 지원서'),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _category = value == 'executive' ? ApplicationCategory.executive : ApplicationCategory.member;
+                });
+                _fetchApplications(); // 카테고리 변경 시 데이터 새로고침
+              },
+            ),
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -459,40 +626,6 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 color: Colors.blue,
               ),
               child: Text('메뉴', style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.assignment),
-              title: const Text('지원서 양식 선택'),
-              onTap: () {
-                Navigator.of(context).pop();
-                ApplicationCategory? selected = _category;
-                showDialog(
-                  context: context,
-                  barrierColor: Colors.black.withOpacity(0.7),
-                  builder: (context) => AlertDialog(
-                    title: const Text('지원서 양식 선택'),
-                    content: StatefulBuilder(
-                      builder: (context, setState) => DropdownButton<ApplicationCategory>(
-                        value: selected,
-                        items: [
-                          DropdownMenuItem(value: ApplicationCategory.executive, child: Text('KUHAS 운영진 모집 지원서')),
-                          DropdownMenuItem(value: ApplicationCategory.member, child: Text('KUHAS 부원 모집 지원서 목록')),
-                        ],
-                        onChanged: (v) => setState(() => selected = v),
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          setState(() => _category = selected!);
-                        },
-                        child: const Text('확인'),
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
