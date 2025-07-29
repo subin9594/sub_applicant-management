@@ -177,6 +177,50 @@
     </tr>
     </tbody>
   </table>
+<!-- 운영진 모집 지원서 목록 테이블 -->
+<h2>KUHAS 운영진 모집 지원서 목록</h2>
+<table>
+  <thead>
+    <tr>
+      <th>순번</th>
+      <th>이름</th>
+      <th>학번</th>
+      <th>학년</th>
+      <th>이메일</th>
+      <th>전화번호</th>
+      <th>휴학 계획</th>
+      <th>활동 기간</th>
+      <th>지원동기</th>
+      <th>활동 목표</th>
+      <th>위기 극복 경험</th>
+      <th>회의 참석</th>
+      <th>각오 한 마디</th>
+      <th>개인정보 동의</th>
+      <th>제출일</th>
+      <th>수정일</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="exec, iterStat : ${executiveApplications}">
+      <td th:text="${iterStat.index + 1}"></td>
+      <td th:text="${exec.name}"></td>
+      <td th:text="${exec.studentId}"></td>
+      <td th:text="${exec.grade}"></td>
+      <td th:text="${exec.email}"></td>
+      <td th:text="${exec.phoneNumber}"></td>
+      <td th:text="${exec.leavePlan}"></td>
+      <td th:text="${exec.period}"></td>
+      <td th:text="${exec.motivation}"></td>
+      <td th:text="${exec.goal}"></td>
+      <td th:text="${exec.crisis}"></td>
+      <td th:text="${exec.meeting}"></td>
+      <td th:text="${exec.resolution}"></td>
+      <td th:text="${exec.privacy}"></td>
+      <td th:text="${#temporals.format(exec.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+      <td th:text="${#temporals.format(exec.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+    </tr>
+  </tbody>
+</table>
 </div>
 <!-- 커스텀 모달 영역 -->
 <div id="customModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35);">

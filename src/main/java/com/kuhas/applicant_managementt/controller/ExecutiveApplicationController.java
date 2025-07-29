@@ -1,24 +1,40 @@
 package com.kuhas.applicant_managementt.controller;
 
 import com.kuhas.applicant_managementt.dto.ExecutiveApplicationRequest;
+import com.kuhas.applicant_managementt.dto.ExecutiveApplicationResponse;
+import com.kuhas.applicant_managementt.service.ExecutiveApplicationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/executive-applications")
 public class ExecutiveApplicationController {
-    private final List<ExecutiveApplicationRequest> applications = new ArrayList<>(); // 임시 메모리 저장
+    private final ExecutiveApplicationService service;
+
+    @Autowired
+    public ExecutiveApplicationController(ExecutiveApplicationService service) {
+        this.service = service;
+    }
 
     @PostMapping
     public ResponseEntity<?> submitExecutiveApplication(@RequestBody ExecutiveApplicationRequest request) {
-        applications.add(request);
-        return ResponseEntity.ok().body("{\"message\":\"운영진 지원서가 성공적으로 제출되었습니다!\"}");
+        ExecutiveApplicationResponse response = service.submitApplication(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<ExecutiveApplicationRequest> getAll() {
-        return applications;
+    public List<ExecutiveApplicationResponse> getAll() {
+        return service.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ExecutiveApplicationResponse> getById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(service.getById(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 } 
