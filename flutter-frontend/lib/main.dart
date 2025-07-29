@@ -67,9 +67,10 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
   final _careerController = TextEditingController();
   final _languageController = TextEditingController();
   String? _languageExp; // 'O' or 'X'
+  String? _gradeDropdownValue;
 
   // Add state for wishActivities, interviewDate, attendType
-  List<String> _wishActivities = [];
+  final List<String> _wishActivities = [];
   String? _selectedInterviewDate;
   String? _selectedAttendType;
   String? _privacyValue;
@@ -101,54 +102,95 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
       _message = null;
     });
 
+    if (!_formKey.currentState!.validate()) {
+      setState(() {
+        _isSubmitting = false;
+      });
+      return;
+    }
+
+    // 모든 주요 입력값이 공란인지 체크
+    final allEmpty =
+      _nameController.text.trim().isEmpty &&
+      _studentIdController.text.trim().isEmpty &&
+      _phoneController.text.trim().isEmpty &&
+      _emailController.text.trim().isEmpty &&
+      _motivationController.text.trim().isEmpty &&
+      _otherActivityController.text.trim().isEmpty &&
+      _curriculumReasonController.text.trim().isEmpty &&
+      _wishController.text.trim().isEmpty &&
+      _careerController.text.trim().isEmpty &&
+      (_languageExp == null || _languageExp!.isEmpty) &&
+      _languageController.text.trim().isEmpty &&
+      (_wishActivities.isEmpty) &&
+      (_selectedInterviewDate == null || _selectedInterviewDate!.isEmpty) &&
+      (_selectedAttendType == null || _selectedAttendType!.isEmpty) &&
+      (_privacyValue == null || _privacyValue!.isEmpty) &&
+      (_gradeDropdownValue == null || _gradeDropdownValue!.isEmpty);
+    if (allEmpty) {
+      setState(() {
+        _isSubmitting = false;
+        _error = '최소 한 항목은 입력해야 제출할 수 있습니다.';
+      });
+      return;
+    }
+
     // Android 에뮬레이터에서는 10.0.2.2가 PC의 localhost를 가리킴
     final url = Uri.parse('http://10.0.2.2:8080/api/applications');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'name': _nameController.text.trim(),
-        'studentId': _studentIdController.text.trim(),
-        'phoneNumber': _phoneController.text.trim(),
-        'email': _emailController.text.trim(),
-        'motivation': _motivationController.text.trim(),
-        'otherActivity': _otherActivityController.text.trim(),
-        'curriculumReason': _curriculumReasonController.text.trim(),
-        'wish': _wishController.text.trim(),
-        'career': _careerController.text.trim(),
-        'languageExp': _languageExp,
-        'languageDetail': _languageController.text.trim(),
-        'wishActivities': _wishActivities.join(','),
-        'interviewDate': _selectedInterviewDate,
-        'attendType': _selectedAttendType,
-        'privacyAgreement': _privacyValue,
-      }),
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': _nameController.text.trim(),
+          'studentId': _studentIdController.text.trim(),
+          'phoneNumber': _phoneController.text.trim(),
+          'email': _emailController.text.trim(),
+          'motivation': _motivationController.text.trim(),
+          'otherActivity': _otherActivityController.text.trim(),
+          'curriculumReason': _curriculumReasonController.text.trim(),
+          'wish': _wishController.text.trim(),
+          'career': _careerController.text.trim(),
+          'languageExp': _languageExp,
+          'languageDetail': _languageController.text.trim(),
+          'wishActivities': _wishActivities.join(','),
+          'interviewDate': _selectedInterviewDate,
+          'attendType': _selectedAttendType,
+          'privacyAgreement': _privacyValue,
+          'grade': _gradeDropdownValue,
+        }),
+      );
 
-    setState(() {
-      _isSubmitting = false;
+      setState(() {
+        _isSubmitting = false;
+        if (response.statusCode == 200) {
+          _showSuccess = true;
+          _message = '지원서가 성공적으로 제출되었습니다!';
+        } else {
+          String errorMsg = '제출에 실패했습니다. 다시 시도해 주세요. (서버 오류: \n  {response.statusCode}\n  {response.body})';
+          try {
+            final data = json.decode(response.body);
+            if (data['error'] != null) errorMsg = data['error'];
+          } catch (_) {}
+          print('지원서 제출 실패: statusCode =  [response.statusCode], body =  [response.body]');
+          _error = errorMsg;
+        }
+      });
       if (response.statusCode == 200) {
-        _message = '지원이 성공적으로 제출되었습니다!';
-        _formKey.currentState?.reset();
-        _showSuccess = true;
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) {
-            setState(() {
-              _message = null;
-              _showSuccess = false;
-            });
-          }
-        });
-      } else {
-        String errorMsg = '제출에 실패했습니다. 다시 시도해 주세요.';
-        try {
-          final data = json.decode(response.body);
-          if (data['error'] != null) errorMsg = data['error'];
-        } catch (_) {}
-        print('지원서 제출 실패: statusCode =  [response.statusCode], body =  [response.body]');
-        _error = errorMsg;
+        await Future.delayed(const Duration(seconds: 3));
+        if (mounted) {
+          setState(() {
+            _showSuccess = false;
+          });
+          Navigator.of(context).pop();
+        }
       }
-    });
+    } catch (e) {
+      setState(() {
+        _error = '제출 중 오류가 발생했습니다.\n  {e.toString()}';
+        _isSubmitting = false;
+      });
+    }
   }
 
   Future<String?> _checkDuplicate() async {
@@ -174,48 +216,57 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
       backgroundColor: const Color(0xfff7f8fa),
       appBar: AppBar(
         title: const Text('KUHAS'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.assignment),
-            tooltip: '지원서 선택',
-            onPressed: () {
-              ApplicationCategory? selected = ApplicationCategory.executive;
-              showDialog(
-                context: context,
-                barrierColor: Colors.black.withOpacity(0.7),
-                builder: (context) => AlertDialog(
-                  title: const Text('지원서 양식 선택'),
-                  content: StatefulBuilder(
-                    builder: (context, setState) => DropdownButton<ApplicationCategory>(
-                      value: selected,
-                      items: [
-                        DropdownMenuItem(value: ApplicationCategory.executive, child: Text('KUHAS 운영진 모집 지원서')),
-                        // 다른 양식 추가 가능
-                      ],
-                      onChanged: (v) => setState(() => selected = v),
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        if (selected == ApplicationCategory.executive) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => ExecutiveFormPage()),
-                          );
-                        }
-                        // 다른 양식 추가 시 else if ...
-                      },
-                      child: const Text('확인'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: 'member',
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              items: const [
+                DropdownMenuItem(
+                  value: 'member',
+                  child: Text('부원 모집 지원서'),
+                ),
+                DropdownMenuItem(
+                  value: 'executive',
+                  child: Text('운영진 모집 지원서'),
+                ),
+              ],
+              onChanged: (value) {
+                if (value == 'executive') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => ExecutiveFormPage()),
+                  );
+                }
+                // 부원 모집 지원서는 현재 페이지이므로 아무 동작 안 함
+              },
+            ),
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('메뉴', style: TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            // 지원서 양식 선택 메뉴는 Drawer에서 제거
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text('관리자 로그인'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/admin-login');
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -294,6 +345,16 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           },
                         ),
                         const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _gradeDropdownValue,
+                          items: [
+                            '1학년', '2학년', '3학년', '4학년', '5학년 이상'
+                          ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                          onChanged: (v) => setState(() => _gradeDropdownValue = v),
+                          decoration: const InputDecoration(labelText: '학년'),
+                          validator: (v) => v == null ? '학년을 선택하세요.' : null,
+                        ),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _phoneController,
                           decoration: const InputDecoration(
@@ -349,6 +410,10 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           ),
                           minLines: 3,
                           maxLines: 6,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) return '기타 활동을 입력하세요.';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -360,6 +425,10 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           ),
                           minLines: 3,
                           maxLines: 6,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) return '커리큘럼 이수 가능 이유를 입력하세요.';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -371,6 +440,10 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           ),
                           minLines: 3,
                           maxLines: 6,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) return 'KUHAS에서 얻고 싶은 것을 입력하세요.';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -382,6 +455,10 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           ),
                           minLines: 2,
                           maxLines: 4,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) return '진로를 입력하세요.';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 16),
                         const Text('프로그래밍 언어 경험 여부', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -562,13 +639,6 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                                   )
                                 : const Text('지원서 제출'),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('/admin-login');
-                          },
-                          child: const Text('관리자 페이지'),
                         ),
                       ],
                     ),

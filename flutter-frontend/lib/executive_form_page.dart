@@ -46,18 +46,27 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
     super.dispose();
   }
 
-  void _submit() async {
+  Future<void> _submitForm() async {
     setState(() => _error = null);
+    // 추가 검증: grade, period, meeting, privacy
+    if (_gradeDropdownValue == null || _gradeDropdownValue!.trim().isEmpty) {
+      setState(() => _error = '학년을 선택하세요.');
+      return;
+    }
+    if (_periodValue == null || _periodValue!.trim().isEmpty || (_periodValue == '기타' && _periodEtcController.text.trim().isEmpty)) {
+      setState(() => _error = '운영진 활동 기간을 선택하거나 기타 항목을 입력하세요.');
+      return;
+    }
+    if (_meetingValue == null || _meetingValue!.trim().isEmpty) {
+      setState(() => _error = '회의 참석 가능 여부를 선택하세요.');
+      return;
+    }
+    if (_privacyValue == null || _privacyValue!.trim().isEmpty) {
+      setState(() => _error = '개인정보 제공 동의를 선택하세요.');
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
-    if (_periodValue == '기타' && _periodEtcController.text.trim().isEmpty) {
-      setState(() => _error = '운영진 활동 기간의 기타 항목을 입력하세요.');
-      return;
-    }
-    if (_privacyValue != '예') {
-      setState(() => _error = '개인정보 제공에 동의해야 제출할 수 있습니다.');
-      return;
-    }
-    // 실제 서버 제출
+    try {
     final url = Uri.parse('http://10.0.2.2:8080/api/executive-applications');
     final response = await http.post(
       url,
@@ -90,7 +99,10 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
         Navigator.of(context).pop();
       }
     } else {
-      setState(() => _error = '제출에 실패했습니다. 다시 시도해 주세요.');
+        setState(() => _error = '제출에 실패했습니다. 다시 시도해 주세요. (서버 오류: \n${response.statusCode}\n${response.body})');
+      }
+    } catch (e) {
+      setState(() => _error = '제출 중 오류가 발생했습니다.\n${e.toString()}');
     }
   }
 
@@ -187,7 +199,7 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                           onChanged: (v) => setState(() => _gradeDropdownValue = v),
                           decoration: const InputDecoration(labelText: '학년'),
-                          validator: (v) => v == null ? '학년을 선택하세요.' : null,
+                          validator: (v) => v == null || v.trim().isEmpty ? '학년을 선택하세요.' : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -259,17 +271,17 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                                 children: [
                                   const Text('기타:'),
                                   const SizedBox(width: 8),
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: _periodEtcController,
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _periodEtcController,
                                       enabled: _periodValue == '기타',
                                       decoration: const InputDecoration(
                                         hintText: '직접 입력',
                                         hintStyle: TextStyle(color: Colors.grey),
                                         border: UnderlineInputBorder(),
                                       ),
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                               value: '기타',
@@ -278,6 +290,11 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             ),
                           ],
                         ),
+                        if (_periodValue == null || _periodValue!.trim().isEmpty || (_periodValue == '기타' && _periodEtcController.text.trim().isEmpty))
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('운영진 활동 기간을 선택하거나 기타 항목을 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _motivationController,
@@ -357,6 +374,11 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           groupValue: _meetingValue,
                           onChanged: (v) => setState(() => _meetingValue = v),
                         ),
+                        if (_meetingValue == null || _meetingValue!.trim().isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('회의 참석 가능 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _resolutionController,
@@ -380,9 +402,14 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           groupValue: _privacyValue,
                           onChanged: (v) => setState(() => _privacyValue = v),
                         ),
+                        if (_privacyValue == null || _privacyValue!.trim().isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('개인정보 제공 동의를 선택하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: _submit,
+                          onPressed: _submitForm,
                           child: const Text('제출'),
                         ),
                       ],

@@ -14,6 +14,17 @@ class ApplicationForm {
   final String motivation;
   final String status;
   final DateTime createdAt;
+  // 추가 필드
+  final String? otherActivity;
+  final String? curriculumReason;
+  final String? wish;
+  final String? career;
+  final String? languageExp;
+  final String? languageDetail;
+  final String? wishActivities;
+  final String? interviewDate;
+  final String? attendType;
+  final String? privacyAgreement;
 
   ApplicationForm({
     required this.id,
@@ -24,6 +35,16 @@ class ApplicationForm {
     required this.motivation,
     required this.status,
     required this.createdAt,
+    this.otherActivity,
+    this.curriculumReason,
+    this.wish,
+    this.career,
+    this.languageExp,
+    this.languageDetail,
+    this.wishActivities,
+    this.interviewDate,
+    this.attendType,
+    this.privacyAgreement,
   });
 
   factory ApplicationForm.fromJson(Map<String, dynamic> json) {
@@ -36,6 +57,16 @@ class ApplicationForm {
       motivation: json['motivation'],
       status: json['status'],
       createdAt: DateTime.parse(json['createdAt']),
+      otherActivity: json['otherActivity'],
+      curriculumReason: json['curriculumReason'],
+      wish: json['wish'],
+      career: json['career'],
+      languageExp: json['languageExp'],
+      languageDetail: json['languageDetail'],
+      wishActivities: json['wishActivities'],
+      interviewDate: json['interviewDate'],
+      attendType: json['attendType'],
+      privacyAgreement: json['privacyAgreement'],
     );
   }
 }
@@ -54,6 +85,8 @@ class _AdminMainPageState extends State<AdminMainPage> {
   List<Map<String, dynamic>> _executiveApplications = [];
   bool _loading = true;
   String? _error;
+  bool _showSidePanel = false;
+  ApplicationCategory? _sidePanelCategory;
 
   @override
   void initState() {
@@ -160,33 +193,246 @@ class _AdminMainPageState extends State<AdminMainPage> {
     return buffer.toString();
   }
 
-  void _showCategoryDialog() {
-    ApplicationCategory? selected = _category;
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      builder: (context) => AlertDialog(
-        title: const Text('지원서 카테고리 선택'),
-        content: StatefulBuilder(
-          builder: (context, setState) => DropdownButton<ApplicationCategory>(
-            value: selected,
-            items: [
-              DropdownMenuItem(value: ApplicationCategory.member, child: Text('부원 모집 지원서')),
-              DropdownMenuItem(value: ApplicationCategory.executive, child: Text('운영진 모집 지원서')),
-            ],
-            onChanged: (v) => setState(() => selected = v),
+  // 표 기반 UI 완전 제거
+  // _buildCustomTable 및 관련 Table, TableRow, Row 등 표 관련 코드 삭제
+
+  Widget _buildMemberList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _applications.length,
+      itemBuilder: (context, index) {
+        final app = _applications[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blue.shade100,
+                      child: Text(app.name.isNotEmpty ? app.name[0] : '?'),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(app.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                          Text('학번: ${app.studentId}', style: const TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: (app.status == 'PENDING')
+                            ? Colors.orange.shade100
+                            : app.status == 'ACCEPTED'
+                                ? Colors.green.shade100
+                                : Colors.red.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        app.status == 'PENDING'
+                            ? '대기'
+                            : app.status == 'ACCEPTED'
+                                ? '합격'
+                                : '불합격',
+                        style: TextStyle(
+                          color: (app.status == 'PENDING')
+                              ? Colors.orange
+                              : app.status == 'ACCEPTED'
+                                  ? Colors.green
+                                  : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 24, thickness: 1.2),
+                _buildMemberField('이메일', app.email),
+                _buildMemberField('전화번호', app.phoneNumber),
+                _buildMemberField('지원 동기', app.motivation),
+                _buildMemberField('기타 활동', app.otherActivity),
+                _buildMemberField('커리큘럼 이수 가능 이유', app.curriculumReason),
+                _buildMemberField('KUHAS에서 얻고 싶은 것', app.wish),
+                _buildMemberField('진로', app.career),
+                _buildMemberField('프로그래밍 언어 경험', app.languageExp),
+                _buildMemberField('경험한 언어', app.languageDetail),
+                _buildMemberField('희망 활동', app.wishActivities),
+                _buildMemberField('면접 희망 날짜', app.interviewDate),
+                _buildMemberField('개강총회 참석', app.attendType),
+                _buildMemberField('개인정보 동의', app.privacyAgreement),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      tooltip: '수정',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => AdminEditPage(
+                              application: app,
+                              onSaved: () {
+                                Navigator.of(context).pop();
+                                _fetchApplications();
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      tooltip: '삭제',
+                      onPressed: () async {
+                        final ok = await _showDeleteDialog();
+                        if (ok) _deleteApplication(app.id);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              if (selected != null && selected != _category) {
-                setState(() => _category = selected!);
-                _fetchApplications();
-              }
-            },
-            child: const Text('확인'),
+        );
+      },
+    );
+  }
+
+  Widget _buildMemberField(String label, dynamic value) {
+    if (value == null || value.toString().trim().isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
+          ),
+          Expanded(
+            child: Text(value.toString(), style: const TextStyle(color: Colors.black87)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExecutiveList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _executiveApplications.length,
+      itemBuilder: (context, index) {
+        final app = _executiveApplications[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blue.shade100,
+                      child: Text(app['name'] != null && app['name'].isNotEmpty ? app['name'][0] : '?'),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(app['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                          Text('학번: ${app['studentId'] ?? ''}', style: const TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: (app['status'] == 'PENDING')
+                            ? Colors.orange.shade100
+                            : app['status'] == 'ACCEPTED'
+                                ? Colors.green.shade100
+                                : Colors.red.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        app['status'] == 'PENDING'
+                            ? '대기'
+                            : app['status'] == 'ACCEPTED'
+                                ? '합격'
+                                : '불합격',
+                        style: TextStyle(
+                          color: (app['status'] == 'PENDING')
+                              ? Colors.orange
+                              : app['status'] == 'ACCEPTED'
+                                  ? Colors.green
+                                  : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 24, thickness: 1.2),
+                _buildExecutiveField('이메일', app['email']),
+                _buildExecutiveField('전화번호', app['phoneNumber']),
+                _buildExecutiveField('학년', app['grade']),
+                _buildExecutiveField('휴학 계획', app['leavePlan']),
+                _buildExecutiveField('운영진 활동 기간', app['period']),
+                _buildExecutiveField('지원 동기', app['motivation']),
+                _buildExecutiveField('운영진으로 얻고자 하는 것', app['goal']),
+                _buildExecutiveField('위기 극복 경험', app['crisis']),
+                _buildExecutiveField('회의 참석', app['meeting']),
+                _buildExecutiveField('각오 한 마디', app['resolution']),
+                _buildExecutiveField('개인정보 동의', app['privacy']),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      tooltip: '삭제',
+                      onPressed: () async {
+                        final ok = await _showDeleteDialog();
+                        if (ok) _deleteApplication(app['id']);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildExecutiveField(String label, dynamic value) {
+    if (value == null || value.toString().trim().isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
+          ),
+          Expanded(
+            child: Text(value.toString(), style: const TextStyle(color: Colors.black87)),
           ),
         ],
       ),
@@ -195,303 +441,177 @@ class _AdminMainPageState extends State<AdminMainPage> {
 
   @override
   Widget build(BuildContext context) {
+    final sidePanelWidth = MediaQuery.of(context).size.width * 0.4;
     return Scaffold(
       backgroundColor: const Color(0xfff7f8fa),
       appBar: AppBar(
         title: Text(_category == ApplicationCategory.member ? 'KUHAS 부원 모집 지원서 목록' : 'KUHAS 운영진 모집 지원서 목록'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.assignment),
-            tooltip: '지원서 카테고리 선택',
-            onPressed: _showCategoryDialog,
-          ),
-          TextButton(
-            onPressed: widget.onLogout,
-            child: const Text('로그아웃', style: TextStyle(color: Colors.black)),
-          ),
-        ],
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!))
-              : (_category == ApplicationCategory.member
-                  ? (_applications.isEmpty
-                      ? const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-                              SizedBox(height: 16),
-                              Text('지원서가 없습니다', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _applications.length,
-                          itemBuilder: (context, index) {
-                            final app = _applications[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              elevation: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // 헤더 (순번, 이름, 학번, 상태)
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue.shade100,
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            '#${index + 1}',
-                                            style: TextStyle(
-                                              color: Colors.blue.shade700,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                                              Text(
-                                                app.name,
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              Text(
-                                                app.studentId,
-                                                style: TextStyle(
-                                                  color: Colors.grey.shade600,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: app.status == 'PENDING' 
-                                                ? Colors.orange.shade100
-                                                : app.status == 'ACCEPTED'
-                                                    ? Colors.green.shade100
-                                                    : Colors.red.shade100,
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            app.status == 'PENDING' ? '대기중'
-                                                : app.status == 'ACCEPTED' ? '합격'
-                                                : '불합격',
-                                            style: TextStyle(
-                                              color: app.status == 'PENDING'
-                                                  ? Colors.orange.shade700
-                                                  : app.status == 'ACCEPTED'
-                                                      ? Colors.green.shade700
-                                                      : Colors.red.shade700,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                          ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    
-                                    // 연락처 정보
-                                    Row(
-                                      children: [
-                                        Icon(Icons.phone, size: 16, color: Colors.grey.shade600),
-                                        const SizedBox(width: 8),
-                                        Text(app.phoneNumber),
-                                        const SizedBox(width: 16),
-                                        Icon(Icons.email, size: 16, color: Colors.grey.shade600),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            app.email,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    
-                                    // 지원 시각
-                                    Row(
-                                      children: [
-                                        Icon(Icons.access_time, size: 16, color: Colors.grey.shade600),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          '${app.createdAt.year}-${app.createdAt.month.toString().padLeft(2, '0')}-${app.createdAt.day.toString().padLeft(2, '0')} ${app.createdAt.hour.toString().padLeft(2, '0')}:${app.createdAt.minute.toString().padLeft(2, '0')}',
-                                          style: TextStyle(color: Colors.grey.shade600),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    
-                                    // 지원동기
-                                    const Text(
-                                      '지원동기',
-                                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade50,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.grey.shade200),
-                                      ),
-                                      child: Text(
-                                        app.motivation,
-                                        style: const TextStyle(fontSize: 14, height: 1.4),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    
-                                    // 액션 버튼들
-                                    Row(
-                          children: [
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                              onPressed: () => _changeStatus(app.id, 'ACCEPTED'),
-                                            icon: const Icon(Icons.check, size: 16),
-                                            label: const Text('합격'),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.green,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                          ),
-                            ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                              onPressed: () => _changeStatus(app.id, 'REJECTED'),
-                                            icon: const Icon(Icons.close, size: 16),
-                                            label: const Text('불합격'),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.red,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                            ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: OutlinedButton.icon(
-                                            onPressed: () {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (context) => AdminEditPage(
-                                                    application: app,
-                                                    onSaved: () {
-                                                      Navigator.of(context).pop();
-                                                      // 수정 완료 후 목록 새로고침
-                                                      _fetchApplications();
-                                                    },
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            icon: const Icon(Icons.edit, size: 16),
-                                            label: const Text('수정'),
-                                            style: OutlinedButton.styleFrom(
-                                              foregroundColor: Colors.blue,
-                                            ),
-                                          ),
-                            ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: OutlinedButton.icon(
-                              onPressed: () async {
-                                final ok = await _showDeleteDialog();
-                                if (ok) _deleteApplication(app.id);
-                              },
-                                            icon: const Icon(Icons.delete, size: 16),
-                                            label: const Text('삭제'),
-                                            style: OutlinedButton.styleFrom(
-                                              foregroundColor: Colors.red,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('메뉴', style: TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.assignment),
+              title: const Text('지원서 양식 선택'),
+              onTap: () {
+                Navigator.of(context).pop();
+                ApplicationCategory? selected = _category;
+                showDialog(
+                  context: context,
+                  barrierColor: Colors.black.withOpacity(0.7),
+                  builder: (context) => AlertDialog(
+                    title: const Text('지원서 양식 선택'),
+                    content: StatefulBuilder(
+                      builder: (context, setState) => DropdownButton<ApplicationCategory>(
+                        value: selected,
+                        items: [
+                          DropdownMenuItem(value: ApplicationCategory.executive, child: Text('KUHAS 운영진 모집 지원서')),
+                          DropdownMenuItem(value: ApplicationCategory.member, child: Text('KUHAS 부원 모집 지원서 목록')),
+                        ],
+                        onChanged: (v) => setState(() => selected = v),
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          setState(() => _category = selected!);
+                        },
+                        child: const Text('확인'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('로그아웃'),
+              onTap: () {
+                Navigator.of(context).pop();
+                widget.onLogout();
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Stack(
+        children: [
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+                  ? Center(child: Text(_error!))
+                  : (_category == ApplicationCategory.member
+                      ? (_applications.isEmpty
+                          ? const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.inbox, size: 64, color: Colors.grey),
+                                  SizedBox(height: 16),
+                                  Text('지원서가 없습니다.', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                                ],
                               ),
-                            );
-                          },
-                        ))
-                  : (_executiveApplications.isEmpty
-                      ? const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-                              SizedBox(height: 16),
-                              Text('운영진 지원서가 없습니다', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _executiveApplications.length,
-                          itemBuilder: (context, index) {
-                            final app = _executiveApplications[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              elevation: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('이름: ${app['name'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    Text('학번: ${app['studentId'] ?? ''}'),
-                                    Text('학년: ${app['grade'] ?? ''}'),
-                                    Text('이메일: ${app['email'] ?? ''}'),
-                                    Text('전화번호: ${app['phoneNumber'] ?? ''}'),
-                                    Text('휴학 계획: ${app['leavePlan'] ?? ''}'),
-                                    Text('운영진 활동 기간: ${app['period'] ?? ''}'),
-                                    const SizedBox(height: 8),
-                                    Text('지원 동기: ${app['motivation'] ?? ''}'),
-                                    const SizedBox(height: 8),
-                                    Text('운영진으로 얻고자 하는 것: ${app['goal'] ?? ''}'),
-                                    const SizedBox(height: 8),
-                                    Text('위기 극복 경험: ${app['crisis'] ?? ''}'),
-                                    const SizedBox(height: 8),
-                                    Text('회의 참석: ${app['meeting'] ?? ''}'),
-                                    const SizedBox(height: 8),
-                                    Text('각오 한 마디: ${app['resolution'] ?? ''}'),
-                                    const SizedBox(height: 8),
-                                    Text('개인정보 동의: ${app['privacy'] ?? ''}'),
-                                  ],
-                                ),
+                            )
+                          : _buildMemberList())
+                      : (_executiveApplications.isEmpty
+                          ? const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.inbox, size: 64, color: Colors.grey),
+                                  SizedBox(height: 16),
+                                  Text('운영진 지원서가 없습니다.', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                                ],
                               ),
-                            );
-                          },
-                        ))
-                ),
+                            )
+                          : _buildExecutiveList())),
+          // 사이드 패널 + 오버레이
+          // if (_showSidePanel) ...[
+          //   GestureDetector(
+          //     onTap: () => setState(() => _showSidePanel = false),
+          //     child: Container(
+          //       color: Colors.black.withOpacity(0.7),
+          //       width: double.infinity,
+          //       height: double.infinity,
+          //     ),
+          //   ),
+          //   Align(
+          //     alignment: Alignment.centerRight,
+          //     child: Container(
+          //       width: sidePanelWidth,
+          //       height: double.infinity,
+          //       color: Colors.white,
+          //       child: Column(
+          //         crossAxisAlignment: CrossAxisAlignment.start,
+          //         children: [
+          //           Row(
+          //             children: [
+          //               IconButton(
+          //                 icon: const Icon(Icons.arrow_back),
+          //                 onPressed: () => setState(() => _showSidePanel = false),
+          //               ),
+          //               const Text('관리자 메뉴', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          //             ],
+          //           ),
+          //           const Divider(),
+          //           Padding(
+          //             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //             child: ElevatedButton.icon(
+          //               onPressed: widget.onLogout,
+          //               icon: const Icon(Icons.logout),
+          //               label: const Text('로그아웃'),
+          //               style: ElevatedButton.styleFrom(
+          //                 backgroundColor: Colors.red,
+          //                 foregroundColor: Colors.white,
+          //               ),
+          //             ),
+          //           ),
+          //           const Divider(),
+          //           Padding(
+          //             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //             child: Column(
+          //               crossAxisAlignment: CrossAxisAlignment.start,
+          //               children: [
+          //                 const Text('지원서 양식 선택', style: TextStyle(fontWeight: FontWeight.bold)),
+          //                 const SizedBox(height: 8),
+          //                 DropdownButton<ApplicationCategory>(
+          //                   value: _sidePanelCategory,
+          //                   items: const [
+          //                     DropdownMenuItem(value: ApplicationCategory.member, child: Text('부원 모집 지원서')),
+          //                     DropdownMenuItem(value: ApplicationCategory.executive, child: Text('운영진 모집 지원서')),
+          //                   ],
+          //                   onChanged: (v) {
+          //                     setState(() {
+          //                       _sidePanelCategory = v;
+          //                       if (v != null && v != _category) {
+          //                         _category = v;
+          //                         _fetchApplications();
+          //                       }
+          //                     });
+          //                   },
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //           // 추가 관리자 기능/설정은 여기에
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ],
+        ],
+      ),
     );
   }
 } 
