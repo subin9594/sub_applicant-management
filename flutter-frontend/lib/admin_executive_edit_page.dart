@@ -30,6 +30,19 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
   String? _privacyValue;
   bool _isSubmitting = false;
   String? _error;
+  bool _hasSubmitted = false;
+  bool _showGradeError = false;
+  bool _showPeriodError = false;
+  bool _showMeetingError = false;
+  bool _showPrivacyError = false;
+  bool _showCrisisError = false;
+  bool _showLeavePlanError = false;
+  bool _showNameError = false;
+  bool _showStudentIdError = false;
+  bool _showPhoneError = false;
+  bool _showEmailError = false;
+  bool _showMotivationError = false;
+  bool _showGoalError = false;
 
   @override
   void initState() {
@@ -52,6 +65,16 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
     _periodValue = widget.application['period'];
     _meetingValue = widget.application['meeting'];
     _privacyValue = widget.application['privacy'];
+    
+    // meeting 값이 유효하지 않은 경우 null로 설정
+    if (_meetingValue != null && _meetingValue != '가능' && _meetingValue != '불가능') {
+      _meetingValue = null;
+    }
+    
+    // privacy 값이 유효하지 않은 경우 null로 설정
+    if (_privacyValue != null && _privacyValue != '예' && _privacyValue != '아니오') {
+      _privacyValue = null;
+    }
   }
 
   @override
@@ -70,12 +93,30 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
-
     setState(() {
       _isSubmitting = true;
       _error = null;
+      _hasSubmitted = true;
+      _showGradeError = _gradeDropdownValue == null || _gradeDropdownValue!.trim().isEmpty;
+      _showPeriodError = _periodValue == null || _periodValue!.trim().isEmpty || (_periodValue == '기타' && _periodEtcController.text.trim().isEmpty);
+      _showMeetingError = _meetingValue == null || _meetingValue!.trim().isEmpty;
+      _showPrivacyError = _privacyValue == null || _privacyValue!.trim().isEmpty;
+      _showCrisisError = _crisisController.text.trim().isEmpty;
+      _showLeavePlanError = _leavePlanController.text.trim().isEmpty;
+      _showNameError = _nameController.text.trim().isEmpty;
+      _showStudentIdError = _studentIdController.text.trim().isEmpty;
+      _showPhoneError = _phoneController.text.trim().isEmpty;
+      _showEmailError = _emailController.text.trim().isEmpty;
+      _showMotivationError = _motivationController.text.trim().isEmpty;
+      _showGoalError = _goalController.text.trim().isEmpty;
     });
+    
+    if (!_formKey.currentState!.validate() || _showGradeError || _showPeriodError || _showMeetingError || _showPrivacyError || _showCrisisError || _showLeavePlanError || _showNameError || _showStudentIdError || _showPhoneError || _showEmailError || _showMotivationError || _showGoalError) {
+      setState(() {
+        _isSubmitting = false;
+      });
+      return;
+    }
 
     try {
       final url = Uri.parse('http://10.0.2.2:8080/api/executive-applications/${widget.application['id']}');
@@ -104,9 +145,27 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
       );
 
       if (response.statusCode == 200) {
-        widget.onSaved();
+        setState(() {
+          _isSubmitting = false;
+        });
+        
+        // 성공 메시지 표시 후 네비게이션
         if (mounted) {
-          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('운영진 지원서가 성공적으로 수정되었습니다.'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          
+          // 잠시 대기 후 콜백 호출 (네비게이션 제거)
+          await Future.delayed(const Duration(milliseconds: 500));
+          
+          if (mounted) {
+            widget.onSaved();
+            // Navigator.of(context).pop(); // 이 줄 제거
+          }
         }
       } else {
         String errorMsg = '수정에 실패했습니다. 다시 시도해 주세요.';
@@ -132,7 +191,7 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
     return Scaffold(
       backgroundColor: const Color(0xfff7f8fa),
       appBar: AppBar(
-        title: const Text('운영진 지원서 수정'),
+        title: const Text('KUHAS'),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -162,7 +221,7 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                   const SizedBox(height: 8),
                   const Text('운영진 모집 지원서 수정', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 24),
-                  if (_error != null)
+                  if (_error != null && _hasSubmitted)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Text(
@@ -185,6 +244,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showNameError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('이름을 입력하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _studentIdController,
@@ -200,6 +264,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showStudentIdError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('학번을 입력하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: _gradeDropdownValue,
@@ -210,6 +279,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                     decoration: const InputDecoration(labelText: '학년'),
                     validator: (v) => v == null ? '학년을 선택하세요.' : null,
                   ),
+                  if (_showGradeError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('학년을 선택하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
@@ -225,6 +299,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showEmailError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('이메일을 입력하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _phoneController,
@@ -240,6 +319,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showPhoneError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('전화번호를 입력하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _leavePlanController,
@@ -260,6 +344,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showLeavePlanError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('휴학 계획을 입력하세요. (없다면 \'없음\'이라고 작성해주세요.)', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   const Text('운영진 활동 기간', style: TextStyle(fontWeight: FontWeight.bold)),
                   Column(
@@ -306,6 +395,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       ),
                     ],
                   ),
+                  if (_showPeriodError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('운영진 활동 기간을 선택하거나 기타 항목을 입력하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _motivationController,
@@ -327,6 +421,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showMotivationError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('지원 동기를 입력하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _goalController,
@@ -348,6 +447,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showGoalError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('운영진 활동 목표를 입력하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _crisisController,
@@ -368,6 +472,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                       return null;
                     },
                   ),
+                  if (_showCrisisError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('위기 극복 경험을 입력하세요. (없다면 \'없음\'이라고 작성해주세요.)', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   const Text(
                     '학기 중 대면 회의 참석 여부 (방학 중에는 온라인으로 진행)\n회의 참석은 필수이며, 매주 목요일 오후 10시(시간 변동 가능)입니다.',
@@ -385,6 +494,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                     groupValue: _meetingValue,
                     onChanged: (v) => setState(() => _meetingValue = v),
                   ),
+                  if (_showMeetingError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('회의 참석 가능 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _resolutionController,
@@ -408,6 +522,11 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                     groupValue: _privacyValue,
                     onChanged: (v) => setState(() => _privacyValue = v),
                   ),
+                  if (_showPrivacyError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text('개인정보 제공 동의를 선택하세요.', style: TextStyle(color: Colors.red)),
+                    ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: _status,

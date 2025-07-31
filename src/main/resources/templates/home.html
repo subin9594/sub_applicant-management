@@ -78,6 +78,23 @@
         margin: 0;
         font-weight: normal;
     }
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .checkbox-item input[type="checkbox"] {
+        width: auto;
+    }
+    .checkbox-item label {
+        margin: 0;
+        font-weight: normal;
+    }
     .etc-input {
         margin-left: 20px;
         margin-top: 8px;
@@ -175,31 +192,85 @@
       <textarea id="career" name="career" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="졸업 후 진로계획이나 목표를 작성해주세요."></textarea>
       
       <label for="languageExp">언어 경험:</label>
-      <textarea id="languageExp" name="languageExp" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="외국어 학습 경험이나 자격증이 있다면 작성해주세요. (없다면 '없음'이라고 작성해주세요.)"></textarea>
+      <div class="radio-group">
+        <div class="radio-item">
+          <input type="radio" id="languageExp_yes" name="languageExp" value="있음">
+          <label for="languageExp_yes">있음</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" id="languageExp_no" name="languageExp" value="없음">
+          <label for="languageExp_no">없음</label>
+        </div>
+      </div>
       
-      <label for="languageDetail">언어 상세:</label>
-      <textarea id="languageDetail" name="languageDetail" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="언어 경험에 대한 추가 설명이나 구체적인 경험을 작성해주세요."></textarea>
+      <div id="languageDetailSection" style="display: none;">
+        <label for="languageDetail">언어 상세:</label>
+        <textarea id="languageDetail" name="languageDetail" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="언어 경험에 대한 추가 설명이나 구체적인 경험을 작성해주세요."></textarea>
+      </div>
       
       <label for="wishActivities">희망 활동:</label>
-      <textarea id="wishActivities" name="wishActivities" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="KUHAS에서 참여하고 싶은 구체적인 활동이나 프로젝트를 작성해주세요."></textarea>
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" id="wishActivities_1" name="wishActivities" value="프로젝트">
+          <label for="wishActivities_1">프로젝트</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="wishActivities_2" name="wishActivities" value="스터디">
+          <label for="wishActivities_2">스터디</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="wishActivities_3" name="wishActivities" value="세미나">
+          <label for="wishActivities_3">세미나</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="wishActivities_4" name="wishActivities" value="기타">
+          <label for="wishActivities_4">기타</label>
+        </div>
+      </div>
       
       <label for="interviewDate">면접 일정:</label>
-      <input type="text" id="interviewDate" name="interviewDate" maxlength="100" autocomplete="off" placeholder="면접 가능한 날짜와 시간을 작성해주세요.">
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" id="interviewDate_1" name="interviewDate" value="평일 오후">
+          <label for="interviewDate_1">평일 오후</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="interviewDate_2" name="interviewDate" value="평일 저녁">
+          <label for="interviewDate_2">평일 저녁</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="interviewDate_3" name="interviewDate" value="주말">
+          <label for="interviewDate_3">주말</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="interviewDate_4" name="interviewDate" value="기타">
+          <label for="interviewDate_4">기타</label>
+        </div>
+      </div>
       
-      <label for="attendType">참석 유형:</label>
-      <select id="attendType" name="attendType">
-        <option value="">참석 유형을 선택하세요</option>
-        <option value="대면">대면</option>
-        <option value="온라인">온라인</option>
-        <option value="혼합">혼합</option>
-      </select>
+      <label for="attendType">개강총회 참석 유형:</label>
+      <div class="radio-group">
+        <div class="radio-item">
+          <input type="radio" id="attendType_1" name="attendType" value="개강총회만 참석">
+          <label for="attendType_1">개강총회만 참석</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" id="attendType_2" name="attendType" value="뒷풀이만 참석">
+          <label for="attendType_2">뒷풀이만 참석</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" id="attendType_3" name="attendType" value="둘 다 참석">
+          <label for="attendType_3">둘 다 참석</label>
+        </div>
+      </div>
       
       <label for="privacyAgreement">개인정보 동의:</label>
-      <select id="privacyAgreement" name="privacyAgreement" required>
-        <option value="">개인정보 제공 동의 여부를 선택하세요</option>
-        <option value="예">예</option>
-        <option value="아니오">아니오</option>
-      </select>
+      <div class="radio-group">
+        <div class="radio-item">
+          <input type="radio" id="privacyAgreement_yes" name="privacyAgreement" value="예" required>
+          <label for="privacyAgreement_yes">예</label>
+        </div>
+      </div>
       
       <button type="submit">지원서 제출</button>
     </form>
@@ -215,6 +286,20 @@
     </div>
     <script>
       const errorDiv = document.getElementById('formError');
+      
+      // 언어 경험 선택에 따라 언어 상세 섹션 표시/숨김
+      document.querySelectorAll('input[name="languageExp"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+          const languageDetailSection = document.getElementById('languageDetailSection');
+          if (this.value === '있음') {
+            languageDetailSection.style.display = 'block';
+          } else {
+            languageDetailSection.style.display = 'none';
+            document.getElementById('languageDetail').value = '';
+          }
+        });
+      });
+      
        function hideError() {
          errorDiv.style.display = 'none';
        }
