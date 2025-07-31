@@ -27,6 +27,22 @@ public class ApplicationFormService {
 
     // 지원서 제출
     public ApplicationFormResponse submitApplication(ApplicationFormRequest request) {
+        // 필수 필드 검증
+        if (request.getName() == null || request.getName().isBlank() || request.getName().length() > 100)
+            throw new IllegalArgumentException("이름은 필수이며 100자 이하여야 합니다.");
+        if (request.getStudentId() == null || request.getStudentId().isBlank() || request.getStudentId().length() > 20)
+            throw new IllegalArgumentException("학번은 필수이며 20자 이하여야 합니다.");
+        if (request.getPhoneNumber() == null || request.getPhoneNumber().isBlank() || request.getPhoneNumber().length() > 20)
+            throw new IllegalArgumentException("전화번호는 필수이며 20자 이하여야 합니다.");
+        if (request.getEmail() == null || request.getEmail().isBlank() || request.getEmail().length() > 100)
+            throw new IllegalArgumentException("이메일은 필수이며 100자 이하여야 합니다.");
+        if (request.getGrade() == null || request.getGrade().isBlank())
+            throw new IllegalArgumentException("학년은 필수입니다.");
+        if (request.getMotivation() == null || request.getMotivation().isBlank() || request.getMotivation().length() > 2000)
+            throw new IllegalArgumentException("지원동기는 필수이며 2000자 이하여야 합니다.");
+        if (request.getPrivacyAgreement() == null || request.getPrivacyAgreement().isBlank())
+            throw new IllegalArgumentException("개인정보 제공 동의는 필수입니다.");
+
         // 중복 지원 확인 (학번, 이메일, 전화번호 기준)
         StringBuilder duplicateMsg = new StringBuilder();
         if (applicationFormRepository.findByStudentId(request.getStudentId()).isPresent()) {
@@ -50,6 +66,7 @@ public class ApplicationFormService {
                 request.getMotivation()
         );
         // Set new fields
+        applicationForm.setGrade(request.getGrade());
         applicationForm.setOtherActivity(request.getOtherActivity());
         applicationForm.setCurriculumReason(request.getCurriculumReason());
         applicationForm.setWish(request.getWish());
@@ -59,6 +76,7 @@ public class ApplicationFormService {
         applicationForm.setWishActivities(request.getWishActivities());
         applicationForm.setInterviewDate(request.getInterviewDate());
         applicationForm.setAttendType(request.getAttendType());
+        applicationForm.setPrivacyAgreement(request.getPrivacyAgreement());
         ApplicationForm savedForm = applicationFormRepository.save(applicationForm);
 
         // 지원 완료 이메일 발송

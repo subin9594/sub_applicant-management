@@ -37,6 +37,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
   void initState() {
     super.initState();
     
+    // 기존 데이터로 컨트롤러 초기화
     _nameController = TextEditingController(text: widget.application['name'] ?? '');
     _studentIdController = TextEditingController(text: widget.application['studentId'] ?? '');
     _phoneController = TextEditingController(text: widget.application['phoneNumber'] ?? '');
@@ -50,6 +51,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
     _languageDetailController = TextEditingController(text: widget.application['languageDetail'] ?? '');
     _wishActivitiesController = TextEditingController(text: widget.application['wishActivities'] ?? '');
     _interviewDateController = TextEditingController(text: widget.application['interviewDate'] ?? '');
+    
     _status = widget.application['status'] ?? 'PENDING';
     _gradeDropdownValue = widget.application['grade'];
     _attendTypeValue = widget.application['attendType'];
@@ -74,34 +76,28 @@ class _AdminEditPageState extends State<AdminEditPage> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       _isSubmitting = true;
       _error = null;
     });
-    
-    final id = widget.application['id'];
-    if (id == null) {
-      setState(() {
-        _isSubmitting = false;
-        _error = '지원서 ID를 찾을 수 없습니다.';
-      });
-      return;
-    }
-    
-    final url = Uri.parse('http://10.0.2.2:8080/api/applications/$id');
-    print('Saving application with ID: $id');
-    
+
     try {
+      final url = Uri.parse('http://10.0.2.2:8080/api/applications/${widget.application['id']}');
       final response = await http.put(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: json.encode({
           'name': _nameController.text.trim(),
           'studentId': _studentIdController.text.trim(),
-          'grade': _gradeDropdownValue,
-          'email': _emailController.text.trim(),
           'phoneNumber': _phoneController.text.trim(),
+          'email': _emailController.text.trim(),
+          'grade': _gradeDropdownValue,
           'motivation': _motivationController.text.trim(),
           'otherActivity': _otherActivityController.text.trim(),
           'curriculumReason': _curriculumReasonController.text.trim(),
@@ -116,240 +112,381 @@ class _AdminEditPageState extends State<AdminEditPage> {
           'status': _status,
         }),
       );
-      
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         widget.onSaved();
-        
         if (mounted) {
-          setState(() {
-            _isSubmitting = false;
-          });
-          
-          Navigator.of(context).pop(); // 편집 페이지 닫기
-          
-          await Future.delayed(const Duration(milliseconds: 300));
-          if (mounted) {
-            Navigator.of(context).pop(); // 상세 페이지 닫기
-          }
+          Navigator.of(context).pop();
         }
       } else {
+        String errorMsg = '수정에 실패했습니다. 다시 시도해 주세요.';
+        try {
+          final data = json.decode(response.body);
+          if (data['error'] != null) errorMsg = data['error'];
+        } catch (_) {}
         setState(() {
+          _error = errorMsg;
           _isSubmitting = false;
-          _error = '저장에 실패했습니다. (상태 코드: ${response.statusCode})';
         });
       }
     } catch (e) {
-      print('Error saving application: $e');
       setState(() {
+        _error = '수정 중 오류가 발생했습니다.\n${e.toString()}';
         _isSubmitting = false;
-        _error = '저장 중 오류가 발생했습니다: $e';
       });
     }
-  }
-
-  Future<bool> _showSaveDialog() async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('수정 확인'),
-            content: const Text('수정하시겠습니까?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('취소'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('확인'),
-              ),
-            ],
-          ),
-        ) ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('부원 지원서 수정')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: '이름'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '이름을 입력하세요.';
-                  if (!RegExp(r'^[가-힣a-zA-Z\s]+$').hasMatch(value)) return '이름은 한글 또는 영문만 입력하세요.';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _studentIdController,
-                decoration: const InputDecoration(labelText: '학번'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '학번을 입력하세요.';
-                  if (!RegExp(r'^\d{10}$').hasMatch(value)) return '학번은 숫자 10자리로 입력하세요.';
-                  return null;
-                },
-              ),
-              DropdownButtonFormField<String>(
-                value: _gradeDropdownValue,
-                items: [
-                  '1학년', '2학년', '3학년', '4학년'
-                ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                onChanged: (v) => setState(() => _gradeDropdownValue = v),
-                decoration: const InputDecoration(labelText: '학년'),
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: '이메일'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '이메일을 입력하세요.';
-                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) return '이메일 형식이 올바르지 않습니다.';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: '전화번호'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '전화번호를 입력하세요.';
-                  if (!RegExp(r'^[0-9\-]+$').hasMatch(value)) return '전화번호는 숫자와 -만 입력하세요.';
-                  if (value.length < 8 || value.length > 13) return '전화번호는 8~13자 이내로 입력하세요.';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _motivationController,
-                decoration: const InputDecoration(labelText: '지원 동기'),
-                minLines: 3,
-                maxLines: 8,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return '지원 동기를 입력하세요.';
-                  if (value.trim().length < 50) return '50자 이상 입력하세요.';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _otherActivityController,
-                decoration: const InputDecoration(labelText: '기타 활동'),
-                minLines: 2,
-                maxLines: 4,
-              ),
-              TextFormField(
-                controller: _curriculumReasonController,
-                decoration: const InputDecoration(labelText: '커리큘럼 이수 가능 이유'),
-                minLines: 2,
-                maxLines: 4,
-              ),
-              TextFormField(
-                controller: _wishController,
-                decoration: const InputDecoration(labelText: 'KUHAS에서 얻고 싶은 것'),
-                minLines: 2,
-                maxLines: 4,
-              ),
-              TextFormField(
-                controller: _careerController,
-                decoration: const InputDecoration(labelText: '진로'),
-                minLines: 2,
-                maxLines: 4,
-              ),
-              TextFormField(
-                controller: _languageExpController,
-                decoration: const InputDecoration(labelText: '프로그래밍 언어 경험'),
-                minLines: 2,
-                maxLines: 4,
-              ),
-              TextFormField(
-                controller: _languageDetailController,
-                decoration: const InputDecoration(labelText: '경험한 언어'),
-                minLines: 2,
-                maxLines: 4,
-              ),
-              TextFormField(
-                controller: _wishActivitiesController,
-                decoration: const InputDecoration(labelText: '희망 활동'),
-                minLines: 2,
-                maxLines: 4,
-              ),
-              TextFormField(
-                controller: _interviewDateController,
-                decoration: const InputDecoration(labelText: '면접 희망 날짜'),
-              ),
-              const Text('개강총회 참석', style: TextStyle(fontWeight: FontWeight.bold)),
-              RadioListTile<String>(
-                title: const Text('참석'),
-                value: '참석',
-                groupValue: _attendTypeValue,
-                onChanged: (v) => setState(() => _attendTypeValue = v),
-              ),
-              RadioListTile<String>(
-                title: const Text('불참석'),
-                value: '불참석',
-                groupValue: _attendTypeValue,
-                onChanged: (v) => setState(() => _attendTypeValue = v),
-              ),
-              const Text('개인정보 제공 동의', style: TextStyle(fontWeight: FontWeight.bold)),
-              RadioListTile<String>(
-                title: const Text('예'),
-                value: '예',
-                groupValue: _privacyAgreementValue,
-                onChanged: (v) => setState(() => _privacyAgreementValue = v),
-              ),
-              DropdownButtonFormField<String>(
-                value: _status,
-                items: const [
-                  DropdownMenuItem(value: 'PENDING', child: Text('대기')),
-                  DropdownMenuItem(value: 'ACCEPTED', child: Text('합격')),
-                  DropdownMenuItem(value: 'REJECTED', child: Text('불합격')),
-                ],
-                onChanged: (v) => setState(() => _status = v ?? 'PENDING'),
-                decoration: const InputDecoration(labelText: '상태'),
-              ),
-              const SizedBox(height: 24),
-              Row(
+      backgroundColor: const Color(0xfff7f8fa),
+      appBar: AppBar(
+        title: const Text('지원서 수정'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha((0.08 * 255).toInt()),
+                  blurRadius: 24,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            width: 380,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  const Text('KUHAS', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  const Text('부원 모집 지원서 수정', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 24),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        softWrap: true,
+                        maxLines: null,
+                      ),
+                    ),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: '이름',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return '이름을 입력하세요.';
+                      if (!RegExp(r'^[가-힣a-zA-Z\s]+$').hasMatch(v.trim())) return '이름은 한글 또는 영문만 입력하세요.';
+                      if (v.length > 100) return '이름은 100자 이하여야 합니다.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _studentIdController,
+                    decoration: const InputDecoration(
+                      labelText: '학번',
+                      hintText: 'ex) 20XX270XXX',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return '학번을 입력하세요.';
+                      if (!RegExp(r'^\d{10}$').hasMatch(v.trim())) return '학번은 숫자 10자리로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _phoneController,
+                    decoration: const InputDecoration(
+                      labelText: '전화번호',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    keyboardType: TextInputType.phone,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return '전화번호를 입력하세요.';
+                      if (!RegExp(r'^[0-9\-]+$').hasMatch(v.trim())) return '전화번호는 숫자와 -만 입력하세요.';
+                      if (v.length < 8 || v.length > 14) return '전화번호는 8~14자 이내로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: '이메일',
+                      hintText: 'ex) xxx@gmail.com 또는 xxx@korea.ac.kr',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return '이메일을 입력하세요.';
+                      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v.trim())) return '이메일 형식이 올바르지 않습니다.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _gradeDropdownValue,
+                    items: [
+                      '1학년', '2학년', '3학년', '4학년'
+                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    onChanged: (v) => setState(() => _gradeDropdownValue = v),
+                    decoration: const InputDecoration(labelText: '학년'),
+                    validator: (v) => v == null ? '학년을 선택하세요.' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _motivationController,
+                    decoration: const InputDecoration(
+                      labelText: '지원 동기',
+                      hintText: 'KUHAS에 지원하게 된 동기를 작성해주세요.(300자 내외)',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 3,
+                    maxLines: 8,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return '지원 동기를 입력하세요.';
+                      if (v.trim().length < 50) return '50자 이상 입력하세요.';
+                      if (v.trim().length > 2000) return '2000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _otherActivityController,
+                    decoration: const InputDecoration(
+                      labelText: '기타 활동',
+                      hintText: '현재 참여하고 있는 동아리, 학회, 봉사활동 등이 있다면 작성해주세요. (없다면 \'없음\'이라고 작성해주세요.)',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 1000) return '1000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _curriculumReasonController,
+                    decoration: const InputDecoration(
+                      labelText: '커리큘럼 선택 이유',
+                      hintText: 'KUHAS의 커리큘럼 중 관심 있는 분야와 그 이유를 작성해주세요.',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 1000) return '1000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _wishController,
+                    decoration: const InputDecoration(
+                      labelText: '희망사항',
+                      hintText: 'KUHAS에서 하고 싶은 활동이나 배우고 싶은 것들을 작성해주세요.',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 1000) return '1000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _careerController,
+                    decoration: const InputDecoration(
+                      labelText: '진로계획',
+                      hintText: '졸업 후 진로계획이나 목표를 작성해주세요.',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 1000) return '1000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _languageExpController,
+                    decoration: const InputDecoration(
+                      labelText: '언어 경험',
+                      hintText: '외국어 학습 경험이나 자격증이 있다면 작성해주세요. (없다면 \'없음\'이라고 작성해주세요.)',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 1000) return '1000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _languageDetailController,
+                    decoration: const InputDecoration(
+                      labelText: '언어 상세',
+                      hintText: '언어 경험에 대한 추가 설명이나 구체적인 경험을 작성해주세요.',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 1000) return '1000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _wishActivitiesController,
+                    decoration: const InputDecoration(
+                      labelText: '희망 활동',
+                      hintText: 'KUHAS에서 참여하고 싶은 구체적인 활동이나 프로젝트를 작성해주세요.',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      decorationThickness: 0,
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 1000) return '1000자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _interviewDateController,
+                    decoration: const InputDecoration(
+                      labelText: '면접 일정',
+                      hintText: '면접 가능한 날짜와 시간을 작성해주세요.',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    validator: (v) {
+                      if (v != null && v.trim().length > 100) return '100자 이하로 입력하세요.';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _attendTypeValue,
+                    items: [
+                      '대면', '온라인', '혼합'
+                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    onChanged: (v) => setState(() => _attendTypeValue = v),
+                    decoration: const InputDecoration(labelText: '참석 유형'),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _privacyAgreementValue,
+                    items: [
+                      '예', '아니오'
+                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    onChanged: (v) => setState(() => _privacyAgreementValue = v),
+                    decoration: const InputDecoration(labelText: '개인정보 동의'),
+                    validator: (v) => v == null ? '개인정보 제공 동의 여부를 선택하세요.' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _status,
+                    items: [
+                      'PENDING', 'ACCEPTED', 'REJECTED'
+                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    onChanged: (v) => setState(() => _status = v!),
+                    decoration: const InputDecoration(labelText: '상태'),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _isSubmitting
                           ? null
                           : () async {
                               if (_formKey.currentState?.validate() ?? false) {
-                                final ok = await _showSaveDialog();
-                                if (ok) {
-                                  await Future.delayed(const Duration(milliseconds: 100));
-                                  if (mounted) {
-                                    await _save();
-                                  }
-                                }
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('수정 확인'),
+                                    content: const Text('지원서를 수정하시겠습니까?\n확인을 누르면 수정이 됩니다.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(ctx).pop(),
+                                        child: const Text('취소'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(ctx).pop();
+                                          _submitForm();
+                                        },
+                                        child: const Text('확인'),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               }
                             },
                       child: _isSubmitting
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Text('저장'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                      child: const Text('취소'),
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Text('지원서 수정'),
                     ),
                   ),
                 ],
               ),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(_error!, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                ),
-            ],
+            ),
           ),
         ),
       ),

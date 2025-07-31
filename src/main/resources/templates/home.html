@@ -23,7 +23,7 @@
         box-shadow: 0 4px 24px #0002;
         padding: 40px 32px 32px 32px;
         min-width: 340px;
-        max-width: 400px;
+        max-width: 480px;
     }
     h2 {
         margin-bottom: 32px;
@@ -42,7 +42,7 @@
         margin-bottom: 4px;
         text-align: left;
     }
-    input, textarea {
+    input, textarea, select {
         border: 1px solid #d1d5db;
         border-radius: 6px;
         padding: 10px;
@@ -53,13 +53,34 @@
         background: #f9fafb;
         transition: border 0.2s;
     }
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
         border: 1.5px solid #4f8cff;
         background: #fff;
     }
     textarea {
         resize: vertical;
         min-height: 100px;
+    }
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .radio-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .radio-item input[type="radio"] {
+        width: auto;
+    }
+    .radio-item label {
+        margin: 0;
+        font-weight: normal;
+    }
+    .etc-input {
+        margin-left: 20px;
+        margin-top: 8px;
     }
     button[type="submit"] {
         margin-top: 12px;
@@ -119,14 +140,67 @@
     <form th:action="@{/api/applications}" method="post" id="applicationForm" th:if="${message} == null">
       <label for="name">이름:</label>
       <input type="text" id="name" name="name" required maxlength="100" autocomplete="name">
+      
       <label for="studentId">학번:</label>
       <input type="text" id="studentId" name="studentId" required maxlength="20" autocomplete="off">
+      
       <label for="phoneNumber">전화번호:</label>
       <input type="text" id="phoneNumber" name="phoneNumber" required maxlength="20" autocomplete="tel">
+      
       <label for="email">이메일:</label>
       <input type="email" id="email" name="email" required maxlength="100" autocomplete="email">
+      
+      <label for="grade">학년:</label>
+      <select id="grade" name="grade" required>
+        <option value="">학년을 선택하세요</option>
+        <option value="1학년">1학년</option>
+        <option value="2학년">2학년</option>
+        <option value="3학년">3학년</option>
+        <option value="4학년">4학년</option>
+      </select>
+      
       <label for="motivation">지원동기:</label>
-      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" autocomplete="off"></textarea>
+      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" autocomplete="off" placeholder="KUHAS에 지원하게 된 동기를 작성해주세요.(300자 내외)"></textarea>
+      
+      <label for="otherActivity">기타 활동:</label>
+      <textarea id="otherActivity" name="otherActivity" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="현재 참여하고 있는 동아리, 학회, 봉사활동 등이 있다면 작성해주세요. (없다면 '없음'이라고 작성해주세요.)"></textarea>
+      
+      <label for="curriculumReason">커리큘럼 선택 이유:</label>
+      <textarea id="curriculumReason" name="curriculumReason" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="KUHAS의 커리큘럼 중 관심 있는 분야와 그 이유를 작성해주세요."></textarea>
+      
+      <label for="wish">희망사항:</label>
+      <textarea id="wish" name="wish" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="KUHAS에서 하고 싶은 활동이나 배우고 싶은 것들을 작성해주세요."></textarea>
+      
+      <label for="career">진로계획:</label>
+      <textarea id="career" name="career" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="졸업 후 진로계획이나 목표를 작성해주세요."></textarea>
+      
+      <label for="languageExp">언어 경험:</label>
+      <textarea id="languageExp" name="languageExp" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="외국어 학습 경험이나 자격증이 있다면 작성해주세요. (없다면 '없음'이라고 작성해주세요.)"></textarea>
+      
+      <label for="languageDetail">언어 상세:</label>
+      <textarea id="languageDetail" name="languageDetail" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="언어 경험에 대한 추가 설명이나 구체적인 경험을 작성해주세요."></textarea>
+      
+      <label for="wishActivities">희망 활동:</label>
+      <textarea id="wishActivities" name="wishActivities" maxlength="1000" rows="4" cols="50" autocomplete="off" placeholder="KUHAS에서 참여하고 싶은 구체적인 활동이나 프로젝트를 작성해주세요."></textarea>
+      
+      <label for="interviewDate">면접 일정:</label>
+      <input type="text" id="interviewDate" name="interviewDate" maxlength="100" autocomplete="off" placeholder="면접 가능한 날짜와 시간을 작성해주세요.">
+      
+      <label for="attendType">참석 유형:</label>
+      <select id="attendType" name="attendType">
+        <option value="">참석 유형을 선택하세요</option>
+        <option value="대면">대면</option>
+        <option value="온라인">온라인</option>
+        <option value="혼합">혼합</option>
+      </select>
+      
+      <label for="privacyAgreement">개인정보 동의:</label>
+      <select id="privacyAgreement" name="privacyAgreement" required>
+        <option value="">개인정보 제공 동의 여부를 선택하세요</option>
+        <option value="예">예</option>
+        <option value="아니오">아니오</option>
+      </select>
+      
       <button type="submit">지원서 제출</button>
     </form>
     <!-- 커스텀 모달 영역 -->
@@ -144,8 +218,9 @@
        function hideError() {
          errorDiv.style.display = 'none';
        }
-       document.querySelectorAll('#applicationForm input, #applicationForm textarea').forEach(function(el) {
+       document.querySelectorAll('#applicationForm input, #applicationForm textarea, #applicationForm select').forEach(function(el) {
          el.addEventListener('input', hideError);
+         el.addEventListener('change', hideError);
        });
        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
            e.preventDefault(); // 항상 먼저 막음
@@ -156,12 +231,18 @@
            const studentId = document.getElementById('studentId').value.trim();
            const phoneNumber = document.getElementById('phoneNumber').value.trim();
            const email = document.getElementById('email').value.trim();
+           const grade = document.getElementById('grade').value.trim();
            const motivation = document.getElementById('motivation').value.trim();
+           const privacyAgreement = document.getElementById('privacyAgreement').value.trim();
+           
            if (!name) missing.push('이름');
            if (!studentId) missing.push('학번');
            if (!phoneNumber) missing.push('전화번호');
            if (!email) missing.push('이메일');
+           if (!grade) missing.push('학년');
            if (!motivation) missing.push('지원동기');
+           if (!privacyAgreement) missing.push('개인정보 동의');
+           
            if (missing.length > 0) {
                errorMsg = missing.join(', ') + ' 항목이 작성되지 않았습니다.';
            } else if (!/^[가-힣a-zA-Z\s]+$/.test(name)) {
@@ -172,7 +253,7 @@
                errorMsg = '전화번호는 숫자와 -(하이픈)만 작성할 수 있습니다.';
            } else if (phoneNumber.length < 8 || phoneNumber.length > 14) {
                errorMsg = '전화번호는 -(하이픈) 포함 8자 미만, 14자 초과로 입력해 주세요.';
-           }else if (motivation.length < 50) {
+           } else if (motivation.length < 50) {
                errorMsg = '지원동기는 50자 이상 작성해야 합니다.';
            }
            if (errorMsg) {
@@ -202,6 +283,7 @@
              okBtn.onclick = null;
              cancelBtn.onclick = null;
              modal.onclick = null;
+             document.onkeydown = null;
              resolve(result);
            }
            okBtn.onclick = () => close(true);
@@ -216,7 +298,7 @@
          });
        }
     </script>
-    </div>
   </div>
+</div>
 </body>
 </html>

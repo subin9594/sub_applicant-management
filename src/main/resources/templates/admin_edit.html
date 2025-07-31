@@ -101,23 +101,77 @@
     <form th:action="@{/admin/edit/{id}(id=${id})}" method="post" id="editForm">
       <label for="name">이름:</label>
       <input type="text" id="name" name="name" th:value="${name != null ? name : application.name}" required maxlength="100" autocomplete="name">
+      
       <label for="studentId">학번:</label>
       <input type="text" id="studentId" name="studentId" th:value="${studentId != null ? studentId : application.studentId}" required maxlength="20" onblur="checkStudentId()" autocomplete="off">
       <div id="studentIdError" style="color:red;"></div>
+      
       <label for="phoneNumber">전화번호:</label>
       <input type="text" id="phoneNumber" name="phoneNumber" th:value="${phoneNumber != null ? phoneNumber : application.phoneNumber}" required maxlength="20" onblur="checkPhoneNumber()" autocomplete="tel">
       <div id="phoneNumberError" style="color:red;"></div>
+      
       <label for="email">이메일:</label>
       <input type="email" id="email" name="email" th:value="${email != null ? email : application.email}" required maxlength="100" onblur="checkEmail()" autocomplete="email">
       <div id="emailError" style="color:red;"></div>
+      
+      <label for="grade">학년:</label>
+      <select id="grade" name="grade" required>
+        <option value="">학년을 선택하세요</option>
+        <option value="1학년" th:selected="${(grade != null ? grade : application.grade) == '1학년'}">1학년</option>
+        <option value="2학년" th:selected="${(grade != null ? grade : application.grade) == '2학년'}">2학년</option>
+        <option value="3학년" th:selected="${(grade != null ? grade : application.grade) == '3학년'}">3학년</option>
+        <option value="4학년" th:selected="${(grade != null ? grade : application.grade) == '4학년'}">4학년</option>
+      </select>
+      
       <label for="motivation">지원동기:</label>
-      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" th:text="${motivation != null ? motivation : application.motivation}" autocomplete="off"></textarea>
+      <textarea id="motivation" name="motivation" required maxlength="2000" rows="6" cols="50" th:text="${motivation != null ? motivation : application.motivation}" autocomplete="off" placeholder="KUHAS에 지원하게 된 동기를 작성해주세요.(300자 내외)"></textarea>
+      
+      <label for="otherActivity">기타 활동:</label>
+      <textarea id="otherActivity" name="otherActivity" maxlength="1000" rows="4" cols="50" th:text="${otherActivity != null ? otherActivity : application.otherActivity}" autocomplete="off" placeholder="현재 참여하고 있는 동아리, 학회, 봉사활동 등이 있다면 작성해주세요. (없다면 '없음'이라고 작성해주세요.)"></textarea>
+      
+      <label for="curriculumReason">커리큘럼 선택 이유:</label>
+      <textarea id="curriculumReason" name="curriculumReason" maxlength="1000" rows="4" cols="50" th:text="${curriculumReason != null ? curriculumReason : application.curriculumReason}" autocomplete="off" placeholder="KUHAS의 커리큘럼 중 관심 있는 분야와 그 이유를 작성해주세요."></textarea>
+      
+      <label for="wish">희망사항:</label>
+      <textarea id="wish" name="wish" maxlength="1000" rows="4" cols="50" th:text="${wish != null ? wish : application.wish}" autocomplete="off" placeholder="KUHAS에서 하고 싶은 활동이나 배우고 싶은 것들을 작성해주세요."></textarea>
+      
+      <label for="career">진로계획:</label>
+      <textarea id="career" name="career" maxlength="1000" rows="4" cols="50" th:text="${career != null ? career : application.career}" autocomplete="off" placeholder="졸업 후 진로계획이나 목표를 작성해주세요."></textarea>
+      
+      <label for="languageExp">언어 경험:</label>
+      <textarea id="languageExp" name="languageExp" maxlength="1000" rows="4" cols="50" th:text="${languageExp != null ? languageExp : application.languageExp}" autocomplete="off" placeholder="외국어 학습 경험이나 자격증이 있다면 작성해주세요. (없다면 '없음'이라고 작성해주세요.)"></textarea>
+      
+      <label for="languageDetail">언어 상세:</label>
+      <textarea id="languageDetail" name="languageDetail" maxlength="1000" rows="4" cols="50" th:text="${languageDetail != null ? languageDetail : application.languageDetail}" autocomplete="off" placeholder="언어 경험에 대한 추가 설명이나 구체적인 경험을 작성해주세요."></textarea>
+      
+      <label for="wishActivities">희망 활동:</label>
+      <textarea id="wishActivities" name="wishActivities" maxlength="1000" rows="4" cols="50" th:text="${wishActivities != null ? wishActivities : application.wishActivities}" autocomplete="off" placeholder="KUHAS에서 참여하고 싶은 구체적인 활동이나 프로젝트를 작성해주세요."></textarea>
+      
+      <label for="interviewDate">면접 일정:</label>
+      <input type="text" id="interviewDate" name="interviewDate" th:value="${interviewDate != null ? interviewDate : application.interviewDate}" maxlength="100" autocomplete="off" placeholder="면접 가능한 날짜와 시간을 작성해주세요.">
+      
+      <label for="attendType">참석 유형:</label>
+      <select id="attendType" name="attendType">
+        <option value="">참석 유형을 선택하세요</option>
+        <option value="대면" th:selected="${(attendType != null ? attendType : application.attendType) == '대면'}">대면</option>
+        <option value="온라인" th:selected="${(attendType != null ? attendType : application.attendType) == '온라인'}">온라인</option>
+        <option value="혼합" th:selected="${(attendType != null ? attendType : application.attendType) == '혼합'}">혼합</option>
+      </select>
+      
+      <label for="privacyAgreement">개인정보 동의:</label>
+      <select id="privacyAgreement" name="privacyAgreement" required>
+        <option value="">개인정보 제공 동의 여부를 선택하세요</option>
+        <option value="예" th:selected="${(privacyAgreement != null ? privacyAgreement : application.privacyAgreement) == '예'}">예</option>
+        <option value="아니오" th:selected="${(privacyAgreement != null ? privacyAgreement : application.privacyAgreement) == '아니오'}">아니오</option>
+      </select>
+      
       <label for="status">상태:</label>
       <select id="status" name="status">
         <option value="PENDING" th:selected="${(status != null ? status : application.status) == 'PENDING'}">PENDING</option>
         <option value="ACCEPTED" th:selected="${(status != null ? status : application.status) == 'ACCEPTED'}">ACCEPTED</option>
         <option value="REJECTED" th:selected="${(status != null ? status : application.status) == 'REJECTED'}">REJECTED</option>
       </select>
+      
       <div class="btn-row">
         <button type="submit">저장</button>
         <a th:href="@{/admin}" class="cancel-btn" style="text-align:center; display:inline-block; line-height:44px; border-radius:6px; flex:1; text-decoration:none;">취소</a>
@@ -176,7 +230,9 @@
       const studentId = document.getElementById('studentId').value.trim();
       const phoneNumber = document.getElementById('phoneNumber').value.trim();
       const email = document.getElementById('email').value.trim();
+      const grade = document.getElementById('grade').value.trim();
       const motivation = document.getElementById('motivation').value.trim();
+      const privacyAgreement = document.getElementById('privacyAgreement').value.trim();
 
       // 이름: 한글 또는 영문만
       if (!/^[가-힣a-zA-Z\s]+$/.test(name)) {
@@ -205,11 +261,25 @@
         document.getElementById('phoneNumber').focus();
         return;
       }
+      // 학년: 필수 선택
+      if (!grade) {
+        errorDiv.innerText = '학년을 선택해주세요.';
+        errorDiv.style.display = 'block';
+        document.getElementById('grade').focus();
+        return;
+      }
       // 지원동기: 50자 이상
       if (motivation.length < 50) {
         errorDiv.innerText = '지원동기는 50자 이상 작성해야 합니다.';
         errorDiv.style.display = 'block';
         document.getElementById('motivation').focus();
+        return;
+      }
+      // 개인정보 동의: 필수 선택
+      if (!privacyAgreement) {
+        errorDiv.innerText = '개인정보 제공 동의 여부를 선택해주세요.';
+        errorDiv.style.display = 'block';
+        document.getElementById('privacyAgreement').focus();
         return;
       }
 
