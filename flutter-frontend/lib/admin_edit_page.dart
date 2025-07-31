@@ -132,7 +132,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
       });
       return;
     }
-
+    
     try {
       final url = Uri.parse('http://10.0.2.2:8080/api/applications/${widget.application['id']}');
       final response = await http.put(
@@ -161,7 +161,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
           'status': _status,
         }),
       );
-
+      
       if (response.statusCode == 200) {
         setState(() {
           _isSubmitting = false;
@@ -229,12 +229,12 @@ class _AdminEditPageState extends State<AdminEditPage> {
               ],
             ),
             width: 380,
-            child: Form(
-              key: _formKey,
+        child: Form(
+          key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+            children: [
                   const Text('KUHAS', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   const Text('부원 모집 지원서 수정', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
@@ -249,8 +249,8 @@ class _AdminEditPageState extends State<AdminEditPage> {
                         maxLines: null,
                       ),
                     ),
-                  TextFormField(
-                    controller: _nameController,
+              TextFormField(
+                controller: _nameController,
                     decoration: const InputDecoration(
                       labelText: '이름:',
                       hintStyle: TextStyle(color: Colors.grey),
@@ -259,17 +259,17 @@ class _AdminEditPageState extends State<AdminEditPage> {
                       if (v == null || v.trim().isEmpty) return '이름을 입력하세요.';
                       if (!RegExp(r'^[가-힣a-zA-Z\s]+$').hasMatch(v.trim())) return '이름은 한글 또는 영문만 입력하세요.';
                       if (v.length > 100) return '이름은 100자 이하여야 합니다.';
-                      return null;
-                    },
-                  ),
+                  return null;
+                },
+              ),
                   if (_showNameError)
                     const Padding(
                       padding: EdgeInsets.only(top: 4, bottom: 8),
                       child: Text('이름을 입력하세요.', style: TextStyle(color: Colors.red)),
                     ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _studentIdController,
+              TextFormField(
+                controller: _studentIdController,
                     decoration: const InputDecoration(
                       labelText: '학번:',
                       hintText: 'ex) 20XX270XXX',
@@ -319,21 +319,21 @@ class _AdminEditPageState extends State<AdminEditPage> {
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return '이메일을 입력하세요.';
                       if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v.trim())) return '이메일 형식이 올바르지 않습니다.';
-                      return null;
-                    },
-                  ),
+                  return null;
+                },
+              ),
                   if (_showEmailError)
                     const Padding(
                       padding: EdgeInsets.only(top: 4, bottom: 8),
                       child: Text('이메일을 입력하세요.', style: TextStyle(color: Colors.red)),
                     ),
                   const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: _gradeDropdownValue,
-                    items: [
-                      '1학년', '2학년', '3학년', '4학년'
-                    ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                    onChanged: (v) => setState(() => _gradeDropdownValue = v),
+              DropdownButtonFormField<String>(
+                value: _gradeDropdownValue,
+                items: [
+                  '1학년', '2학년', '3학년', '4학년'
+                ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                onChanged: (v) => setState(() => _gradeDropdownValue = v),
                     decoration: const InputDecoration(labelText: '학년:'),
                     validator: (v) => v == null ? '학년을 선택하세요.' : null,
                   ),
@@ -343,15 +343,15 @@ class _AdminEditPageState extends State<AdminEditPage> {
                       child: Text('학년을 선택하세요.', style: TextStyle(color: Colors.red)),
                     ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _motivationController,
+              TextFormField(
+                controller: _motivationController,
                     decoration: const InputDecoration(
                       labelText: '지원동기:',
                       hintText: 'KUHAS에 지원하게 된 동기를 작성해주세요.(300자 내외)',
                       hintStyle: TextStyle(color: Colors.grey),
                     ),
-                    minLines: 3,
-                    maxLines: 8,
+                minLines: 3,
+                maxLines: 8,
                     style: const TextStyle(
                       decoration: TextDecoration.none,
                       decorationThickness: 0,
@@ -360,24 +360,24 @@ class _AdminEditPageState extends State<AdminEditPage> {
                       if (v == null || v.trim().isEmpty) return '지원동기를 입력하세요.';
                       if (v.trim().length < 50) return '50자 이상 입력하세요.';
                       if (v.trim().length > 2000) return '2000자 이하로 입력하세요.';
-                      return null;
-                    },
-                  ),
+                  return null;
+                },
+              ),
                   if (_showMotivationError)
                     const Padding(
                       padding: EdgeInsets.only(top: 4, bottom: 8),
                       child: Text('지원동기를 입력하세요.', style: TextStyle(color: Colors.red)),
                     ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _otherActivityController,
+              TextFormField(
+                controller: _otherActivityController,
                     decoration: const InputDecoration(
                       labelText: '기타 활동:',
                       hintText: '현재 참여하고 있는 동아리, 학회, 봉사활동 등이 있다면 작성해주세요. (없다면 \'없음\'이라고 작성해주세요.)',
                       hintStyle: TextStyle(color: Colors.grey),
                     ),
-                    minLines: 2,
-                    maxLines: 4,
+                minLines: 2,
+                maxLines: 4,
                     style: const TextStyle(
                       decoration: TextDecoration.none,
                       decorationThickness: 0,
@@ -391,7 +391,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
                   TextFormField(
                     controller: _curriculumReasonController,
                     decoration: const InputDecoration(
-                      labelText: '커리큘럼 선택 이유:',
+                      labelText: '커리큘럼 이수 가능 이유:',
                       hintText: 'KUHAS의 커리큘럼 중 관심 있는 분야와 그 이유를 작성해주세요.',
                       hintStyle: TextStyle(color: Colors.grey),
                     ),
@@ -410,7 +410,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
                   TextFormField(
                     controller: _wishController,
                     decoration: const InputDecoration(
-                      labelText: '희망사항:',
+                      labelText: 'KUHAS에서 얻고 싶은 것:',
                       hintText: 'KUHAS에서 하고 싶은 활동이나 배우고 싶은 것들을 작성해주세요.',
                       hintStyle: TextStyle(color: Colors.grey),
                     ),
@@ -426,15 +426,15 @@ class _AdminEditPageState extends State<AdminEditPage> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _careerController,
+              TextFormField(
+                controller: _careerController,
                     decoration: const InputDecoration(
                       labelText: '진로계획:',
                       hintText: '졸업 후 진로계획이나 목표를 작성해주세요.',
                       hintStyle: TextStyle(color: Colors.grey),
                     ),
-                    minLines: 2,
-                    maxLines: 4,
+                minLines: 2,
+                maxLines: 4,
                     style: const TextStyle(
                       decoration: TextDecoration.none,
                       decorationThickness: 0,
@@ -446,7 +446,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    '언어 경험:',
+                    '프로그래밍 언어 경험 여부:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   RadioListTile<String>(
@@ -569,7 +569,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    '면접 일정:',
+                    '대면 면접 희망 날짜:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   CheckboxListTile(
@@ -647,44 +647,44 @@ class _AdminEditPageState extends State<AdminEditPage> {
                     groupValue: _attendTypeValue,
                     onChanged: (v) => setState(() => _attendTypeValue = v),
                   ),
-                  RadioListTile<String>(
+              RadioListTile<String>(
                     title: const Text('뒷풀이만 참석'),
                     value: '뒷풀이만 참석',
-                    groupValue: _attendTypeValue,
-                    onChanged: (v) => setState(() => _attendTypeValue = v),
-                  ),
-                  RadioListTile<String>(
+                groupValue: _attendTypeValue,
+                onChanged: (v) => setState(() => _attendTypeValue = v),
+              ),
+              RadioListTile<String>(
                     title: const Text('둘 다 참석'),
                     value: '둘 다 참석',
-                    groupValue: _attendTypeValue,
-                    onChanged: (v) => setState(() => _attendTypeValue = v),
-                  ),
+                groupValue: _attendTypeValue,
+                onChanged: (v) => setState(() => _attendTypeValue = v),
+              ),
                   const SizedBox(height: 16),
                   const Text(
                     '개인정보 동의:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  RadioListTile<String>(
-                    title: const Text('예'),
-                    value: '예',
-                    groupValue: _privacyAgreementValue,
-                    onChanged: (v) => setState(() => _privacyAgreementValue = v),
-                  ),
+              RadioListTile<String>(
+                title: const Text('예'),
+                value: '예',
+                groupValue: _privacyAgreementValue,
+                onChanged: (v) => setState(() => _privacyAgreementValue = v),
+              ),
                   if (_showPrivacyError)
                     const Padding(
                       padding: EdgeInsets.only(top: 4, bottom: 8),
                       child: Text('개인정보 제공 동의 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
                     ),
                   const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: _status,
+              DropdownButtonFormField<String>(
+                value: _status,
                     items: [
                       'PENDING', 'ACCEPTED', 'REJECTED'
                     ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                     onChanged: (v) => setState(() => _status = v!),
-                    decoration: const InputDecoration(labelText: '상태'),
-                  ),
-                  const SizedBox(height: 24),
+                decoration: const InputDecoration(labelText: '상태'),
+              ),
+              const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -725,7 +725,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
                   ),
                 ],
               ),
-            ),
+                ),
           ),
         ),
       ),
