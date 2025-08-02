@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/executive-applications")
@@ -58,6 +59,19 @@ public class ExecutiveApplicationController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("{\"error\":\"" + e.getMessage() + "\"}");
         }
+    }
+
+    @GetMapping("/exists")
+    public ResponseEntity<?> checkDuplicate(@RequestParam String studentId, @RequestParam String email, @RequestParam String phoneNumber) {
+        boolean studentIdExists = service.existsByStudentId(studentId);
+        boolean emailExists = service.existsByEmail(email);
+        boolean phoneNumberExists = service.existsByPhoneNumber(phoneNumber);
+        
+        return ResponseEntity.ok(Map.of(
+            "studentId", studentIdExists,
+            "email", emailExists,
+            "phoneNumber", phoneNumberExists
+        ));
     }
 
     @PutMapping("/{id}/status")

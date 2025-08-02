@@ -62,32 +62,8 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
   }
 
   void _scrollToFirstError() {
-    // 에러가 있는 항목들의 순서대로 스크롤할 위치 결정
-    if (_showNameError) {
-      _scrollToTop();
-    } else if (_showStudentIdError) {
-      _scrollToTop();
-    } else if (_showGradeError) {
-      _scrollToTop();
-    } else if (_showEmailError) {
-      _scrollToTop();
-    } else if (_showPhoneError) {
-      _scrollToTop();
-    } else if (_showLeavePlanError) {
-      _scrollToTop();
-    } else if (_showPeriodError) {
-      _scrollToTop();
-    } else if (_showMotivationError) {
-      _scrollToTop();
-    } else if (_showGoalError) {
-      _scrollToTop();
-    } else if (_showCrisisError) {
-      _scrollToTop();
-    } else if (_showMeetingError) {
-      _scrollToTop();
-    } else if (_showPrivacyError) {
-      _scrollToTop();
-    }
+    // 검증 실패 시 상단으로 스크롤
+    _scrollToTop();
   }
 
   void _scrollToTop() {
@@ -104,6 +80,26 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
         }
       }
     });
+  }
+
+  Future<String?> _checkDuplicate() async {
+    final studentId = _studentIdController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final url = Uri.parse('http://10.0.2.2:8080/api/executive-applications/exists?studentId=$studentId&email=$email&phoneNumber=$phone');
+    final res = await http.get(url);
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body);
+      List<String> duplicates = [];
+      if (data['studentId'] == true) duplicates.add('학번');
+      if (data['email'] == true) duplicates.add('이메일');
+      if (data['phoneNumber'] == true) duplicates.add('전화번호');
+      
+      if (duplicates.isNotEmpty) {
+        return '이미 사용 중인 ${duplicates.join(', ')}입니다.';
+      }
+    }
+    return null;
   }
 
   Future<void> _submitForm() async {
@@ -366,29 +362,34 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                                 children: [
                                   const Text('기타:'),
                                   const SizedBox(width: 8),
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: _periodEtcController,
-                                        enabled: _periodValue == '기타',
-                                        decoration: const InputDecoration(
-                                          hintText: '직접 입력',
-                                          hintStyle: TextStyle(color: Colors.grey),
-                                          border: UnderlineInputBorder(),
-                                        ),
-                                        validator: (value) {
-                                          if (_periodValue == '기타' && (value == null || value.trim().isEmpty)) {
-                                            return '기타 항목을 입력하세요.';
-                                          }
-                                          return null;
-                                        },
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _periodEtcController,
+                                      enabled: _periodValue == '기타',
+                                      decoration: const InputDecoration(
+                                        hintText: '직접 입력',
+                                        hintStyle: TextStyle(color: Colors.grey),
+                                        border: UnderlineInputBorder(),
                                       ),
+                                      validator: (value) {
+                                        if (_periodValue == '기타' && (value == null || value.trim().isEmpty)) {
+                                          return '기타 항목을 입력하세요.';
+                                        }
+                                        return null;
+                                      },
                                     ),
+                                  ),
                                 ],
                               ),
                               value: '기타',
                               groupValue: _periodValue,
                               onChanged: (v) => setState(() => _periodValue = v),
                             ),
+                            if (_periodValue == null && _hasSubmitted)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 4, bottom: 8),
+                                child: Text('운영진 활동 기간을 선택하거나 기타 항목을 입력하세요.', style: TextStyle(color: Colors.red)),
+                              ),
                           ],
                         ),
 
@@ -493,7 +494,7 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                             decoration: TextDecoration.none,
                             decorationThickness: 0,
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty) ? '입력하세요.' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty) ? '각오 한 마디를 입력하세요.' : null,
                         ),
                         const SizedBox(height: 16),
                         const Text('제출 시 개인정보 제공에 동의하는 것으로 간주합니다. 개인정보 동의를 하지 않으실 경우 해당 설문을 제출하지 않으시면 됩니다.', style: TextStyle(fontSize: 13)),
@@ -523,6 +524,19 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                                       // 첫 번째 에러가 있는 항목으로 스크롤
                                       WidgetsBinding.instance.addPostFrameCallback((_) {
                                         _scrollToFirstError();
+                                      });
+                                      return;
+                                    }
+                                    
+                                    // 중복 확인
+                                    final duplicateMsg = await _checkDuplicate();
+                                    if (duplicateMsg != null) {
+                                      setState(() {
+                                        _error = duplicateMsg;
+                                      });
+                                      // 중복 확인 실패 시 상단으로 스크롤
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        _scrollToTop();
                                       });
                                       return;
                                     }

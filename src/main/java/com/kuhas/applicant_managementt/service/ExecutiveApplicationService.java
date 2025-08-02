@@ -98,6 +98,21 @@ public class ExecutiveApplicationService {
         repository.delete(entity);
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByStudentId(String studentId) {
+        return repository.existsByStudentId(studentId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return repository.existsByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByPhoneNumber(String phoneNumber) {
+        return repository.existsByPhoneNumber(phoneNumber);
+    }
+
     // 지원서 상태 변경
     public ExecutiveApplicationResponse updateApplicationStatus(Long id, ExecutiveApplication.ApplicationStatus newStatus) {
         ExecutiveApplication application = repository.findById(id)
