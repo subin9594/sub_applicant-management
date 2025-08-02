@@ -115,8 +115,6 @@ public class EmailService {
             helper.setTo(applicationForm.getEmail());
             helper.setFrom(new InternetAddress("koreauniv.kuhas@gmail.com", "KUHAS"));
 
-            String motivationHtml = insertLineBreaks(applicationForm.getMotivation(), 30, true);
-            String motivationPlain = insertLineBreaks(applicationForm.getMotivation(), 30, false);
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
 
             String subject, htmlContent, plainText;
@@ -142,11 +140,6 @@ public class EmailService {
                 "<tr><td style='width:30%;'><b>이메일</b></td><td style='padding-left:16px; width:70%;'>" + applicationForm.getEmail() + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>상태</b></td><td style='padding-left:16px; width:70%; color:" + statusColor + ";'>" + statusDisplay + "</td></tr>" +
                 "</table>" +
-                // 지원동기
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>지원동기</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + motivationHtml + "</div>" +
-                "</div>" +
                 // 하단
                 "<div style='text-align:center; margin-top:32px;'><a href='" + infoUrl + "' style='color:#3b82f6; text-decoration:underline;'>KUHAS Notion 바로가기</a></div>" +
                 "<div style='text-align:center; color:#888; font-size:13px; margin-top:8px;'>© 2025 KUHAS. All rights reserved.</div>" +
@@ -160,7 +153,6 @@ public class EmailService {
                 "학번: " + applicationForm.getStudentId() + "\n" +
                 "이메일: " + applicationForm.getEmail() + "\n" +
                 "전화번호: " + applicationForm.getPhoneNumber() + "\n" +
-                "지원동기: " + motivationPlain + "\n" +
                 "현재 상태: " + statusDisplay + "\n\n" +
                 "KUHAS Notion 바로가기: " + infoUrl + "\n" +
                 "© 2025 KUHAS. All rights reserved.";
@@ -353,11 +345,37 @@ public class EmailService {
                 .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
-    // 줄바꿈 함수 수정 - 한글 텍스트 처리 개선
+    // 줄바꿈 함수 수정 - 긴 텍스트 자동 줄바꿈
     private String insertLineBreaks(String text, int maxLen, boolean html) {
-        if (text == null) return "";
-        // 한글 텍스트는 줄바꿈 없이 그대로 반환
-        return text;
+        if (text == null || text.trim().isEmpty()) return "";
+        
+        // HTML인 경우 <br> 태그로 줄바꿈, 일반 텍스트는 \n으로 줄바꿈
+        String lineBreak = html ? "<br>" : "\n";
+        
+        // 긴 텍스트를 maxLen 글자마다 줄바꿈
+        StringBuilder result = new StringBuilder();
+        int count = 0;
+        
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            result.append(c);
+            count++;
+            
+            // maxLen 글자마다 줄바꿈 (단어 중간에서 끊기지 않도록 개선)
+            if (count >= maxLen) {
+                // 다음 공백을 찾아서 그곳에서 줄바꿈
+                int nextSpace = text.indexOf(' ', i + 1);
+                if (nextSpace != -1 && nextSpace - i <= 10) { // 10글자 이내에 공백이 있으면
+                    result.append(lineBreak);
+                    count = 0;
+                } else {
+                    result.append(lineBreak);
+                    count = 0;
+                }
+            }
+        }
+        
+        return result.toString();
     }
 
     private String nullToDash(String s) {
@@ -465,8 +483,6 @@ public class EmailService {
             helper.setSubject(subject);
 
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
-            String motivationHtml = insertLineBreaks(execApp.getMotivation(), 30, true);
-            String motivationPlain = insertLineBreaks(execApp.getMotivation(), 30, false);
 
             String htmlContent =
                 "<html><body style='font-family:Arial,sans-serif; color:#222;'>" +
@@ -484,11 +500,6 @@ public class EmailService {
                 "<tr><td style='width:30%;'><b>전화번호</b></td><td style='padding-left:16px; width:70%;'>" + execApp.getPhoneNumber() + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>상태</b></td><td style='padding-left:16px; width:70%; color:" + statusColor + ";'>" + statusText + "</td></tr>" +
                 "</table>" +
-                // 지원동기
-                "<div style='text-align:center; margin-top:16px;'>" +
-                "<b>지원동기</b>" +
-                "<div style='display:inline-block; background:#f7f7f7; border-radius:8px; padding:12px; margin-top:4px; text-align:left; max-width:400px;'>" + motivationHtml + "</div>" +
-                "</div>" +
                 // 하단
                 "<div style='text-align:center; margin-top:32px;'><a href='" + infoUrl + "' style='color:#3b82f6; text-decoration:underline;'>KUHAS Notion 바로가기</a></div>" +
                 "<div style='text-align:center; color:#888; font-size:13px; margin-top:8px;'>© 2025 KUHAS. All rights reserved.</div>" +
@@ -503,7 +514,6 @@ public class EmailService {
                 "학년: " + execApp.getGrade() + "\n" +
                 "이메일: " + execApp.getEmail() + "\n" +
                 "전화번호: " + execApp.getPhoneNumber() + "\n" +
-                "지원동기: " + motivationPlain + "\n" +
                 "현재 상태: " + statusText + "\n\n" +
                 "KUHAS Notion 바로가기: " + infoUrl + "\n" +
                 "© 2025 KUHAS. All rights reserved.";

@@ -245,6 +245,9 @@ class _AdminApplicationDetailPageState extends State<AdminApplicationDetailPage>
             style: TextStyle(
               fontSize: isLongText ? 14 : 16,
             ),
+            softWrap: true,
+            maxLines: null,
+            overflow: TextOverflow.visible,
           ),
         ],
       ),

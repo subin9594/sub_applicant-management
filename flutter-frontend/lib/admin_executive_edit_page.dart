@@ -152,10 +152,10 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
         // 성공 메시지 표시 후 네비게이션
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('운영진 지원서가 성공적으로 수정되었습니다.'),
+            SnackBar(
+              content: Text('${_nameController.text.trim()}의 운영진 지원서가 성공적으로 수정되었습니다.'),
               backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
+              duration: Duration(seconds: 3),
             ),
           );
           
