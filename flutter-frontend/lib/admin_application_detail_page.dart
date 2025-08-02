@@ -138,16 +138,6 @@ class _AdminApplicationDetailPageState extends State<AdminApplicationDetailPage>
                       await _refreshApplication();
                       // 메인 리스트도 새로고침
                       widget.onSaved();
-                      // 성공 메시지
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('부원 지원서가 성공적으로 수정되었습니다.'),
-                            backgroundColor: Colors.green,
-                            duration: Duration(seconds: 3),
-                          ),
-                        );
-                      }
                     },
                   ),
                 ),

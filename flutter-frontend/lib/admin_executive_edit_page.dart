@@ -544,7 +544,26 @@ class _AdminExecutiveEditPageState extends State<AdminExecutiveEditPage> {
                           ? null
                           : () async {
                               if (_formKey.currentState?.validate() ?? false) {
-                                _submitForm();
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('수정 확인'),
+                                    content: const Text('운영진 지원서를 수정하시겠습니까?\n확인을 누르면 수정이 됩니다.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(ctx).pop(),
+                                        child: const Text('취소'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(ctx).pop();
+                                          _submitForm();
+                                        },
+                                        child: const Text('확인'),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               }
                             },
                       child: _isSubmitting

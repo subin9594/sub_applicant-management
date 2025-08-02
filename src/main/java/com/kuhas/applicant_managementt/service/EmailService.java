@@ -263,6 +263,14 @@ public class EmailService {
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
             String motivationHtml = insertLineBreaks(execApp.getMotivation(), 30, true);
             String motivationPlain = insertLineBreaks(execApp.getMotivation(), 30, false);
+            String leavePlanHtml = insertLineBreaks(execApp.getLeavePlan(), 30, true);
+            String leavePlanPlain = insertLineBreaks(execApp.getLeavePlan(), 30, false);
+            String goalHtml = insertLineBreaks(execApp.getGoal(), 30, true);
+            String goalPlain = insertLineBreaks(execApp.getGoal(), 30, false);
+            String crisisHtml = insertLineBreaks(execApp.getCrisis(), 30, true);
+            String crisisPlain = insertLineBreaks(execApp.getCrisis(), 30, false);
+            String resolutionHtml = insertLineBreaks(execApp.getResolution(), 30, true);
+            String resolutionPlain = insertLineBreaks(execApp.getResolution(), 30, false);
 
             String htmlContent =
                 "<html><body style='font-family:Arial,sans-serif; color:#222;'>" +
@@ -278,12 +286,12 @@ public class EmailService {
                 "<tr><td style='width:30%;'><b>학년</b></td><td style='padding-left:16px; width:70%;'>" + execApp.getGrade() + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>이메일</b></td><td style='padding-left:16px; width:70%;'>" + execApp.getEmail() + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>전화번호</b></td><td style='padding-left:16px; width:70%;'>" + execApp.getPhoneNumber() + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>휴학 계획</b></td><td style='padding-left:16px; width:70%;'>" + nullToDash(execApp.getLeavePlan()) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>휴학 계획</b></td><td style='padding-left:16px; width:70%;'>" + (execApp.getLeavePlan() != null && !execApp.getLeavePlan().trim().isEmpty() ? leavePlanHtml : "-") + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>활동 기간</b></td><td style='padding-left:16px; width:70%;'>" + nullToDash(execApp.getPeriod()) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>활동 목표</b></td><td style='padding-left:16px; width:70%;'>" + nullToDash(execApp.getGoal()) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>위기 극복 경험</b></td><td style='padding-left:16px; width:70%;'>" + nullToDash(execApp.getCrisis()) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>활동 목표</b></td><td style='padding-left:16px; width:70%;'>" + (execApp.getGoal() != null && !execApp.getGoal().trim().isEmpty() ? goalHtml : "-") + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>위기 극복 경험</b></td><td style='padding-left:16px; width:70%;'>" + (execApp.getCrisis() != null && !execApp.getCrisis().trim().isEmpty() ? crisisHtml : "-") + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>회의 참석</b></td><td style='padding-left:16px; width:70%;'>" + nullToDash(execApp.getMeeting()) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>각오 한 마디</b></td><td style='padding-left:16px; width:70%;'>" + nullToDash(execApp.getResolution()) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>각오 한 마디</b></td><td style='padding-left:16px; width:70%;'>" + (execApp.getResolution() != null && !execApp.getResolution().trim().isEmpty() ? resolutionHtml : "-") + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>개인정보 동의</b></td><td style='padding-left:16px; width:70%;'>" + nullToDash(execApp.getPrivacy()) + "</td></tr>" +
                 "</table>" +
                 // 지원동기
@@ -308,12 +316,12 @@ public class EmailService {
                 "학년: " + execApp.getGrade() + "\n" +
                 "이메일: " + execApp.getEmail() + "\n" +
                 "전화번호: " + execApp.getPhoneNumber() + "\n" +
-                "휴학 계획: " + nullToDash(execApp.getLeavePlan()) + "\n" +
+                "휴학 계획: " + leavePlanPlain + "\n" +
                 "활동 기간: " + nullToDash(execApp.getPeriod()) + "\n" +
-                "활동 목표: " + nullToDash(execApp.getGoal()) + "\n" +
-                "위기 극복 경험: " + nullToDash(execApp.getCrisis()) + "\n" +
+                "활동 목표: " + goalPlain + "\n" +
+                "위기 극복 경험: " + crisisPlain + "\n" +
                 "회의 참석: " + nullToDash(execApp.getMeeting()) + "\n" +
-                "각오 한 마디: " + nullToDash(execApp.getResolution()) + "\n" +
+                "각오 한 마디: " + resolutionPlain + "\n" +
                 "개인정보 동의: " + nullToDash(execApp.getPrivacy()) + "\n" +
                 "지원동기: " + motivationPlain + "\n" +
                 "현재 상태: " + execApp.getStatus().getDisplayName() + "\n\n" +
@@ -392,6 +400,14 @@ public class EmailService {
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
             String motivationHtml = insertLineBreaks(request.getMotivation(), 30, true);
             String motivationPlain = insertLineBreaks(request.getMotivation(), 30, false);
+            String leavePlanHtml = insertLineBreaks(request.getLeavePlan(), 30, true);
+            String leavePlanPlain = insertLineBreaks(request.getLeavePlan(), 30, false);
+            String goalHtml = insertLineBreaks(request.getGoal(), 30, true);
+            String goalPlain = insertLineBreaks(request.getGoal(), 30, false);
+            String crisisHtml = insertLineBreaks(request.getCrisis(), 30, true);
+            String crisisPlain = insertLineBreaks(request.getCrisis(), 30, false);
+            String resolutionHtml = insertLineBreaks(request.getResolution(), 30, true);
+            String resolutionPlain = insertLineBreaks(request.getResolution(), 30, false);
 
             String htmlContent =
                 "<html><body style='font-family:Arial,sans-serif; color:#222;'>" +
@@ -407,12 +423,12 @@ public class EmailService {
                 "<tr><td style='width:30%;'><b>학년</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getGrade(), request.getGrade()) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>이메일</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getEmail(), request.getEmail()) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>전화번호</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getPhoneNumber(), request.getPhoneNumber()) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>휴학 계획</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getLeavePlan(), request.getLeavePlan()) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>휴학 계획</b></td><td style='padding-left:16px; width:70%;'>" + (request.getLeavePlan() != null && !request.getLeavePlan().trim().isEmpty() ? highlightIfChanged(before.getLeavePlan(), leavePlanHtml) : highlightIfChanged(before.getLeavePlan(), "-")) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>활동 기간</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getPeriod(), request.getPeriod()) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>활동 목표</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getGoal(), request.getGoal()) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>위기 극복 경험</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getCrisis(), request.getCrisis()) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>활동 목표</b></td><td style='padding-left:16px; width:70%;'>" + (request.getGoal() != null && !request.getGoal().trim().isEmpty() ? highlightIfChanged(before.getGoal(), goalHtml) : highlightIfChanged(before.getGoal(), "-")) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>위기 극복 경험</b></td><td style='padding-left:16px; width:70%;'>" + (request.getCrisis() != null && !request.getCrisis().trim().isEmpty() ? highlightIfChanged(before.getCrisis(), crisisHtml) : highlightIfChanged(before.getCrisis(), "-")) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>회의 참석</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getMeeting(), request.getMeeting()) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>각오 한 마디</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getResolution(), request.getResolution()) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>각오 한 마디</b></td><td style='padding-left:16px; width:70%;'>" + (request.getResolution() != null && !request.getResolution().trim().isEmpty() ? highlightIfChanged(before.getResolution(), resolutionHtml) : highlightIfChanged(before.getResolution(), "-")) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>개인정보 동의</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getPrivacy(), request.getPrivacy()) + "</td></tr>" +
                 "</table>" +
                 // 지원동기
@@ -436,12 +452,12 @@ public class EmailService {
                 "학년: " + nullToDash(request.getGrade()) + "\n" +
                 "이메일: " + request.getEmail() + "\n" +
                 "전화번호: " + request.getPhoneNumber() + "\n" +
-                "휴학 계획: " + nullToDash(request.getLeavePlan()) + "\n" +
+                "휴학 계획: " + leavePlanPlain + "\n" +
                 "활동 기간: " + nullToDash(request.getPeriod()) + "\n" +
-                "활동 목표: " + nullToDash(request.getGoal()) + "\n" +
-                "위기 극복 경험: " + nullToDash(request.getCrisis()) + "\n" +
+                "활동 목표: " + goalPlain + "\n" +
+                "위기 극복 경험: " + crisisPlain + "\n" +
                 "회의 참석: " + nullToDash(request.getMeeting()) + "\n" +
-                "각오 한 마디: " + nullToDash(request.getResolution()) + "\n" +
+                "각오 한 마디: " + resolutionPlain + "\n" +
                 "개인정보 동의: " + nullToDash(request.getPrivacy()) + "\n" +
                 "지원동기: " + motivationPlain + "\n\n" +
                 "결과는 이메일로 안내드릴 예정입니다. 감사합니다.\n" +
