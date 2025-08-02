@@ -79,16 +79,20 @@ class _AdminApplicationDetailPageState extends State<AdminApplicationDetailPage>
     final response = await http.delete(url);
     
     if (response.statusCode == 200 || response.statusCode == 204) {
-      widget.onSaved();
-      // 삭제 후 이전 페이지로 돌아가고 성공 메시지 표시
+      // 삭제 후 지원서 목록으로 돌아가고 성공 메시지 표시
+      widget.onSaved(); // 지원서 목록 새로고침
+      // 상세 페이지만 닫고 목록 페이지로 돌아가기
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('지원서가 성공적으로 삭제되었습니다.'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
-        ),
-      );
+      // 성공 메시지는 메인 페이지에서 표시
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${_application['name']}의 부원 지원서가 성공적으로 삭제되었습니다.'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('삭제에 실패했습니다.')),

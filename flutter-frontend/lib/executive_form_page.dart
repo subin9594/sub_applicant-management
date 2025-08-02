@@ -469,17 +469,17 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           groupValue: _meetingValue,
                           onChanged: (v) => setState(() => _meetingValue = v),
                         ),
-                        if (_meetingValue == null && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('회의 참석 가능 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
-                          ),
                         RadioListTile<String>(
                           title: const Text('불가능'),
                           value: '불가능',
                           groupValue: _meetingValue,
                           onChanged: (v) => setState(() => _meetingValue = v),
                         ),
+                        if (_meetingValue == null && _hasSubmitted)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('회의 참석 가능 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
+                          ),
 
                         const SizedBox(height: 16),
                         TextFormField(
@@ -496,6 +496,11 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty) ? '각오 한 마디를 입력하세요.' : null,
                         ),
+                        if (_resolutionController.text.trim().isEmpty && _hasSubmitted)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, bottom: 8),
+                            child: Text('각오 한 마디를 입력하세요.', style: TextStyle(color: Colors.red)),
+                          ),
                         const SizedBox(height: 16),
                         const Text('제출 시 개인정보 제공에 동의하는 것으로 간주합니다. 개인정보 동의를 하지 않으실 경우 해당 설문을 제출하지 않으시면 됩니다.', style: TextStyle(fontSize: 13)),
                         RadioListTile<String>(
