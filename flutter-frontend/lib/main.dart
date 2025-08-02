@@ -390,11 +390,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showNameError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('이름을 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _studentIdController,
@@ -410,14 +406,10 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showStudentIdError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('학번을 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
-                                                 DropdownButtonFormField<String>(
-                           value: _gradeDropdownValue,
+                                                                         DropdownButtonFormField<String>(
+                          value: _gradeDropdownValue,
                           items: [
                             '1학년', '2학년', '3학년', '4학년'
                           ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
@@ -425,11 +417,6 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           decoration: const InputDecoration(labelText: '학년'),
                           validator: (v) => v == null ? '학년을 선택하세요.' : null,
                         ),
-                        if (_showGradeError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('학년을 선택하세요.', style: TextStyle(color: Colors.red)),
-                          ),
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _phoneController,
@@ -445,11 +432,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showPhoneError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('전화번호를 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _emailController,
@@ -465,11 +448,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showEmailError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('이메일을 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _motivationController,
@@ -486,11 +465,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showMotivationError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('지원동기를 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _otherActivityController,
@@ -506,11 +481,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showOtherActivityError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('기타 활동을 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _curriculumReasonController,
@@ -526,11 +497,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showCurriculumReasonError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('커리큘럼 선택 이유를 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _wishController,
@@ -546,11 +513,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showWishError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('희망사항을 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  TextFormField(
                            controller: _careerController,
@@ -566,11 +529,7 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             return null;
                           },
                         ),
-                        if (_showCareerError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('진로를 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                                                  const Text('프로그래밍 언어 경험 여부', style: TextStyle(fontWeight: FontWeight.bold)),
                          Column(
@@ -623,36 +582,42 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                                     });
                                   },
                                 ),
-                                const Text('X'),
-                              ],
-                            ),
-                          ],
-                        ),
-                        if (_showLanguageExpError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('프로그래밍 언어 경험 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
-                          ),
-                        if (_showLanguageDetailError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('경험한 언어를 입력하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+                                                                 const Text('X'),
+                               ],
+                             ),
+                           ],
+                         ),
+                         if (_languageExp == null && _hasSubmitted)
+                           const Padding(
+                             padding: EdgeInsets.only(top: 4, bottom: 8),
+                             child: Text('프로그래밍 언어 경험 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
+                           ),
+                         if (_languageExp == 'O' && _languageController.text.trim().isEmpty && _hasSubmitted)
+                           const Padding(
+                             padding: EdgeInsets.only(top: 4, bottom: 8),
+                             child: Text('경험한 언어를 입력하세요.', style: TextStyle(color: Colors.red)),
+                           ),
+
                         const SizedBox(height: 16),
                                                  const Text('희망 활동 (중복 선택 가능)', style: TextStyle(fontWeight: FontWeight.bold)),
-                         CheckboxListTile(
-                          title: const Text('활동 1'),
-                          value: _wishActivities.contains('활동 1'),
-                          onChanged: (checked) {
-                            setState(() {
-                              if (checked == true) {
-                                _wishActivities.add('활동 1');
-                              } else {
-                                _wishActivities.remove('활동 1');
-                              }
-                            });
-                          },
-                        ),
+                                                  CheckboxListTile(
+                           title: const Text('활동 1'),
+                           value: _wishActivities.contains('활동 1'),
+                           onChanged: (checked) {
+                             setState(() {
+                               if (checked == true) {
+                                 _wishActivities.add('활동 1');
+                               } else {
+                                 _wishActivities.remove('활동 1');
+                               }
+                             });
+                           },
+                         ),
+                         if (_wishActivities.isEmpty && _hasSubmitted)
+                           const Padding(
+                             padding: EdgeInsets.only(top: 4, bottom: 8),
+                             child: Text('희망 활동을 선택하세요.', style: TextStyle(color: Colors.red)),
+                           ),
                         CheckboxListTile(
                           title: const Text('활동 2'),
                           value: _wishActivities.contains('활동 2'),
@@ -679,20 +644,21 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             });
                           },
                         ),
-                         if (_showWishActivitiesError && _hasSubmitted)
-                           const Padding(
-                             padding: EdgeInsets.only(top: 4, bottom: 8),
-                             child: Text('희망 활동을 선택하세요.', style: TextStyle(color: Colors.red)),
-                           ),
+
                          const SizedBox(height: 16),
                                                  const Text('대면 면접 희망 날짜', style: TextStyle(fontWeight: FontWeight.bold)),
 
-                        RadioListTile<String>(
-                          title: const Text('9월 1일(화)'),
-                          value: '9월 1일(화)',
-                          groupValue: _selectedInterviewDate,
-                          onChanged: (v) => setState(() => _selectedInterviewDate = v),
-                        ),
+                                                 RadioListTile<String>(
+                           title: const Text('9월 1일(화)'),
+                           value: '9월 1일(화)',
+                           groupValue: _selectedInterviewDate,
+                           onChanged: (v) => setState(() => _selectedInterviewDate = v),
+                         ),
+                         if (_selectedInterviewDate == null && _hasSubmitted)
+                           const Padding(
+                             padding: EdgeInsets.only(top: 4, bottom: 8),
+                             child: Text('대면 면접 희망 날짜를 선택하세요.', style: TextStyle(color: Colors.red)),
+                           ),
                         RadioListTile<String>(
                           title: const Text('9월 2일(수)'),
                           value: '9월 2일(수)',
@@ -711,19 +677,20 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           groupValue: _selectedInterviewDate,
                           onChanged: (v) => setState(() => _selectedInterviewDate = v),
                         ),
-                        if (_showInterviewDateError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('대면 면접 희망 날짜를 선택하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                         const Text('개강총회 참석 여부', style: TextStyle(fontWeight: FontWeight.bold)),
-                        RadioListTile<String>(
-                          title: const Text('개강총회만 참석'),
-                          value: '개강총회만 참석',
-                          groupValue: _selectedAttendType,
-                          onChanged: (v) => setState(() => _selectedAttendType = v),
-                        ),
+                                                 RadioListTile<String>(
+                           title: const Text('개강총회만 참석'),
+                           value: '개강총회만 참석',
+                           groupValue: _selectedAttendType,
+                           onChanged: (v) => setState(() => _selectedAttendType = v),
+                         ),
+                         if (_selectedAttendType == null && _hasSubmitted)
+                           const Padding(
+                             padding: EdgeInsets.only(top: 4, bottom: 8),
+                             child: Text('개강총회 참석 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
+                           ),
                         RadioListTile<String>(
                           title: const Text('뒷풀이만 참석'),
                           value: '뒷풀이만 참석',
@@ -736,24 +703,21 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                           groupValue: _selectedAttendType,
                           onChanged: (v) => setState(() => _selectedAttendType = v),
                         ),
-                        if (_showAttendTypeError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('개강총회 참석 여부를 선택하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+
                         const SizedBox(height: 16),
                         const Text('제출 시 개인정보 제공에 동의하는 것으로 간주합니다. 개인정보 동의를 하지 않으실 경우 해당 설문을 제출하지 않으시면 됩니다.', style: TextStyle(fontSize: 13)),
-                        RadioListTile<String>(
-                          title: const Text('예'),
-                          value: '예',
-                          groupValue: _privacyValue,
-                          onChanged: (v) => setState(() => _privacyValue = v),
-                        ),
-                        if (_showPrivacyError && _hasSubmitted)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4, bottom: 8),
-                            child: Text('개인정보 동의를 선택하세요.', style: TextStyle(color: Colors.red)),
-                          ),
+                                                 RadioListTile<String>(
+                           title: const Text('예'),
+                           value: '예',
+                           groupValue: _privacyValue,
+                           onChanged: (v) => setState(() => _privacyValue = v),
+                         ),
+                         if (_privacyValue == null && _hasSubmitted)
+                           const Padding(
+                             padding: EdgeInsets.only(top: 4, bottom: 8),
+                             child: Text('개인정보 동의를 선택하세요.', style: TextStyle(color: Colors.red)),
+                           ),
+
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
@@ -761,48 +725,11 @@ class _ApplicantFormPageState extends State<ApplicantFormPage> {
                             onPressed: _isSubmitting
                                 ? null
                                 : () async {
-                                    // 모든 필수 항목 검증
-                                    setState(() {
-                                      _hasSubmitted = true;
-                                      _showNameError = _nameController.text.trim().isEmpty;
-                                      _showStudentIdError = _studentIdController.text.trim().isEmpty;
-                                      _showGradeError = _gradeDropdownValue == null || _gradeDropdownValue!.trim().isEmpty;
-                                      _showPhoneError = _phoneController.text.trim().isEmpty;
-                                      _showEmailError = _emailController.text.trim().isEmpty;
-                                      _showMotivationError = _motivationController.text.trim().isEmpty;
-                                      _showOtherActivityError = _otherActivityController.text.trim().isEmpty;
-                                      _showCurriculumReasonError = _curriculumReasonController.text.trim().isEmpty;
-                                      _showWishError = _wishController.text.trim().isEmpty;
-                                      _showCareerError = _careerController.text.trim().isEmpty;
-                                      _showPrivacyError = _privacyValue == null || _privacyValue!.trim().isEmpty;
-                                      _showLanguageExpError = _languageExp == null || _languageExp!.trim().isEmpty;
-                                      _showLanguageDetailError = _languageExp == 'O' && (_languageController.text.trim().isEmpty);
-                                      _showWishActivitiesError = _wishActivities.isEmpty;
-                                      _showInterviewDateError = _selectedInterviewDate == null || _selectedInterviewDate!.trim().isEmpty;
-                                      _showAttendTypeError = _selectedAttendType == null || _selectedAttendType!.trim().isEmpty;
-                                    });
-
-                                    // 모든 에러 메시지 수집
-                                    List<String> errorMessages = [];
-                                    if (_showNameError) errorMessages.add('이름을 입력하세요.');
-                                    if (_showStudentIdError) errorMessages.add('학번을 입력하세요.');
-                                    if (_showGradeError) errorMessages.add('학년을 선택하세요.');
-                                    if (_showPhoneError) errorMessages.add('전화번호를 입력하세요.');
-                                    if (_showEmailError) errorMessages.add('이메일을 입력하세요.');
-                                    if (_showMotivationError) errorMessages.add('지원동기를 입력하세요.');
-                                    if (_showOtherActivityError) errorMessages.add('기타 활동을 입력하세요.');
-                                    if (_showCurriculumReasonError) errorMessages.add('커리큘럼 선택 이유를 입력하세요.');
-                                    if (_showWishError) errorMessages.add('희망사항을 입력하세요.');
-                                    if (_showCareerError) errorMessages.add('진로를 입력하세요.');
-                                    if (_showPrivacyError) errorMessages.add('개인정보 동의를 선택하세요.');
-                                    if (_showLanguageExpError) errorMessages.add('프로그래밍 언어 경험 여부를 선택하세요.');
-                                    if (_showLanguageDetailError) errorMessages.add('경험한 언어를 입력하세요.');
-                                    if (_showWishActivitiesError) errorMessages.add('희망 활동을 선택하세요.');
-                                    if (_showInterviewDateError) errorMessages.add('대면 면접 희망 날짜를 선택하세요.');
-                                    if (_showAttendTypeError) errorMessages.add('개강총회 참석 여부를 선택하세요.');
-
                                                                          // 폼 검증
-                                     if (!_formKey.currentState!.validate() || errorMessages.isNotEmpty) {
+                                     setState(() {
+                                       _hasSubmitted = true;
+                                     });
+                                     if (!_formKey.currentState!.validate()) {
                                        // 첫 번째 에러가 있는 항목으로 스크롤
                                        WidgetsBinding.instance.addPostFrameCallback((_) {
                                          _scrollToFirstError();
