@@ -178,6 +178,16 @@ public class EmailService {
             String infoUrl = "https://www.notion.so/K-U-H-A-S-3ff94268d9c74280b9840d56833ea762";
             String motivationHtml = insertLineBreaks(motivation, 30, true);
             String motivationPlain = insertLineBreaks(motivation, 30, false);
+            String otherActivityHtml = insertLineBreaks(otherActivity, 30, true);
+            String otherActivityPlain = insertLineBreaks(otherActivity, 30, false);
+            String curriculumReasonHtml = insertLineBreaks(curriculumReason, 30, true);
+            String curriculumReasonPlain = insertLineBreaks(curriculumReason, 30, false);
+            String wishHtml = insertLineBreaks(wish, 30, true);
+            String wishPlain = insertLineBreaks(wish, 30, false);
+            String careerHtml = insertLineBreaks(career, 30, true);
+            String careerPlain = insertLineBreaks(career, 30, false);
+            String languageDetailHtml = insertLineBreaks(languageDetail, 30, true);
+            String languageDetailPlain = insertLineBreaks(languageDetail, 30, false);
 
             String htmlContent =
                 "<html><body style='font-family:Arial,sans-serif; color:#222;'>" +
@@ -194,12 +204,12 @@ public class EmailService {
                 "<tr><td style='width:30%;'><b>이메일</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getEmail(), email) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>상태</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getStatus().name(), status) + "</td></tr>" +
                 // 추가 항목들
-                "<tr><td style='width:30%;'><b>기타 활동</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getOtherActivity(), otherActivity) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>커리큘럼 이수 가능 이유</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getCurriculumReason(), curriculumReason) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>KUHAS에서 얻고 싶은 것</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getWish(), wish) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>진로</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getCareer(), career) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>기타 활동</b></td><td style='padding-left:16px; width:70%;'>" + (otherActivity != null && !otherActivity.trim().isEmpty() ? highlightIfChanged(before.getOtherActivity(), otherActivityHtml) : highlightIfChanged(before.getOtherActivity(), "-")) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>커리큘럼 이수 가능 이유</b></td><td style='padding-left:16px; width:70%;'>" + (curriculumReason != null && !curriculumReason.trim().isEmpty() ? highlightIfChanged(before.getCurriculumReason(), curriculumReasonHtml) : highlightIfChanged(before.getCurriculumReason(), "-")) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>KUHAS에서 얻고 싶은 것</b></td><td style='padding-left:16px; width:70%;'>" + (wish != null && !wish.trim().isEmpty() ? highlightIfChanged(before.getWish(), wishHtml) : highlightIfChanged(before.getWish(), "-")) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>진로</b></td><td style='padding-left:16px; width:70%;'>" + (career != null && !career.trim().isEmpty() ? highlightIfChanged(before.getCareer(), careerHtml) : highlightIfChanged(before.getCareer(), "-")) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>프로그래밍 언어 경험</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getLanguageExp(), languageExp) + "</td></tr>" +
-                "<tr><td style='width:30%;'><b>경험한 언어</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getLanguageDetail(), languageDetail) + "</td></tr>" +
+                "<tr><td style='width:30%;'><b>경험한 언어</b></td><td style='padding-left:16px; width:70%;'>" + (languageDetail != null && !languageDetail.trim().isEmpty() ? highlightIfChanged(before.getLanguageDetail(), languageDetailHtml) : highlightIfChanged(before.getLanguageDetail(), "-")) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>희망 활동</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getWishActivities(), wishActivities) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>대면 면접 희망 날짜</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getInterviewDate(), interviewDate) + "</td></tr>" +
                 "<tr><td style='width:30%;'><b>개강총회 참석</b></td><td style='padding-left:16px; width:70%;'>" + highlightIfChanged(before.getAttendType(), attendType) + "</td></tr>" +
@@ -226,12 +236,12 @@ public class EmailService {
                 "학번: " + studentId + "\n" +
                 "이메일: " + email + "\n" +
                 "전화번호: " + phoneNumber + "\n" +
-                "기타 활동: " + nullToDash(otherActivity) + "\n" +
-                "커리큘럼 이수 가능 이유: " + nullToDash(curriculumReason) + "\n" +
-                "KUHAS에서 얻고 싶은 것: " + nullToDash(wish) + "\n" +
-                "진로: " + nullToDash(career) + "\n" +
+                "기타 활동: " + otherActivityPlain + "\n" +
+                "커리큘럼 이수 가능 이유: " + curriculumReasonPlain + "\n" +
+                "KUHAS에서 얻고 싶은 것: " + wishPlain + "\n" +
+                "진로: " + careerPlain + "\n" +
                 "프로그래밍 언어 경험: " + nullToDash(languageExp) + "\n" +
-                "경험한 언어: " + nullToDash(languageDetail) + "\n" +
+                "경험한 언어: " + languageDetailPlain + "\n" +
                 "희망 활동: " + nullToDash(wishActivities) + "\n" +
                 "대면 면접 희망 날짜: " + nullToDash(interviewDate) + "\n" +
                 "개강총회 참석: " + nullToDash(attendType) + "\n" +
