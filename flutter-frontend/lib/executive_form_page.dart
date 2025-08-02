@@ -71,14 +71,12 @@ class _ExecutiveFormPageState extends State<ExecutiveFormPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final scrollController = PrimaryScrollController.of(context);
-        if (scrollController != null) {
-          scrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        }
-      }
+        scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+            }
     });
   }
 

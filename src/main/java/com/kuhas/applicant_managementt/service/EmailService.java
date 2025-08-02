@@ -349,29 +349,18 @@ public class EmailService {
     private String insertLineBreaks(String text, int maxLen, boolean html) {
         if (text == null || text.trim().isEmpty()) return "";
         
-        // HTML인 경우 <br> 태그로 줄바꿈, 일반 텍스트는 \n으로 줄바꿈
         String lineBreak = html ? "<br>" : "\n";
-        
-        // 긴 텍스트를 maxLen 글자마다 줄바꿈
         StringBuilder result = new StringBuilder();
-        int count = 0;
+        int currentLen = 0;
         
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
             result.append(c);
-            count++;
+            currentLen++;
             
-            // maxLen 글자마다 줄바꿈 (단어 중간에서 끊기지 않도록 개선)
-            if (count >= maxLen) {
-                // 다음 공백을 찾아서 그곳에서 줄바꿈
-                int nextSpace = text.indexOf(' ', i + 1);
-                if (nextSpace != -1 && nextSpace - i <= 10) { // 10글자 이내에 공백이 있으면
-                    result.append(lineBreak);
-                    count = 0;
-                } else {
-                    result.append(lineBreak);
-                    count = 0;
-                }
+            if (currentLen >= maxLen) {
+                result.append(lineBreak);
+                currentLen = 0;
             }
         }
         
