@@ -138,25 +138,55 @@
       <label for="career">진로계획:</label>
       <textarea id="career" name="career" maxlength="1000" rows="4" cols="50" th:text="${career != null ? career : application.career}" autocomplete="off" placeholder="졸업 후 진로계획이나 목표를 작성해주세요."></textarea>
       
-      <label for="languageExp">언어 경험:</label>
-      <textarea id="languageExp" name="languageExp" maxlength="1000" rows="4" cols="50" th:text="${languageExp != null ? languageExp : application.languageExp}" autocomplete="off" placeholder="외국어 학습 경험이나 자격증이 있다면 작성해주세요. (없다면 '없음'이라고 작성해주세요.)"></textarea>
+      <label for="languageExp">프로그래밍 언어 경험 여부:</label>
+      <div>
+        <input type="radio" id="languageExp_O" name="languageExp" value="O" th:checked="${(languageExp != null ? languageExp : application.languageExp) == 'O'}">
+        <label for="languageExp_O">O</label>
+        <input type="radio" id="languageExp_X" name="languageExp" value="X" th:checked="${(languageExp != null ? languageExp : application.languageExp) == 'X'}">
+        <label for="languageExp_X">X</label>
+      </div>
       
       <label for="languageDetail">언어 상세:</label>
       <textarea id="languageDetail" name="languageDetail" maxlength="1000" rows="4" cols="50" th:text="${languageDetail != null ? languageDetail : application.languageDetail}" autocomplete="off" placeholder="언어 경험에 대한 추가 설명이나 구체적인 경험을 작성해주세요."></textarea>
       
-      <label for="wishActivities">희망 활동:</label>
-      <textarea id="wishActivities" name="wishActivities" maxlength="1000" rows="4" cols="50" th:text="${wishActivities != null ? wishActivities : application.wishActivities}" autocomplete="off" placeholder="KUHAS에서 참여하고 싶은 구체적인 활동이나 프로젝트를 작성해주세요."></textarea>
+      <label for="wishActivities">희망 활동 (중복 선택 가능):</label>
+      <div>
+        <input type="checkbox" id="wishActivities_1" name="wishActivities" value="활동 1" th:checked="${(wishActivities != null ? wishActivities : application.wishActivities) != null and (wishActivities != null ? wishActivities : application.wishActivities).contains('활동 1')}">
+        <label for="wishActivities_1">활동 1</label>
+        <br>
+        <input type="checkbox" id="wishActivities_2" name="wishActivities" value="활동 2" th:checked="${(wishActivities != null ? wishActivities : application.wishActivities) != null and (wishActivities != null ? wishActivities : application.wishActivities).contains('활동 2')}">
+        <label for="wishActivities_2">활동 2</label>
+        <br>
+        <input type="checkbox" id="wishActivities_3" name="wishActivities" value="활동 3" th:checked="${(wishActivities != null ? wishActivities : application.wishActivities) != null and (wishActivities != null ? wishActivities : application.wishActivities).contains('활동 3')}">
+        <label for="wishActivities_3">활동 3</label>
+      </div>
       
-      <label for="interviewDate">면접 일정:</label>
-      <input type="text" id="interviewDate" name="interviewDate" th:value="${interviewDate != null ? interviewDate : application.interviewDate}" maxlength="100" autocomplete="off" placeholder="면접 가능한 날짜와 시간을 작성해주세요.">
+      <label for="interviewDate">대면 면접 희망 날짜:</label>
+      <div>
+        <input type="radio" id="interviewDate_1" name="interviewDate" value="9월 1일(화)" th:checked="${(interviewDate != null ? interviewDate : application.interviewDate) == '9월 1일(화)'}">
+        <label for="interviewDate_1">9월 1일(화)</label>
+        <br>
+        <input type="radio" id="interviewDate_2" name="interviewDate" value="9월 2일(수)" th:checked="${(interviewDate != null ? interviewDate : application.interviewDate) == '9월 2일(수)'}">
+        <label for="interviewDate_2">9월 2일(수)</label>
+        <br>
+        <input type="radio" id="interviewDate_3" name="interviewDate" value="9월 3일(목)" th:checked="${(interviewDate != null ? interviewDate : application.interviewDate) == '9월 3일(목)'}">
+        <label for="interviewDate_3">9월 3일(목)</label>
+        <br>
+        <input type="radio" id="interviewDate_4" name="interviewDate" value="9월 4일(금)" th:checked="${(interviewDate != null ? interviewDate : application.interviewDate) == '9월 4일(금)'}">
+        <label for="interviewDate_4">9월 4일(금)</label>
+      </div>
       
-      <label for="attendType">참석 유형:</label>
-      <select id="attendType" name="attendType">
-        <option value="">참석 유형을 선택하세요</option>
-        <option value="대면" th:selected="${(attendType != null ? attendType : application.attendType) == '대면'}">대면</option>
-        <option value="온라인" th:selected="${(attendType != null ? attendType : application.attendType) == '온라인'}">온라인</option>
-        <option value="혼합" th:selected="${(attendType != null ? attendType : application.attendType) == '혼합'}">혼합</option>
-      </select>
+      <label for="attendType">개강총회 참석 여부:</label>
+      <div>
+        <input type="radio" id="attendType_1" name="attendType" value="개강총회만 참석" th:checked="${(attendType != null ? attendType : application.attendType) == '개강총회만 참석'}">
+        <label for="attendType_1">개강총회만 참석</label>
+        <br>
+        <input type="radio" id="attendType_2" name="attendType" value="뒷풀이만 참석" th:checked="${(attendType != null ? attendType : application.attendType) == '뒷풀이만 참석'}">
+        <label for="attendType_2">뒷풀이만 참석</label>
+        <br>
+        <input type="radio" id="attendType_3" name="attendType" value="둘 다 참석" th:checked="${(attendType != null ? attendType : application.attendType) == '둘 다 참석'}">
+        <label for="attendType_3">둘 다 참석</label>
+      </div>
       
       <label for="privacyAgreement">개인정보 동의:</label>
       <select id="privacyAgreement" name="privacyAgreement" required>
@@ -297,6 +327,11 @@
         
         // 폼 데이터 수집
         const formData = new FormData(e.target);
+        
+        // 체크박스 값들을 쉼표로 구분된 문자열로 변환
+        const wishActivitiesCheckboxes = document.querySelectorAll('input[name="wishActivities"]:checked');
+        const wishActivitiesValues = Array.from(wishActivitiesCheckboxes).map(cb => cb.value);
+        formData.set('wishActivities', wishActivitiesValues.join(', '));
         
         // fetch를 사용하여 폼 제출
         try {

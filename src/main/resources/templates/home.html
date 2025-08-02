@@ -194,11 +194,11 @@
       <label for="languageExp">언어 경험:</label>
       <div class="radio-group">
         <div class="radio-item">
-          <input type="radio" id="languageExp_yes" name="languageExp" value="있음">
+          <input type="radio" id="languageExp_yes" name="languageExp" value="있음" required>
           <label for="languageExp_yes">있음</label>
         </div>
         <div class="radio-item">
-          <input type="radio" id="languageExp_no" name="languageExp" value="없음">
+          <input type="radio" id="languageExp_no" name="languageExp" value="없음" required>
           <label for="languageExp_no">없음</label>
         </div>
       </div>
@@ -251,15 +251,15 @@
       <label for="attendType">개강총회 참석 유형:</label>
       <div class="radio-group">
         <div class="radio-item">
-          <input type="radio" id="attendType_1" name="attendType" value="개강총회만 참석">
+          <input type="radio" id="attendType_1" name="attendType" value="개강총회만 참석" required>
           <label for="attendType_1">개강총회만 참석</label>
         </div>
         <div class="radio-item">
-          <input type="radio" id="attendType_2" name="attendType" value="뒷풀이만 참석">
+          <input type="radio" id="attendType_2" name="attendType" value="뒷풀이만 참석" required>
           <label for="attendType_2">뒷풀이만 참석</label>
         </div>
         <div class="radio-item">
-          <input type="radio" id="attendType_3" name="attendType" value="둘 다 참석">
+          <input type="radio" id="attendType_3" name="attendType" value="둘 다 참석" required>
           <label for="attendType_3">둘 다 참석</label>
         </div>
       </div>
@@ -307,6 +307,12 @@
          el.addEventListener('input', hideError);
          el.addEventListener('change', hideError);
        });
+       // 체크박스 그룹에서 최소 하나 선택되도록 하는 함수
+       function validateCheckboxGroup(groupName) {
+         const checkboxes = document.querySelectorAll(`input[name="${groupName}"]:checked`);
+         return checkboxes.length > 0;
+       }
+       
        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
            e.preventDefault(); // 항상 먼저 막음
            errorDiv.style.display = 'none';
@@ -320,6 +326,19 @@
            const motivation = document.getElementById('motivation').value.trim();
            const privacyAgreement = document.getElementById('privacyAgreement').value.trim();
            
+           // 언어 경험 검증
+           const languageExp = document.querySelector('input[name="languageExp"]:checked');
+           const languageDetail = document.getElementById('languageDetail').value.trim();
+           
+           // 희망 활동 검증
+           const wishActivities = document.querySelectorAll('input[name="wishActivities"]:checked');
+           
+           // 면접 일정 검증
+           const interviewDate = document.querySelectorAll('input[name="interviewDate"]:checked');
+           
+           // 개강총회 참석 유형 검증
+           const attendType = document.querySelector('input[name="attendType"]:checked');
+           
            if (!name) missing.push('이름');
            if (!studentId) missing.push('학번');
            if (!phoneNumber) missing.push('전화번호');
@@ -327,6 +346,11 @@
            if (!grade) missing.push('학년');
            if (!motivation) missing.push('지원동기');
            if (!privacyAgreement) missing.push('개인정보 동의');
+           if (!languageExp) missing.push('프로그래밍 언어 경험 여부');
+           if (languageExp && languageExp.value === '있음' && !languageDetail) missing.push('경험한 언어');
+           if (!validateCheckboxGroup('wishActivities')) missing.push('희망 활동');
+           if (!validateCheckboxGroup('interviewDate')) missing.push('대면 면접 희망 날짜');
+           if (!attendType) missing.push('개강총회 참석 여부');
            
            if (missing.length > 0) {
                errorMsg = missing.join(', ') + ' 항목이 작성되지 않았습니다.';

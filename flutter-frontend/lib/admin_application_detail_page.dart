@@ -80,7 +80,15 @@ class _AdminApplicationDetailPageState extends State<AdminApplicationDetailPage>
     
     if (response.statusCode == 200 || response.statusCode == 204) {
       widget.onSaved();
-      Navigator.of(context).pop(); // 상세 페이지에서 목록으로 돌아가기
+      // 삭제 후 이전 페이지로 돌아가고 성공 메시지 표시
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('지원서가 성공적으로 삭제되었습니다.'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('삭제에 실패했습니다.')),

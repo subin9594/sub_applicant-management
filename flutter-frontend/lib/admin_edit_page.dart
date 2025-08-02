@@ -71,7 +71,14 @@ class _AdminEditPageState extends State<AdminEditPage> {
     _languageExpValue = widget.application['languageExp'];
     
     // 언어 경험에 따라 언어 상세 표시 여부 설정
-    _showLanguageDetail = _languageExpValue == '있음';
+    _showLanguageDetail = _languageExpValue == 'O';
+    
+    // 기존 데이터를 새로운 선택지에 맞게 변환
+    if (_languageExpValue == '있음') {
+      _languageExpValue = 'O';
+    } else if (_languageExpValue == '없음') {
+      _languageExpValue = 'X';
+    }
     
     // 희망 활동 파싱 (쉼표로 구분된 문자열을 리스트로 변환)
     if (widget.application['wishActivities'] != null && widget.application['wishActivities'].toString().isNotEmpty) {
@@ -155,7 +162,7 @@ class _AdminEditPageState extends State<AdminEditPage> {
           'languageExp': _languageExpValue,
           'languageDetail': _languageDetailController.text.trim(),
           'wishActivities': _wishActivitiesValues.join(', '),
-          'interviewDate': _interviewDateValues.join(', '),
+          'interviewDate': _interviewDateValues.isNotEmpty ? _interviewDateValues.first : '',
           'attendType': _attendTypeValue,
           'privacyAgreement': _privacyAgreementValue,
           'status': _status,
@@ -450,28 +457,28 @@ class _AdminEditPageState extends State<AdminEditPage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   RadioListTile<String>(
-                    title: const Text('있음'),
-                    value: '있음',
+                    title: const Text('O'),
+                    value: 'O',
                     groupValue: _languageExpValue,
                     onChanged: (v) {
                       setState(() {
                         _languageExpValue = v;
-                        _showLanguageDetail = v == '있음';
-                        if (v != '있음') {
+                        _showLanguageDetail = v == 'O';
+                        if (v != 'O') {
                           _languageDetailController.clear();
                         }
                       });
                     },
                   ),
                   RadioListTile<String>(
-                    title: const Text('없음'),
-                    value: '없음',
+                    title: const Text('X'),
+                    value: 'X',
                     groupValue: _languageExpValue,
                     onChanged: (v) {
                       setState(() {
                         _languageExpValue = v;
-                        _showLanguageDetail = v == '있음';
-                        if (v != '있음') {
+                        _showLanguageDetail = v == 'O';
+                        if (v != 'O') {
                           _languageDetailController.clear();
                         }
                       });
@@ -504,64 +511,48 @@ class _AdminEditPageState extends State<AdminEditPage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   CheckboxListTile(
-                    title: const Text('프로젝트'),
-                    value: _wishActivitiesValues.contains('프로젝트'),
+                    title: const Text('활동 1'),
+                    value: _wishActivitiesValues.contains('활동 1'),
                     onChanged: (v) {
                       setState(() {
                         if (v != null && v) {
-                          if (!_wishActivitiesValues.contains('프로젝트')) {
-                            _wishActivitiesValues.add('프로젝트');
+                          if (!_wishActivitiesValues.contains('활동 1')) {
+                            _wishActivitiesValues.add('활동 1');
                           }
                         } else {
-                          _wishActivitiesValues.remove('프로젝트');
+                          _wishActivitiesValues.remove('활동 1');
                         }
                       });
                     },
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
                   CheckboxListTile(
-                    title: const Text('스터디'),
-                    value: _wishActivitiesValues.contains('스터디'),
+                    title: const Text('활동 2'),
+                    value: _wishActivitiesValues.contains('활동 2'),
                     onChanged: (v) {
                       setState(() {
                         if (v != null && v) {
-                          if (!_wishActivitiesValues.contains('스터디')) {
-                            _wishActivitiesValues.add('스터디');
+                          if (!_wishActivitiesValues.contains('활동 2')) {
+                            _wishActivitiesValues.add('활동 2');
                           }
                         } else {
-                          _wishActivitiesValues.remove('스터디');
+                          _wishActivitiesValues.remove('활동 2');
                         }
                       });
                     },
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
                   CheckboxListTile(
-                    title: const Text('세미나'),
-                    value: _wishActivitiesValues.contains('세미나'),
+                    title: const Text('활동 3'),
+                    value: _wishActivitiesValues.contains('활동 3'),
                     onChanged: (v) {
                       setState(() {
                         if (v != null && v) {
-                          if (!_wishActivitiesValues.contains('세미나')) {
-                            _wishActivitiesValues.add('세미나');
+                          if (!_wishActivitiesValues.contains('활동 3')) {
+                            _wishActivitiesValues.add('활동 3');
                           }
                         } else {
-                          _wishActivitiesValues.remove('세미나');
-                        }
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  CheckboxListTile(
-                    title: const Text('기타'),
-                    value: _wishActivitiesValues.contains('기타'),
-                    onChanged: (v) {
-                      setState(() {
-                        if (v != null && v) {
-                          if (!_wishActivitiesValues.contains('기타')) {
-                            _wishActivitiesValues.add('기타');
-                          }
-                        } else {
-                          _wishActivitiesValues.remove('기타');
+                          _wishActivitiesValues.remove('활동 3');
                         }
                       });
                     },
@@ -572,69 +563,57 @@ class _AdminEditPageState extends State<AdminEditPage> {
                     '대면 면접 희망 날짜:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  CheckboxListTile(
-                    title: const Text('평일 오후'),
-                    value: _interviewDateValues.contains('평일 오후'),
+                  RadioListTile<String>(
+                    title: const Text('9월 1일(화)'),
+                    value: '9월 1일(화)',
+                    groupValue: _interviewDateValues.isNotEmpty ? _interviewDateValues.first : null,
                     onChanged: (v) {
                       setState(() {
-                        if (v != null && v) {
-                          if (!_interviewDateValues.contains('평일 오후')) {
-                            _interviewDateValues.add('평일 오후');
-                          }
-                        } else {
-                          _interviewDateValues.remove('평일 오후');
+                        _interviewDateValues.clear();
+                        if (v != null) {
+                          _interviewDateValues.add(v);
                         }
                       });
                     },
-                    controlAffinity: ListTileControlAffinity.leading,
                   ),
-                  CheckboxListTile(
-                    title: const Text('평일 저녁'),
-                    value: _interviewDateValues.contains('평일 저녁'),
+                  RadioListTile<String>(
+                    title: const Text('9월 2일(수)'),
+                    value: '9월 2일(수)',
+                    groupValue: _interviewDateValues.isNotEmpty ? _interviewDateValues.first : null,
                     onChanged: (v) {
                       setState(() {
-                        if (v != null && v) {
-                          if (!_interviewDateValues.contains('평일 저녁')) {
-                            _interviewDateValues.add('평일 저녁');
-                          }
-                        } else {
-                          _interviewDateValues.remove('평일 저녁');
+                        _interviewDateValues.clear();
+                        if (v != null) {
+                          _interviewDateValues.add(v);
                         }
                       });
                     },
-                    controlAffinity: ListTileControlAffinity.leading,
                   ),
-                  CheckboxListTile(
-                    title: const Text('주말'),
-                    value: _interviewDateValues.contains('주말'),
+                  RadioListTile<String>(
+                    title: const Text('9월 3일(목)'),
+                    value: '9월 3일(목)',
+                    groupValue: _interviewDateValues.isNotEmpty ? _interviewDateValues.first : null,
                     onChanged: (v) {
                       setState(() {
-                        if (v != null && v) {
-                          if (!_interviewDateValues.contains('주말')) {
-                            _interviewDateValues.add('주말');
-                          }
-                        } else {
-                          _interviewDateValues.remove('주말');
+                        _interviewDateValues.clear();
+                        if (v != null) {
+                          _interviewDateValues.add(v);
                         }
                       });
                     },
-                    controlAffinity: ListTileControlAffinity.leading,
                   ),
-                  CheckboxListTile(
-                    title: const Text('기타'),
-                    value: _interviewDateValues.contains('기타'),
+                  RadioListTile<String>(
+                    title: const Text('9월 4일(금)'),
+                    value: '9월 4일(금)',
+                    groupValue: _interviewDateValues.isNotEmpty ? _interviewDateValues.first : null,
                     onChanged: (v) {
                       setState(() {
-                        if (v != null && v) {
-                          if (!_interviewDateValues.contains('기타')) {
-                            _interviewDateValues.add('기타');
-                          }
-                        } else {
-                          _interviewDateValues.remove('기타');
+                        _interviewDateValues.clear();
+                        if (v != null) {
+                          _interviewDateValues.add(v);
                         }
                       });
                     },
-                    controlAffinity: ListTileControlAffinity.leading,
                   ),
                   const SizedBox(height: 16),
                   const Text(
